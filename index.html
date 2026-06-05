@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>医学統計学 学習サイト</title>
+<style>
+  :root{--bg:#f3efe6;--paper:#fcfbf7;--ink:#20262a;--soft:#6c685c;--line:#ded7c7;--red:#9a3324;--teal:#2f5d62;--gold:#a8842c;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Helvetica Neue",sans-serif;}
+  #bar{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);
+    padding:9px 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .brand{font-family:Georgia,serif;font-size:16px;color:var(--ink);margin-right:4px;}
+  .brand small{color:var(--gold);font-size:10px;letter-spacing:1px;display:block;line-height:1;}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;}
+  .tab{padding:7px 13px;font-size:13.5px;border-radius:999px;background:transparent;color:var(--soft);
+    border:1px solid var(--line);cursor:pointer;font-family:inherit;}
+  .tab.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+  #frame{display:block;width:100%;border:none;background:var(--bg);
+    height:calc(100vh - 52px);}
+  @media(max-width:430px){#frame{height:calc(100vh - 84px);}}
+</style>
+</head>
+<body>
+  <div id="bar">
+    <div class="brand">医学統計学<small>STUDY SUITE</small></div>
+    <div class="tabs">
+      <button class="tab on" data-src="textbook.html">📖 図解テキスト</button>
+      <button class="tab" data-src="lab.html">🧮 計算ラボ</button>
+      <button class="tab" data-src="advanced.html">🎓 上級編</button>
+      <button class="tab" data-src="tools.html">🧪 AI演習ツール</button>
+    </div>
+  </div>
+  <iframe id="frame" src="textbook.html" title="content"></iframe>
+<script>
+  var f=document.getElementById('frame');
+  document.querySelectorAll('.tab').forEach(function(b){
+    b.onclick=function(){
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');});
+      b.classList.add('on');
+      f.src=b.dataset.src;
+    };
+  });
+</script>
+</body>
+</html>

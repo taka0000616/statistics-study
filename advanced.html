@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>医学統計学 上級編（研究者向け）</title>
+<style>
+  :root{--bg:#eef0f1;--paper:#fbfbf9;--ink:#1b2228;--soft:#646b73;--line:#d4d6da;--red:#8c2d2d;--teal:#26565c;--gold:#9a7820;--green:#356048;--ind:#3a3f63;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Helvetica Neue",sans-serif;font-size:16px;line-height:1.78;}
+  .wrap{max-width:700px;margin:0 auto;padding:20px 16px 70px;}
+  header{border-bottom:2px solid var(--ind);padding-bottom:14px;margin-bottom:16px;}
+  .kicker{font-size:11px;letter-spacing:2px;color:var(--gold);}
+  h1{font-family:Georgia,serif;font-size:26px;margin:2px 0 0;color:var(--ind);}
+  .sub{font-size:13px;color:var(--soft);margin:4px 0 0;}
+  nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;}
+  .tab{padding:7px 10px;font-size:13px;border-radius:7px;background:transparent;color:var(--soft);border:1px solid var(--line);cursor:pointer;}
+  .tab.on{background:var(--ind);color:#fff;border-color:var(--ind);}
+  h2{font-family:Georgia,serif;font-size:22px;margin:0 0 2px;color:var(--ind);}
+  .uline{width:48px;height:4px;background:var(--gold);margin-bottom:8px;border-radius:2px;}
+  p{margin:14px 0;}
+  .kw{color:var(--red);font-weight:600;}
+  .box{margin:18px 0;border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:9px;background:var(--paper);padding:14px 16px;}
+  .box .bt{font-weight:700;font-size:14px;margin-bottom:4px;}
+  .box .bb{font-size:14.5px;line-height:1.72;}
+  .formula{font-family:ui-monospace,Menlo,Consolas,monospace;background:#e7e9ec;border:1px solid var(--line);border-radius:8px;padding:11px 13px;margin:14px 0;font-size:14px;overflow-x:auto;color:var(--ink);}
+  figure{margin:20px 0;}
+  .figbox{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px;}
+  figcaption{font-size:12px;color:var(--soft);margin-top:8px;}
+  figcaption b{color:var(--red);}
+  svg{display:block;width:100%;height:auto;}
+  .rows>div{display:flex;gap:10px;padding:8px;border-radius:6px;background:rgba(0,0,0,.03);margin:5px 0;font-size:14px;}
+  .rows .k{font-weight:700;flex:0 0 38%;color:var(--teal);}
+  .eg{margin:14px 0;border:1px dashed var(--ind);border-radius:9px;background:rgba(58,63,99,.05);padding:12px 14px;font-size:13.5px;}
+  .eg .et{font-weight:700;color:var(--ind);font-size:13px;margin-bottom:4px;letter-spacing:.5px;}
+  .navbtns{display:flex;justify-content:space-between;align-items:center;margin-top:26px;padding-top:14px;border-top:1px solid var(--line);}
+  .navbtns button{background:none;border:none;color:var(--teal);font-size:14px;cursor:pointer;font-family:inherit;}
+  .navbtns button:disabled{opacity:.3;}
+  .pg{font-size:12px;color:var(--soft);}
+  footer{margin-top:26px;text-align:center;font-size:12px;color:var(--soft);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">MEDICAL BIOSTATISTICS · ADVANCED</div>
+    <h1>医学統計学 上級編</h1>
+    <p class="sub">研究者のための応用解析 ― 論文で実際に使われる技法</p>
+  </header>
+  <nav id="nav"></nav>
+  <article id="art"></article>
+  <div class="navbtns"><button id="prev">← 前の章</button><span class="pg" id="pg"></span><button id="next">次の章 →</button></div>
+  <footer>初学者向け「図解テキスト」を前提とした応用編です。記法・前提・報告作法は分野や雑誌により差があります。</footer>
+</div>
+<script>
+const COL={ink:"#1b2228",soft:"#646b73",line:"#d4d6da",red:"#8c2d2d",teal:"#26565c",gold:"#9a7820",green:"#356048",ind:"#3a3f63"};
+const TL=COL.teal,R=COL.red,G=COL.green,GD=COL.gold,SF=COL.soft,L=COL.line,IK=COL.ink,IN=COL.ind;
+function scaler(xd,yd,W,H,pad){const[x0,x1]=xd,[y0,y1]=yd;return{x:v=>pad+(v-x0)/(x1-x0)*(W-2*pad),y:v=>H-pad-(v-y0)/(y1-y0)*(H-2*pad)};}
+function path(p,sc){return p.map((q,i)=>(i?'L':'M')+sc.x(q[0]).toFixed(1)+' '+sc.y(q[1]).toFixed(1)).join(' ');}
+
+/* ===== figures ===== */
+function fLogit(){const W=320,H=150,sc=scaler([-6,6],[0,1],W,H,24),p=[];for(let x=-6;x<=6;x+=0.2)p.push([x,1/(1+Math.exp(-x))]);
+ return `<svg viewBox="0 0 ${W} ${H}"><line x1="24" y1="${sc.y(0.5)}" x2="${W-24}" y2="${sc.y(0.5)}" stroke="${L}" stroke-dasharray="3 3"/><path d="${path(p,sc)}" fill="none" stroke="${TL}" stroke-width="2.2"/><text x="24" y="${H-6}" font-size="9" fill="${SF}">線形予測子  η = Xβ  →</text><text x="6" y="20" font-size="9" fill="${SF}">P(Y=1)</text></svg>`;}
+function fSpline(){const W=320,H=150,sc=scaler([0,10],[0,10],W,H,24),tru=[];for(let x=0;x<=10;x+=0.3)tru.push([x,2+0.16*(x-5)*(x-5)]);const lin=[[0,4.2],[10,4.2]];
+ return `<svg viewBox="0 0 ${W} ${H}"><path d="${path(tru,sc)}" fill="none" stroke="${TL}" stroke-width="2"/><path d="${path(lin,sc)}" fill="none" stroke="${R}" stroke-width="2" stroke-dasharray="5 3"/><text x="${W-24}" y="${sc.y(8.5)}" font-size="9" fill="${TL}" text-anchor="end">真の関係(J型)</text><text x="${W-24}" y="${sc.y(4.2)-4}" font-size="9" fill="${R}" text-anchor="end">直線の当てはめ</text><text x="24" y="${H-6}" font-size="9" fill="${SF}">共変量(例:年齢) →</text></svg>`;}
+function fCalib(){const W=300,H=160,sc=scaler([0,1],[0,1],W,H,28),cal=[];for(let x=0;x<=1;x+=0.05)cal.push([x,Math.pow(x,1.35)]);
+ return `<svg viewBox="0 0 ${W} ${H}"><line x1="${sc.x(0)}" y1="${sc.y(0)}" x2="${sc.x(1)}" y2="${sc.y(1)}" stroke="${SF}" stroke-dasharray="4 3"/><path d="${path(cal,sc)}" fill="none" stroke="${TL}" stroke-width="2.2"/><text x="${sc.x(0.55)}" y="${sc.y(0.7)}" font-size="9" fill="${SF}">理想(対角線)</text><text x="${sc.x(0.5)}" y="${H-6}" font-size="9" fill="${SF}" text-anchor="middle">予測確率 →</text><text x="8" y="20" font-size="9" fill="${SF}">実測割合</text></svg>`;}
+function fPH(){const W=320,H=150,sc=scaler([0,5],[-2,2],W,H,26),a=[[0.3,1.4],[4.7,-1.4]],b=[[0.3,0.6],[4.7,-2.0]];
+ return `<svg viewBox="0 0 ${W} ${H}"><path d="${path(a,sc)}" fill="none" stroke="${TL}" stroke-width="2"/><path d="${path(b,sc)}" fill="none" stroke="${R}" stroke-width="2"/><text x="${W-26}" y="${sc.y(-1.0)}" font-size="9" fill="${TL}" text-anchor="end">群1</text><text x="${W-26}" y="${sc.y(-1.7)}" font-size="9" fill="${R}" text-anchor="end">群2</text><text x="${sc.x(2.5)}" y="${H-6}" font-size="9" fill="${SF}" text-anchor="middle">log(時間) →</text><text x="6" y="18" font-size="9" fill="${SF}">log(-log S)</text></svg>`;}
+function fDAG(){const node=(x,y,t,c)=>`<rect x="${x-30}" y="${y-13}" width="60" height="26" rx="6" fill="#fff" stroke="${c}" stroke-width="1.4"/><text x="${x}" y="${y+4}" font-size="11" fill="${IK}" text-anchor="middle">${t}</text>`;
+ const ar=(x1,y1,x2,y2,c)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c||SF}" stroke-width="1.4" marker-end="url(#da)"/>`;
+ return `<svg viewBox="0 0 320 180"><defs><marker id="da" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="${SF}"/></marker></defs>
+  ${node(160,26,"交絡 C",GD)}${node(56,86,"曝露 E",TL)}${node(264,86,"結果 O",R)}${node(160,96,"中間 M",G)}${node(160,156,"合流点 K",R)}
+  ${ar(140,36,72,74,GD)}${ar(180,36,248,74,GD)}${ar(86,86,134,92,TL)}${ar(186,92,238,82,G)}${ar(74,98,146,146)}${ar(246,98,174,146)}
+  <text x="160" y="172" font-size="8.5" fill="${SF}" text-anchor="middle">K(合流点)は調整しない / Mも基本は調整しない</text></svg>`;}
+function fOverlap(){const W=320,H=150,sc=scaler([0,1],[0,3.2],W,H,22),np=(x,m,s)=>Math.exp(-((x-m)**2)/(2*s*s))/(s*Math.sqrt(2*Math.PI));
+ const c=[],t=[];for(let x=0;x<=1;x+=0.02){c.push([x,np(x,0.35,0.13)]);t.push([x,np(x,0.62,0.13)]);}
+ return `<svg viewBox="0 0 ${W} ${H}"><path d="${path(c,sc)}" fill="${SF}" fill-opacity=".15" stroke="${SF}" stroke-width="1.6"/><path d="${path(t,sc)}" fill="${TL}" fill-opacity=".15" stroke="${TL}" stroke-width="1.6"/><text x="${sc.x(0.2)}" y="${sc.y(2.6)}" font-size="9" fill="${SF}">対照</text><text x="${sc.x(0.78)}" y="${sc.y(2.6)}" font-size="9" fill="${TL}">治療</text><text x="${sc.x(0.5)}" y="${H-6}" font-size="9" fill="${SF}" text-anchor="middle">傾向スコア(治療を受ける確率) →</text></svg>`;}
+function fForestSub(){const W=320,padR=12,plotL=110,plotR=W-padR,top=12,x0=Math.log(0.4),x1=Math.log(2.6),sx=v=>plotL+(Math.log(v)-x0)/(x1-x0)*(plotR-plotL);
+ const rows=[["全体",0.80,0.68,0.94],["若年層",0.62,0.46,0.84],["高齢層",1.02,0.80,1.30]];let y=top+16,out="";
+ rows.forEach((s,i)=>{out+=`<text x="8" y="${y+4}" font-size="10" fill="${i===0?IN:IK}">${s[0]}</text><line x1="${sx(s[1])}" y1="${y}" x2="${sx(s[3])}" y2="${y}" stroke="${i===0?IN:TL}" stroke-width="1.8"/><rect x="${sx(s[1])-3}" y="${y-3}" width="6" height="6" fill="${i===0?IN:TL}"/>`;y+=26;});
+ const l1=sx(1);return `<svg viewBox="0 0 ${W} ${y+8}"><line x1="${l1}" y1="${top}" x2="${l1}" y2="${y-6}" stroke="${SF}" stroke-dasharray="3 3"/><text x="${l1}" y="${y+2}" font-size="9" fill="${SF}" text-anchor="middle">1.0</text>${out}</svg>`;}
+function fOverfit(){const W=320,H=150,sc=scaler([0,10],[0,10],W,H,26),tr=[],va=[];for(let c=0;c<=10;c+=0.5){const t=8*Math.exp(-c/2.2)+0.5;tr.push([c,t]);va.push([c,t+0.17*Math.pow(Math.max(0,c-3),1.8)]);}
+ return `<svg viewBox="0 0 ${W} ${H}"><path d="${path(tr,sc)}" fill="none" stroke="${TL}" stroke-width="2"/><path d="${path(va,sc)}" fill="none" stroke="${R}" stroke-width="2"/><text x="${W-26}" y="${sc.y(0.9)}" font-size="9" fill="${TL}" text-anchor="end">見かけ(apparent)</text><text x="${W-26}" y="${sc.y(6.2)}" font-size="9" fill="${R}" text-anchor="end">外部/検証</text><text x="${sc.x(5)}" y="${H-6}" font-size="9" fill="${SF}" text-anchor="middle">モデルの複雑さ →</text><text x="6" y="20" font-size="9" fill="${SF}">予測誤差</text></svg>`;}
+const FIGS={fLogit,fSpline,fCalib,fPH,fDAG,fOverlap,fForestSub,fOverfit};
+
+/* ===== markup ===== */
+function md(t){return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\*\*([^*]+)\*\*/g,'<strong class="kw">$1</strong>').replace(/\n/g,"<br>");}
+function block(b){
+ if(b.p)return `<p>${md(b.p)}</p>`;
+ if(b.box)return `<div class="box" style="border-left-color:${b.box.c||TL}"><div class="bt" style="color:${b.box.c||TL}">${md(b.box.t)}</div><div class="bb">${md(b.box.b)}</div></div>`;
+ if(b.fig)return `<figure><div class="figbox">${FIGS[b.fig.html]?FIGS[b.fig.html]():''}</div><figcaption><b>図${b.fig.n}.</b> ${md(b.fig.cap)}</figcaption></figure>`;
+ if(b.formula)return `<div class="formula">${b.formula}</div>`;
+ if(b.eg)return `<div class="eg"><div class="et">論文での見え方・報告例</div>${md(b.eg)}</div>`;
+ if(b.rows)return `<div class="rows">`+b.rows.map(r=>`<div><span class="k">${r[0]}</span><span>${md(r[1])}</span></div>`).join("")+`</div>`;
+ return "";
+}
+
+/* ===== content ===== */
+const CH=[
+{t:"1. 一般化線形モデル(GLM)という地図",b:[
+ {p:"上級編は、ばらばらに見える回帰たちを「**一般化線形モデル(GLM)**」という1枚の地図の上に並べることから始めます。GLMとは、線形回帰・ロジスティック回帰・Poisson回帰などを、同じ設計図のバリエーションとしてまとめた枠組みのことです。最初にこの地図を持っておくと、後の各手法が「同じ仕組みのどこを変えただけか」として見えてきます。"},
+ {p:"GLMは3つの部品でできています。①アウトカムが従う確率分布(連続なら正規、二値なら二項、件数ならPoisson)、②**線形予測子** η＝β₀+β₁x₁+…(共変量に重みβを掛けて足したもの。要するに「効果の足し算の本体」)、③その2つを橋渡しする**リンク関数** g。モデルは『g(アウトカムの期待値)＝η』という1行で表せます。"},
+ {formula:"線形回帰:     E[Y] = Xβ           (恒等リンク)\nロジスティック: logit(p) = log{p/(1-p)} = Xβ\nPoisson回帰:   log(λ) = Xβ"},
+ {p:"ポイントは、**リンク関数を選ぶと、係数の意味も自動的に決まる**ことです。恒等リンク(そのまま)なら係数は「1単位増えると平均がいくつ動くか」。ロジット(対数オッズ)なら、係数を指数化 exp(β) すると**オッズ比**。対数リンクなら exp(β) が**リスク比や率比**。言い換えると、係数はいつも『リンクした尺度の上では足し算の効果』で、元の尺度に戻すと『掛け算の効果(◯倍)』に変わる——この対応が全手法で共通します。"},
+ {box:{t:"なぜ「枠組み」で捉えると得か",c:G,b:"手法ごとにバラバラに覚えると、交互作用・過分散(ばらつきが想定より大きいこと)・頑健標準誤差といった共通の論点を、そのたびに別物として学び直すことになります。GLMの地図があれば「これはリンクが違うだけ」「これは分散構造を足しただけ」と整理でき、初見の手法にも勘が働きます。"}},
+ {p:"以降の章では、この地図上の主要な目的地(ロジスティック・Cox・混合モデルなど)を、『解釈・前提・診断(うまくいっているかの確認)・報告』の4点セットで順に巡ります。"}
+]},
+{t:"2. ロジスティック回帰の実践",b:[
+ {p:"アウトカムが「発症あり/なし」のような二値のとき、最もよく使うのがロジスティック回帰です。基礎編では「オッズ比が出る」とだけ触れましたが、ここでは実務で問われる4点——**解釈・モデルの組み立て・隠れた前提・性能評価**——を順に押さえます。"},
+ {formula:"logit(p) = β₀ + β₁x₁ + β₂x₂ + …\nオッズ比 OR = exp(β)    95%信頼区間 = exp(β ± 1.96 × 標準誤差)"},
+ {fig:{n:"2-1",cap:"ロジスティック関数。直線では確率が0〜1からはみ出してしまうので、S字に押し込めます。効果は線形予測子ηの上では足し算でも、確率に直すとS字なので非線形になります。",html:"fLogit"}},
+ {p:"**まず係数の読み方**。連続変数のβは「その変数が1つ増えたときの対数オッズの増分」で、指数化した exp(β) が**調整オッズ比(adjusted OR)**——『他の変数を一定に保ったうえでの倍率』です。ここで実務上いちばん大事なのが、論文表のORが**単変量(crude＝何も調整していない)か、多変量調整済み(adjusted)か**の区別。両者は別の問いの答えで、取り違えると結論を誤読します。"},
+ {box:{t:"見落としがちな前提:連続変数の「直線性」",c:R,b:"ロジスティック回帰は『対数オッズが共変量に対して一直線に増える』と暗黙に仮定しています。ところが年齢やBMIは、低すぎても高すぎてもリスクが上がるJ型・U型のことが多い。生のまま入れるとこの曲がりを見落とします。対策が**制限付き3次スプライン**——区間ごとに曲線をつなぎ、なめらかな非線形を許す手法です。論文の「age was modeled with restricted cubic splines」はこの処理を指します。"}},
+ {fig:{n:"2-2",cap:"真の関係がJ型(青)なのに直線(赤破線)を当てると、両端での効果を取りこぼします。だから「直線で十分か」を一度疑い、必要ならスプラインで曲げます。",html:"fSpline"}},
+ {p:"**モデルの組み立ては『目的』で分かれます**。(a)交絡を調整して特定の曝露の効果を知りたい(説明型)のか、(b)個人のリスクを当てたい(予測型)のか。説明型なら、調整する変数は事前の知識(第7章のDAG)で選ぶのが筋で、p値で機械的に選ぶ(ステップワイズ)のは避けます。予測型なら、後述の正則化と内部検証が主役になります。"},
+ {box:{t:"性能は2つの軸で測る",c:TL,b:"**判別(discrimination)**＝高リスクの人と低リスクの人を、ちゃんと順序づけられるか。指標は**C統計量(ROC曲線の下の面積AUCと同じ)**。0.5で当てずっぽう、1.0で完璧。\n**較正(calibration)**＝『20%』と予測した人たちで本当に約20%が発症するか、という確率そのものの正確さ。\nこの2つは別物で、判別が高くても較正が崩れていれば臨床では危険です。"}},
+ {fig:{n:"2-3",cap:"較正プロット。横が予測確率、縦が実際の発症割合。対角線がぴったり一致(理想)。曲線が対角線から系統的にずれていれば、確率が偏って出ている合図です。",html:"fCalib"}},
+ {eg:"「多変量ロジスティック回帰で年齢・性別・併存疾患を調整したところ、曝露の調整オッズ比は 1.84(95%CI 1.21–2.79, p=0.004)。年齢は制限付き3次スプラインでモデル化。判別能はC統計量0.78、較正はHosmer-Lemeshow検定 p=0.42 で良好だった。」"},
+ {box:{t:"つまずきやすい点",c:R,b:"・**事象数が足りない**:イベント1件あたり投入変数は最大でも約0.1個(目安EPV≥10)。これを割ると係数が暴れ、過剰適合します。\n・**完全分離**:あるグループで全員がイベント(または全員非イベント)だと、係数が無限大に発散。Firthの罰則付き推定などで回避。\n・**ORをリスク比と読む誤り**:アウトカムが稀でない限り、ORはリスク比より1から離れて(大げさに)出ます。"}}
+]},
+{t:"3. 交互作用と効果修飾",b:[
+ {p:"「この薬は若い人には効くが高齢者では効かない」——治療の効きめが第3の変数(ここでは年齢)によって変わる現象を**効果修飾(effect modification)**と呼び、それをモデルで表す掛け算の項を**交互作用項**と言います。よくサブグループ解析と混同されますが、実は別物です。"},
+ {formula:"logit(p) = β₀ + β₁・treat + β₂・age + β₃・(treat × age)\n→ treatの効果は β₁ + β₃・age となり、ageによって変わる(β₃が交互作用)"},
+ {box:{t:"「どの物差しで見るか」で結論が変わる",c:GD,b:"交互作用は、**掛け算の物差し(乗法スケール)**で見るか、**足し算の物差し(加法スケール)**で見るかで結論が変わりえます。ロジスティックやCoxの係数が見ているのは比(オッズ比・ハザード比)どうしの掛け算スケール。一方、臨床・公衆衛生で本当に効くのは絶対リスクの差(加法スケール)であることが多い。乗法では交互作用なしでも、加法では有りうる(逆もある)ので、必要なら絶対差の交互作用(RERIなどの指標)も併せて報告します。"}},
+ {fig:{n:"3-1",cap:"サブグループのフォレストプロット。全体(濃色)に比べ若年層は効果が大きく、高齢層は1.0をまたぐ。ただし各サブグループは人数が減って信頼区間が広く、これだけでは効果修飾の証拠になりません。",html:"fForestSub"}},
+ {box:{t:"サブグループを扱う時の規律",c:R,b:"・各群を別々に検定して『片方だけ有意』は効果修飾の証拠にならない。**交互作用項そのもの**を検定する(p for interaction)。\n・サブグループは事前に決め、数を絞る(増やすほど偽陽性。第10章)。\n・交互作用の検出には、主効果よりずっと多い人数が要る(たいてい力不足)。\n・結果は『探索的』と明記し、確証は別研究に委ねる。"}},
+ {eg:"「治療×年齢の交互作用項は有意でなかった(p for interaction = 0.18)。事前指定したサブグループ解析の結果は、探索的なものとして提示する。」"}
+]},
+{t:"4. 生存解析の実践 ― Coxと比例ハザード",b:[
+ {p:"『イベントが起きるまでの時間』を扱うCox比例ハザードモデルは、観察研究・臨床試験の主力です。基礎編のKM曲線・ログランク検定から一歩進み、ここでは**前提の確認・時間で変わる曝露・競合リスク**を扱います。"},
+ {formula:"h(t|X) = h₀(t) × exp(β₁x₁ + …)\nハザード比 HR = exp(β)   ※h₀(t)=基準ハザードは形を仮定しない"},
+ {p:"ハザードとは『今この瞬間にイベントが起きる勢い』。Coxの賢さは、その時間的な形(基準ハザード h₀(t))を具体的に仮定せずに、群間の比であるハザード比だけを取り出せる点です(だから半分だけ仮定する=セミパラメトリックと呼ばれます)。その代わり、『その比が観察期間を通じてほぼ一定』という**比例ハザード(PH)仮定**に寄りかかります。"},
+ {box:{t:"PH仮定が成り立っているかの確認",c:TL,b:"・**Schoenfeld残差**(各イベント時点での「ずれ」)を時間に対して並べ、傾きが0から外れる(検定でp小)ならPH違反のサイン。\n・**log(-log 生存率) を log(時間) に対して描く**と、2群の線が平行ならPHと整合的(図4-1)。交差・収束するなら違反。\n違反していたら、時間で層別化する／時間依存の項を入れる／期間を区切って区間ごとにHRを出す、などで対応します。"}},
+ {fig:{n:"4-1",cap:"log(-log 生存率)対log時間のプロット。2本が平行ならPH仮定と矛盾しません。もし交差していたら、1つのHRで効果をまとめることに無理がある合図です。",html:"fPH"}},
+ {p:"**時間で変わる曝露(時間依存共変量)**にも注意。移植や治療変更のように、追跡の途中で曝露状態が切り替わる場合、それを最初から固定値として扱うと**不死時間バイアス**が生じます。これは『治療を受けた人は、受けるまで必ず生きていた』という当たり前の事実を見落とし、治療を実際より良く見せてしまう偏り。時点ごとに状態を更新する時間依存Coxで防ぎます。"},
+ {box:{t:"競合リスク",c:R,b:"関心のあるイベント(例:再発)の前に、それを妨げる別の結末(例:他病死)が起こりうる状況を**競合リスク**と言います。このとき通常のKMは累積発生を過大評価します。**累積発生関数(CIF)**と**Fine-Grayモデル(部分分布ハザード)**で扱うのが標準。『病因を知りたい』のか『発生を予測したい』のかで、原因別ハザードとどちらを報告するか選びます。"}},
+ {eg:"「多変量Cox回帰の調整ハザード比は 0.71(95%CI 0.58–0.87)。Schoenfeld残差に基づく検定で比例ハザード性に明らかな違反はなかった(p=0.34)。競合する非関連死を考慮し、Fine-Grayモデルでも感度分析を行った。」"}
+]},
+{t:"5. 反復測定・階層データ ― 混合モデルとGEE",b:[
+ {p:"同じ患者を何度も測ったデータ、あるいは『患者が病院に属する』ような入れ子のデータ。これらは観測どうしが似通っていて独立ではありません。独立とみなして普通の回帰にかけると、標準誤差(推定のあやふやさ)を小さく見積もりすぎ、偽の有意を量産します。対処の二大潮流が**混合効果モデル**と**GEE**です。"},
+ {formula:"混合モデル例:  Yij = β₀ + β₁xij + u0i + u1i・tij + εij\n  u0i=個人ごとの切片のずれ(ランダム切片)、u1i=傾きのずれ(ランダム傾き)"},
+ {p:"**混合効果モデル**は、全員に共通する効果(固定効果β)に加え、個人ごとのクセ(ランダム効果＝切片や傾きのばらつき)を式に組み込み、『似ている』という相関構造を正面から表現します。個人差そのものに関心がある、受診回数が人によって不揃い、欠測がある——そんな縦断データに強い手法です。係数は『同じ個人の中で曝露が変わったときの効果(条件付き)』という解釈になります。"},
+ {p:"**GEE(一般化推定方程式)**は逆に、個人内の相関を『邪魔者』として作業相関行列でざっくり吸収し、**集団全体の平均的な効果(周辺効果)**を頑健に取り出します。解釈は『集団全体で曝露が変わったときの平均効果』。混合モデルの『個人内の効果』とは問いが違い、非線形リンクでは数値も一致しません。"},
+ {box:{t:"どちらを選ぶか",c:TL,b:"・**個人差・予測・不規則な測定**が主題 → 混合効果モデル(条件付き解釈)。\n・**集団平均の効果**を相関構造に煩わされず頑健に出したい → GEE(周辺解釈)。\n判断材料に**級内相関(ICC)**——『同じ人/同じ施設のデータがどれだけ似ているか』の指標——を見ます。なおクラスター(施設など)の数が少ないと、GEEの頑健標準誤差は不安定になります。"}},
+ {eg:"「経時的なMayoスコアを、固定効果(治療・時間・治療×時間)とランダム切片・ランダム傾きを持つ線形混合モデルで解析した。欠測はMARを仮定し、最尤推定を用いた。」"}
+]},
+{t:"6. 交絡調整の高度な手法",b:[
+ {p:"多変量回帰で交絡を調整するのが基本(第1–2章)ですが、観察研究で因果に迫るには、ほかにも強力な道具があります。共通するねらいは『**くじ引き(ランダム化)に近い状況を、計算で疑似的に作り出す**』ことです。"},
+ {box:{t:"傾向スコア(PS)",c:TL,b:"たくさんの背景変数から『この人が治療を受ける確率』を1つの点数(0〜1)に要約したもの。使い方は ①**マッチング**(似たPSの治療群・対照群をペアにする)、②**IPTW(逆確率重み付け)**(受けにくい人ほど重く数えて、偏りのない擬似集団を作る)、③層別化、④共変量として投入。回帰より優れる点は、**アウトカムを見る前に**両群のバランスを点検・調整できること、そして変数が多く事象が少ない場面に強いことです。"}},
+ {fig:{n:"6-1",cap:"両群の傾向スコアの分布。重なっている範囲(共通サポート)でしか公平な比較はできません。重なりの乏しい両端は『比べる相手がいない』ので、無理に推定すると不安定になります。",html:"fOverlap"}},
+ {p:"PS法では、調整がうまくいったかを**標準化差(SMD)**——両群の背景がどれだけずれているかの指標——で確認します。慣例として|SMD|＜0.1ならバランス良好。ここでp値を使わずSMDで見るのが現代の作法です(人数が多いと小さな差でもp値が出てしまうため)。"},
+ {box:{t:"操作変数と差分の差分",c:GD,b:"**操作変数(IV)**:『治療の受けやすさは変えるが、結果には直接は効かない』第3の変数(例:遺伝子型を使うメンデル無作為化、地域差)を“てこ”にして、**測定できていない交絡**まで乗り越えようとする方法。ただし『結果に直接効かない』という条件(除外制約)は証明できず、信じるしかない弱点があります。\n**差分の差分(DiD)**:介入の前後の変化を、介入群と対照群で引き算し、世の中全体の時間変化を相殺。『両群は介入がなければ同じように推移したはず(平行トレンド)』という仮定に依存します。"}},
+ {box:{t:"共通の限界",c:R,b:"PSも回帰も、結局**測定された交絡しか調整できません**(IVは例外を狙うが別の強い仮定が要る)。測り忘れた要因による残差交絡は常に残るので、後述のE-value(第10章)などで『どれくらい頑健か』を示すのが望ましい姿勢です。"}},
+ {eg:"「IPTWで重み付け後、全共変量の標準化差は0.1未満となりバランスは良好。重み付きCoxによる平均処置効果(ATE)のハザード比は 0.76(95%CI 0.61–0.95)であった。」"}
+]},
+{t:"7. 因果ダイアグラム(DAG)と変数選択",b:[
+ {p:"『どの変数を調整に入れるべきか』は、統計の計算ではなく**因果の構造についての知識**で決まります。それを矢印の図にしたのが**DAG(有向非巡回グラフ)**。p値や予測精度を頼りに調整変数を選ぶ習慣は、しばしば“調整してはいけないもの”まで入れてしまい、かえって結果を歪めます。"},
+ {fig:{n:"7-1",cap:"DAGの例。Cは交絡(共通原因)→調整する。Mは中間因子(E→M→O)→総合効果を見たいなら調整しない。Kは合流点/コライダー(E→K←O)→調整すると“ないはずの関連”が生まれる。",html:"fDAG"}},
+ {box:{t:"調整の三原則",c:TL,b:"・**交絡因子(曝露と結果の共通原因)** → 調整する。これで裏口の経路(バックドア)を閉じる。\n・**中間因子(曝露→これ→結果と、効果が通り道にしている変数)** → 総合効果を見たいなら調整しない(調整すると効果の一部を消す)。\n・**合流点=コライダー(曝露と結果の両方から矢印が刺さる点)とその子孫** → 絶対に調整しない。調整すると、本来ない関連を人工的に作ってしまう。"}},
+ {p:"この『コライダーを誤って調整する』が、**選択バイアスの正体**でもあります。入院患者だけ・生存者だけ・検査を受けた人だけ、といった『ある条件で絞り込んだ集団』での解析は、知らないうちにコライダーで層別化していることが多く、見かけの関連(バークソン・バイアスや生存者バイアス)を生みます。"},
+ {box:{t:"実務での使い方",c:GD,b:"解析前にDAGを描き、曝露→結果の裏口経路を見つけ、それを閉じる『最小限の十分な調整集合』を選ぶ。そして、回帰のTable 2に並ぶ共変量の係数を**全部まとめて因果効果と読まない**(Table 2 fallacy)。同じ表の中に、交絡として入れた変数と中間因子が混ざっており、係数の意味は変数ごとに違うからです。"}}
+]},
+{t:"8. 欠測データの扱い",b:[
+ {p:"欠測は『あるか/ないか』よりも『**なぜ欠けたか**』が本質です。その理由(メカニズム)の種類によって、許される対処法が変わります。"},
+ {rows:[["MCAR(完全にランダム)","欠測が他の何とも無関係。欠測者を捨てる完全例解析でも偏らない(ただし人数が減り力は落ちる)。"],["MAR(観測値で説明可)","欠測の起こりやすさが、観測されている他の変数で説明できる。多重代入や最尤法が有効。"],["MNAR(欠測値自体に依存)","欠けた値そのものが欠測理由(例:重症だから来院せず値が不明)。標準手法でも偏りが残り、感度分析が必須。"]]},
+ {box:{t:"多重代入(MICE)",c:TL,b:"MARのもとでの標準的な対処。手順は ①欠測を『もっともらしい値』で複数とおり(例:m=20〜50)埋めた完成データを作り、②それぞれで同じ解析を行い、③**Rubinの規則**で結果を合体(このとき『埋め方による結果のばらつき』も不確実性に足し込む)。1とおりだけ埋める単一代入(平均値で埋める・LOCFなど)は、あやふやさを小さく見せてしまい偏りも生むので、今は非推奨です。"}},
+ {p:"忘れてはいけないのは、**完全例解析(欠測者を捨てる)が妥当かどうかも、メカニズム次第**ということ。欠測が結果に関係していれば(MNAR寄りなら)、完全例解析もMICEも偏りえます。万能薬はないので、**わざとMNARを仮定した感度分析**(δ調整やパターン混合モデルで『もし欠測者が違っていたら』を試す)で、結論がぐらつかないかを確認します。"},
+ {eg:"「主要解析は連鎖方程式による多重代入(m=40)を用い、Rubinの規則で統合した。欠測がMNARである可能性を考え、δ法による感度分析でも結論は変わらなかった。」"}
+]},
+{t:"9. モデル構築・検証と過剰適合",b:[
+ {p:"予測モデルの章です。合言葉は**楽観(optimism)**——『同じデータで作って、同じデータで成績をつける』と、見かけの性能は必ず良く出すぎる、という落とし穴のことです。"},
+ {fig:{n:"9-1",cap:"モデルを複雑にするほど、作成データ上の見かけの誤差(青)は下がり続けますが、別データでの誤差(赤)はある点から増えます。この青と赤の差が『楽観』。複雑にしすぎないことが大切です。",html:"fOverfit"}},
+ {box:{t:"変数選択の落とし穴",c:R,b:"**予測モデルでは、p値による段階的選択(ステップワイズ)は推奨されません**。選ばれた変数のp値・係数・信頼区間はすべて偏り、別データで再現しないからです。代わりに ①事前知識で選ぶ、②**正則化(LASSO・Ridge・Elastic Net)**——係数を0方向に縮めて過剰適合を抑える手法。とくにLASSOは不要な係数を0にして変数選択も同時に行う——③全変数を入れてペナルティをかける、などを使います。"}},
+ {box:{t:"内部検証と外部検証",c:TL,b:"・**内部検証**:同じ集団内で楽観の量を見積もって性能を割り引く。**ブートストラップ**(データを復元抽出して何度も作り直す)が推奨。単純な train/test 分割は小標本では不安定。\n・**外部検証**:別の時期・施設・集団で試す。これがあって初めて『他でも通用する』と言える。\n報告は予測モデル用の指針 **TRIPOD** に沿うのが標準です。"}},
+ {p:"性能は3つの面に分けて報告します。**判別**(C統計量＝順序づけの力)、**較正**(較正勾配・切片や較正プロット＝確率の正確さ)、そして可能なら**臨床的な正味の利益**(決定曲線分析DCA＝『この予測を使うと実際どれだけ得か』)。AUCが同じでも、較正や正味利益はまるで違うことがあります。"},
+ {eg:"「ペナルティ付きロジスティック回帰(LASSO)でモデルを構築し、1000回のブートストラップで楽観を補正したC統計量は0.81、較正勾配は0.93。外部コホートでの検証でもC統計量0.77を維持した(TRIPOD準拠)。」"}
+]},
+{t:"10. 多重性・推定対象・報告",b:[
+ {p:"最終章は、解析全体を貫く“作法”です。**自分が何を推定しているのか(推定対象)**をはっきりさせ、**たくさん比べることの弊害(多重性)**を抑え、**効果の大きさとあやふやさ**を中心に報告する——この3点が研究の信頼性を支えます。"},
+ {box:{t:"多重性の制御",c:TL,b:"検定を増やすほど偽陽性が積み上がる問題への対処は2系統。\n**FWER(1つでも間違える確率)を抑える**:Bonferroni(単純だが保守的)、Holm(段階的で検出力が高い)、ゲートキーピング(主要→副次の順に検定して関所を作る)。\n**FDR(見つけた中の間違いの割合)を抑える**:Benjamini-Hochberg。遺伝子・オミクスのような大量検定向き。\n根本対策は、主要評価項目と確証的な比較を**事前登録**で先に固定してしまうこと。"}},
+ {box:{t:"推定対象(estimand)を先に決める",c:GD,b:"近年の臨床試験指針(ICH E9(R1))は、解析手法を選ぶ前に『**そもそも何を推定したいのか**』を明示せよ、と求めます。具体的には、対象集団・エンドポイント・要約指標に加え、**中間事象(治療中止・救済治療・死亡など、途中で起きて解釈を揺らす出来事)をどう扱うか**を宣言します。同じデータでも、この扱い(治療方針のまま見るか、起きなかったと仮定するか、複合的に扱うか)で結論が変わります。ITTかPPか、という古典的議論もこの枠で整理できます。"}},
+ {box:{t:"残差交絡への“どれくらい頑健か”指標 ― E-value",c:GD,b:"観察研究で見えた関連が、もし未測定の交絡だけで説明されてしまうとしたら、その隠れた交絡は曝露・結果の両方とどれほど強く結びついていなければならないか——それを表すのが**E-value**。値が大きいほど『よほど強い未知の交絡がない限り、この結論はひっくり返らない』と主張でき、結果の頑健性の物差しになります。"}},
+ {box:{t:"報告の原則",c:R,b:"・**点推定値＋95%信頼区間**を主役に。p値だけ・『有意/非有意』の二分は避ける。\n・効果の**大きさと臨床的な意味**を必ず論じる。\n・指針に準拠する:観察研究は**STROBE**、RCTは**CONSORT**、予測モデルは**TRIPOD**、診断研究は**STARD**。\n・統計解析計画書(SAP)と事前登録で、探索的な分析と確証的な分析をはっきり分ける。"}},
+ {p:"高度な手法ほど、結果の見栄えは作り込めてしまいます。だからこそ『推定対象を明示し、前提を確かめ、不確実性を正直に示し、別データで再現する』という地味な規律が、技法の華やかさより大切です。これは基礎編の結論とまったく地続きで、上級編を通しての結びでもあります。"}
+]}
+];
+
+/* ===== render ===== */
+let cur=0;
+function render(){
+  const nav=document.getElementById("nav");
+  nav.innerHTML=CH.map((c,i)=>`<button class="tab${i===cur?' on':''}" data-i="${i}">${c.t.split(".")[0]}</button>`).join("");
+  nav.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{cur=+b.dataset.i;render();window.scrollTo(0,0);});
+  document.getElementById("art").innerHTML=`<h2>${CH[cur].t}</h2><div class="uline"></div>`+CH[cur].b.map(block).join("");
+  document.getElementById("pg").textContent=(cur+1)+" / "+CH.length;
+  document.getElementById("prev").disabled=cur===0;
+  document.getElementById("next").disabled=cur===CH.length-1;
+}
+document.getElementById("prev").onclick=()=>{if(cur>0){cur--;render();window.scrollTo(0,0);}};
+document.getElementById("next").onclick=()=>{if(cur<CH.length-1){cur++;render();window.scrollTo(0,0);}};
+render();
+</script>
+</body>
+</html>
