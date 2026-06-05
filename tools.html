@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>医学統計 AI演習ツール</title>
+<style>
+  :root{
+    --bg:#f3efe6; --paper:#fcfbf7; --ink:#20262a; --soft:#6c685c;
+    --line:#ded7c7; --red:#9a3324; --teal:#2f5d62; --gold:#a8842c; --green:#3a6b4a;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Helvetica Neue",sans-serif;
+    font-size:15px;line-height:1.6;}
+  .wrap{max-width:640px;margin:0 auto;padding:20px 16px 60px;}
+  h1{font-family:Georgia,serif;font-size:28px;margin:0;}
+  .kicker{font-size:11px;letter-spacing:2px;color:var(--gold);margin-bottom:4px;}
+  header{border-bottom:2px solid var(--ink);padding-bottom:16px;margin-bottom:18px;}
+  .sub{font-size:13px;color:var(--soft);margin:4px 0 0;}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px;margin:12px 0;}
+  label.lab{display:block;font-size:12px;color:var(--soft);margin:0 0 4px;}
+  input[type=text],input[type=password],textarea,select{
+    width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:#fff;
+    color:var(--ink);font-size:15px;font-family:inherit;}
+  textarea{resize:vertical;}
+  button{font-family:inherit;cursor:pointer;border-radius:8px;transition:.15s;}
+  .btn{padding:10px 16px;font-size:14px;background:var(--red);color:#fff;border:1px solid var(--red);}
+  .btn.ghost{background:#fff;color:var(--teal);border:1px solid var(--line);}
+  .btn:disabled{opacity:.4;}
+  .pill{padding:7px 13px;font-size:14px;border-radius:999px;background:#fff;color:var(--soft);border:1px solid var(--line);margin:0 4px 4px 0;}
+  .pill.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+  nav{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px;}
+  .tab{padding:9px 12px;font-size:14px;background:transparent;color:var(--soft);border:1px solid var(--line);}
+  .tab.on{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  .row{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;}
+  .err{color:var(--red);font-size:13px;margin-top:8px;}
+  .muted{color:var(--soft);font-size:12px;}
+  .choice{display:block;width:100%;text-align:left;padding:10px;margin:5px 0;border:1px solid var(--line);background:#fff;color:var(--ink);font-size:14px;}
+  .choice.ok{border-color:var(--green);background:rgba(58,107,74,.1);}
+  .choice.ng{border-color:var(--red);background:rgba(154,51,36,.08);}
+  .expl{margin-top:8px;padding:12px;border-radius:8px;background:rgba(168,132,44,.1);font-size:14px;}
+  .ans{margin-top:8px;padding:12px;border-radius:8px;background:rgba(47,93,98,.08);font-size:14px;}
+  .qn{font-weight:600;margin-bottom:8px;}
+  .qn b{color:var(--red);}
+  .bar{height:8px;border-radius:999px;background:var(--line);margin:6px 0 14px;overflow:hidden;}
+  .bar>div{height:8px;border-radius:999px;}
+  .score{font-family:Georgia,serif;font-weight:700;font-size:38px;}
+  .seclbl{font-weight:600;font-size:14px;margin:10px 0 2px;}
+  .grade{display:inline-block;padding:4px 12px;border-radius:999px;color:#fff;font-weight:700;font-size:14px;margin-bottom:10px;}
+  .keybar{background:#eef0ea;border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:16px;}
+  .keystat{font-size:12px;margin-top:6px;}
+  strong.kw{color:var(--red);}
+  hr{border:none;border-top:1px solid var(--line);margin:10px 0;}
+  footer{margin-top:30px;text-align:center;font-size:12px;color:var(--soft);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">MEDICAL BIOSTATISTICS · AI STUDY TOOLS</div>
+    <h1>医学統計 AI演習ツール</h1>
+    <p class="sub">問題生成・自己採点・論文レビュー（iPhone対応HTML版）</p>
+  </header>
+
+  <div class="keybar">
+    <label class="lab">Anthropic APIキー（この端末のブラウザにのみ保存。共有厳禁）</label>
+    <input id="key" type="password" placeholder="sk-ant-...">
+    <div style="margin-top:8px;display:flex;gap:8px;">
+      <button class="btn" id="saveKey">保存</button>
+      <button class="btn ghost" id="clearKey">削除</button>
+    </div>
+    <div class="keystat muted" id="keystat">未設定</div>
+  </div>
+
+  <nav>
+    <button class="tab on" data-t="gen">📝 演習問題</button>
+    <button class="tab" data-t="grade">✓ 自己採点</button>
+    <button class="tab" data-t="review">🔬 論文レビュー</button>
+  </nav>
+
+  <!-- 演習問題 -->
+  <section id="gen">
+    <div class="card">
+      <label class="lab">テーマ（章）</label>
+      <select id="g_topic" style="margin-bottom:12px;"></select>
+      <div class="row">
+        <div><label class="lab">難易度</label><div id="g_diff"></div></div>
+        <div><label class="lab">形式</label><div id="g_fmt"></div></div>
+        <div><label class="lab">問題数</label><div id="g_cnt"></div></div>
+      </div>
+      <div style="margin-top:12px;"><button class="btn" id="g_run">問題を生成</button></div>
+      <div class="err" id="g_err"></div>
+    </div>
+    <div id="g_out"></div>
+    <div id="g_more"></div>
+  </section>
+
+  <!-- 自己採点 -->
+  <section id="grade" hidden>
+    <div class="card">
+      <label class="lab">設問（任意・貼り付け可）</label>
+      <textarea id="gr_q" rows="2" placeholder="例: p値の意味と95%信頼区間との関係を説明せよ"></textarea>
+      <label class="lab" style="margin-top:10px;">あなたの解答</label>
+      <textarea id="gr_a" rows="5" placeholder="ここに記述解答を入力…"></textarea>
+      <div style="margin-top:12px;"><button class="btn" id="gr_run">採点する</button></div>
+      <div class="err" id="gr_err"></div>
+    </div>
+    <div id="gr_out"></div>
+  </section>
+
+  <!-- 論文レビュー -->
+  <section id="review" hidden>
+    <div class="card">
+      <label class="lab">論文アブストラクト / 要旨を貼り付け</label>
+      <textarea id="rv_a" rows="7" placeholder="Background / Methods / Results / Conclusions …"></textarea>
+      <div style="margin-top:12px;"><button class="btn" id="rv_run">統計レビュー</button>
+      <span class="muted" style="margin-left:8px;">PubMed botの後段に組込み可</span></div>
+      <div class="err" id="rv_err"></div>
+    </div>
+    <div id="rv_out"></div>
+  </section>
+
+  <footer>APIキーはローカル(localStorage)保存。生成内容は学習補助です。最終確認はご自身で。</footer>
+</div>
+
+<script>
+const CH=["記述統計・データの尺度","正規分布・中心極限定理","推定と信頼区間","仮説検定の論理","検定の使い分け","p値の誤解・効果量","相関と回帰","生存解析と研究デザイン","サンプルサイズと検出力","診断検査(感度・特異度・ROC・尤度比)","多重比較とサブグループ","ベイズの考え方"];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const fmt=t=>esc(t).replace(/\*\*([^*]+)\*\*/g,'<strong class="kw">$1</strong>').replace(/\n/g,"<br>");
+
+/* ---- key ---- */
+function getKey(){return localStorage.getItem("anthropic_key")||"";}
+function refreshKey(){const k=getKey();$("keystat").textContent=k?("設定済み (…"+k.slice(-4)+")"):"未設定";if(k)$("key").value=k;}
+$("saveKey").onclick=()=>{const v=$("key").value.trim();if(v){localStorage.setItem("anthropic_key",v);}refreshKey();};
+$("clearKey").onclick=()=>{localStorage.removeItem("anthropic_key");$("key").value="";refreshKey();};
+refreshKey();
+
+/* ---- API ---- */
+async function callClaude(system,user){
+  const key=getKey();
+  if(!key) throw new Error("APIキーが未設定です。上の欄に入力して保存してください。");
+  let res;
+  try{
+    res=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1500,system,messages:[{role:"user",content:user}]})
+    });
+  }catch(e){throw new Error("ネットワークに接続できません。通信環境を確認してください。");}
+  if(!res.ok){let tx="";try{tx=await res.text();}catch(e){}throw new Error("APIエラー "+res.status+": "+(tx.slice(0,160)||"詳細なし"));}
+  const data=await res.json();
+  if(data.error)throw new Error("API: "+(data.error.message||JSON.stringify(data.error)));
+  if(!Array.isArray(data.content))throw new Error("応答形式が想定外");
+  return data.content.filter(b=>b.type==="text").map(b=>b.text).join("\n");
+}
+function parseJSON(txt){
+  let t=txt.replace(/```json/gi,"").replace(/```/g,"").trim();
+  const cands=[t.indexOf("{"),t.indexOf("[")].filter(i=>i>=0);
+  const start=cands.length?Math.min(...cands):-1;
+  const end=Math.max(t.lastIndexOf("}"),t.lastIndexOf("]"));
+  if(start>=0&&end>start)t=t.slice(start,end+1);
+  try{return JSON.parse(t);}catch(e){
+    if(t[0]==="["){const last=t.lastIndexOf("}");if(last>0)return JSON.parse(t.slice(0,last+1)+"]");}
+    throw e;
+  }
+}
+
+/* ---- pills helper ---- */
+function pills(host,opts,init,onChange){
+  let cur=init;
+  function draw(){host.innerHTML="";opts.forEach(o=>{
+    const b=document.createElement("button");b.className="pill"+(o.v===cur?" on":"");b.textContent=o.l;
+    b.onclick=()=>{cur=o.v;draw();onChange(cur);};host.appendChild(b);});}
+  draw();return ()=>cur;
+}
+
+/* ---- tabs ---- */
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
+  t.classList.add("on");
+  ["gen","grade","review"].forEach(s=>$(s).hidden=(s!==t.dataset.t));
+});
+
+/* ---- Tool 1: 問題生成 ---- */
+$("g_topic").innerHTML=CH.map(c=>`<option>${c}</option>`).join("");
+let gDiff=pills($("g_diff"),[{l:"基礎",v:"基礎"},{l:"応用",v:"応用"},{l:"専門",v:"専門"}],"応用",()=>{});
+let gFmt=pills($("g_fmt"),[{l:"選択式",v:"選択式"},{l:"記述式",v:"記述式"}],"選択式",()=>{});
+let gCnt=pills($("g_cnt"),[{l:"1問",v:1},{l:"3問",v:3},{l:"5問",v:5}],3,()=>{});
+
+function renderProblem(it,n){
+  const wrap=document.createElement("div");wrap.className="card";
+  const mc=Array.isArray(it.choices);
+  let html=`<div class="qn"><b>Q${n}.</b> ${esc(it.q)}</div>`;
+  if(mc){
+    html+=`<div class="choices"></div><div class="expl" hidden></div>`;
+  }else{
+    html+=`<button class="btn ghost showAns">模範解答を表示</button><div class="ans" hidden></div>`;
+  }
+  wrap.innerHTML=html;
+  if(mc){
+    const cbox=wrap.querySelector(".choices");const ex=wrap.querySelector(".expl");let answered=false;
+    it.choices.forEach((c,k)=>{
+      const b=document.createElement("button");b.className="choice";b.innerHTML=String.fromCharCode(65+k)+". "+esc(c);
+      b.onclick=()=>{if(answered)return;answered=true;
+        wrap.querySelectorAll(".choice").forEach((el,j)=>{if(j===it.answer)el.classList.add("ok");});
+        if(k!==it.answer)b.classList.add("ng");
+        ex.hidden=false;ex.innerHTML=(k===it.answer?"✓ 正解。":"✗ 不正解。正解は "+String.fromCharCode(65+it.answer)+"。")+"<br>"+fmt(it.explanation);
+      };
+      cbox.appendChild(b);
+    });
+  }else{
+    const btn=wrap.querySelector(".showAns");const ans=wrap.querySelector(".ans");let shown=false;
+    btn.onclick=()=>{shown=!shown;ans.hidden=!shown;btn.textContent=shown?"模範解答を隠す":"模範解答を表示";
+      if(shown&&!ans.dataset.done){ans.dataset.done=1;
+        ans.innerHTML='<div class="seclbl" style="color:var(--teal)">模範解答</div>'+fmt(it.answer)+
+          (it.explanation?'<hr><div class="seclbl" style="color:var(--gold)">採点ポイント</div>'+fmt(it.explanation):"");}};
+  }
+  return wrap;
+}
+async function genRun(append){
+  const btn=$("g_run");btn.disabled=true;$("g_err").textContent="";
+  if(!append){$("g_out").innerHTML="";$("g_more").innerHTML="";}
+  btn.textContent="生成中…";
+  const dmap={"基礎":"医師国家試験〜初学者レベル","応用":"大学院・臨床研究実践レベル","専門":"研究者・査読者レベル(やや難)"};
+  const f=gFmt(),cnt=gCnt(),topic=$("g_topic").value;
+  const sys=`あなたは医学統計学の問題作成者。相手は内科医(消化器・大学院生)。
+テーマ「${topic}」について${dmap[gDiff()]}の${f}問題を${cnt}問作成。日本語。臨床に即した良問。
+JSONのみ出力(前置き・コードフェンス禁止):
+`+(f==="選択式"
+   ?`[{"q":"問題文","choices":["A","B","C","D"],"answer":2,"explanation":"正解の理由と要点(100字)"}] ※answerは0始まり番号`
+   :`[{"q":"問題文","answer":"模範解答(200字)","explanation":"採点ポイント"}]`);
+  try{
+    const arr=parseJSON(await callClaude(sys,"問題を作成してください。"));
+    const start=$("g_out").children.length;
+    arr.forEach((it,i)=>$("g_out").appendChild(renderProblem(it,start+i+1)));
+    $("g_more").innerHTML='<button class="btn ghost" id="g_more_b">+ もっと生成</button>';
+    $("g_more_b").onclick=()=>genRun(true);
+  }catch(e){$("g_err").textContent=e.message;}
+  btn.disabled=false;btn.textContent="問題を生成";
+}
+$("g_run").onclick=()=>genRun(false);
+
+/* ---- Tool 2: 採点 ---- */
+$("gr_run").onclick=async()=>{
+  const a=$("gr_a").value.trim();if(!a)return;
+  const btn=$("gr_run");btn.disabled=true;btn.textContent="採点中…";$("gr_err").textContent="";$("gr_out").innerHTML="";
+  const sys=`あなたは医学統計学の試験採点者。相手は内科医(大学院生)。厳正かつ建設的に採点。
+JSONのみ出力(前置き・コードフェンス禁止):
+{"score":0-100の整数,"verdict":"一言評価","good":["良い点"],"improve":["改善点・誤り"],"model":"模範解答(250字)"}`;
+  const user=`【設問】\n${$("gr_q").value||"(指定なし — 解答から推測)"}\n\n【受験者の解答】\n${a}`;
+  try{
+    const r=parseJSON(await callClaude(sys,user));
+    const sc=r.score||0,col=sc>=80?"var(--green)":sc>=60?"var(--gold)":"var(--red)";
+    let h=`<div class="card"><div style="display:flex;align-items:center;gap:14px;">
+      <div class="score" style="color:${col}">${sc}<span style="font-size:16px;color:var(--soft)">/100</span></div>
+      <div style="font-size:14px">${esc(r.verdict||"")}</div></div>
+      <div class="bar"><div style="width:${sc}%;background:${col}"></div></div>`;
+    if(r.good&&r.good.length)h+=`<div class="seclbl" style="color:var(--green)">◎ 良い点</div>`+r.good.map(g=>`<div>• ${esc(g)}</div>`).join("");
+    if(r.improve&&r.improve.length)h+=`<div class="seclbl" style="color:var(--red)">△ 改善点</div>`+r.improve.map(g=>`<div>• ${esc(g)}</div>`).join("");
+    if(r.model)h+=`<div class="ans"><div class="seclbl" style="color:var(--teal)">模範解答</div>${fmt(r.model)}</div>`;
+    h+=`</div>`;$("gr_out").innerHTML=h;
+  }catch(e){$("gr_err").textContent=e.message;}
+  btn.disabled=false;btn.textContent="採点する";
+};
+
+/* ---- Tool 3: 論文レビュー ---- */
+function svgBar(spec){
+  try{
+    const W=300,H=130,pad=30,n=spec.values.length,bw=(W-pad*2)/n*0.6,max=Math.max(...spec.values)*1.15||1;
+    let bars="";spec.values.forEach((v,i)=>{const x=pad+(W-pad*2)/n*(i+0.5)-bw/2,h=(H-pad-14)*v/max,y=H-14-h;
+      bars+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" rx="3" fill="var(--teal)"/>
+             <text x="${x+bw/2}" y="${y-3}" font-size="10" fill="var(--ink)" text-anchor="middle">${v}</text>
+             <text x="${x+bw/2}" y="${H-2}" font-size="10" fill="var(--soft)" text-anchor="middle">${esc(spec.labels[i])}</text>`;});
+    return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:340px">${bars}</svg>`;
+  }catch(e){return"";}
+}
+$("rv_run").onclick=async()=>{
+  const ab=$("rv_a").value.trim();if(!ab)return;
+  const btn=$("rv_run");btn.disabled=true;btn.textContent="レビュー中…";$("rv_err").textContent="";$("rv_out").innerHTML="";
+  const sys=`あなたは臨床疫学・生物統計の査読者。提示された論文アブストラクトの統計面を批判的に評価。日本語。
+JSONのみ出力(前置き・コードフェンス禁止):
+{"design":"研究デザインの判定と妥当性","sample":"サンプルサイズ・検出力への言及/懸念","methods":"統計手法の適切性(誤用の有無)","bias":["懸念バイアス・交絡"],"effect":"効果量と臨床的意義","grade":"A〜Dの総合評価","summary":"総評(150字)","fig":{"type":"bar","labels":["対照","介入"],"values":[100,75],"caption":"主要アウトカム比較"}}
+figは数値が読み取れる場合のみ。読めなければ "fig":null。`;
+  try{
+    const r=parseJSON(await callClaude(sys,"以下をレビュー:\n\n"+ab));
+    const gc={A:"var(--green)",B:"var(--teal)",C:"var(--gold)",D:"var(--red)"};
+    const sec=(t,b,c)=>!b?"":`<div class="seclbl" style="color:${c||'var(--teal)'}">${t}</div>`+(Array.isArray(b)?b.map(x=>`<div>• ${esc(x)}</div>`).join(""):`<div>${esc(b)}</div>`);
+    let h=`<div class="card">`;
+    if(r.grade)h+=`<span class="grade" style="background:${gc[(r.grade+"")[0]]||'var(--soft)'}">総合評価 ${esc(r.grade)}</span>`;
+    h+=sec("研究デザイン",r.design);
+    h+=sec("サンプルサイズ・検出力",r.sample,"var(--gold)");
+    h+=sec("統計手法の妥当性",r.methods);
+    h+=sec("バイアス・交絡の懸念",r.bias,"var(--red)");
+    h+=sec("効果量と臨床的意義",r.effect,"var(--green)");
+    if(r.fig){h+=`<div style="margin:8px 0">${svgBar(r.fig)}<div class="muted">${esc(r.fig.caption||"")}</div></div>`;}
+    if(r.summary)h+=`<div class="ans"><div class="seclbl" style="color:var(--ink)">総評</div>${fmt(r.summary)}</div>`;
+    h+=`<div class="muted" style="margin-top:10px">※ AIによる補助評価。最終判断はご自身で。</div></div>`;
+    $("rv_out").innerHTML=h;
+  }catch(e){$("rv_err").textContent=e.message;}
+  btn.disabled=false;btn.textContent="統計レビュー";
+};
+</script>
+</body>
+</html>
