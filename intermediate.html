@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>医学統計学 中級編（理論の土台）</title>
+<style>
+  :root{--bg:#eef1ee;--paper:#fbfcfa;--ink:#1b2228;--soft:#646b73;--line:#d3d8d3;--red:#8c2d2d;--teal:#26565c;--gold:#9a7820;--green:#356048;--ind:#2f6b56;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Helvetica Neue",sans-serif;font-size:16px;line-height:1.78;}
+  .wrap{max-width:700px;margin:0 auto;padding:20px 16px 70px;}
+  header{border-bottom:2px solid var(--ind);padding-bottom:14px;margin-bottom:16px;}
+  .kicker{font-size:11px;letter-spacing:2px;color:var(--gold);}
+  h1{font-family:Georgia,serif;font-size:26px;margin:2px 0 0;color:var(--ind);}
+  .sub{font-size:13px;color:var(--soft);margin:4px 0 0;}
+  nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;}
+  .tab{padding:7px 10px;font-size:13px;border-radius:7px;background:transparent;color:var(--soft);border:1px solid var(--line);cursor:pointer;}
+  .tab.on{background:var(--ind);color:#fff;border-color:var(--ind);}
+  h2{font-family:Georgia,serif;font-size:22px;margin:0 0 2px;color:var(--ind);}
+  .uline{width:48px;height:4px;background:var(--gold);margin-bottom:8px;border-radius:2px;}
+  p{margin:14px 0;}
+  .kw{color:var(--red);font-weight:600;}
+  .box{margin:18px 0;border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:9px;background:var(--paper);padding:14px 16px;}
+  .box .bt{font-weight:700;font-size:14px;margin-bottom:4px;}
+  .box .bb{font-size:14.5px;line-height:1.72;}
+  .formula{font-family:ui-monospace,Menlo,Consolas,monospace;background:#e6ebe7;border:1px solid var(--line);border-radius:8px;padding:11px 13px;margin:14px 0;font-size:14px;overflow-x:auto;color:var(--ink);}
+  figure{margin:20px 0;}
+  .figbox{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px;}
+  figcaption{font-size:12px;color:var(--soft);margin-top:8px;}
+  figcaption b{color:var(--red);}
+  svg{display:block;width:100%;height:auto;}
+  .rows>div{display:flex;gap:10px;padding:8px;border-radius:6px;background:rgba(0,0,0,.03);margin:5px 0;font-size:14px;}
+  .rows .k{font-weight:700;flex:0 0 38%;color:var(--teal);}
+  .eg{margin:14px 0;border:1px dashed var(--ind);border-radius:9px;background:rgba(47,107,86,.06);padding:12px 14px;font-size:13.5px;}
+  .eg .et{font-weight:700;color:var(--ind);font-size:13px;margin-bottom:4px;letter-spacing:.5px;}
+  .navbtns{display:flex;justify-content:space-between;align-items:center;margin-top:26px;padding-top:14px;border-top:1px solid var(--line);}
+  .navbtns button{background:none;border:none;color:var(--teal);font-size:14px;cursor:pointer;font-family:inherit;}
+  .navbtns button:disabled{opacity:.3;}
+  .pg{font-size:12px;color:var(--soft);}
+  footer{margin-top:26px;text-align:center;font-size:12px;color:var(--soft);}
+  .gl{border-bottom:1px dotted var(--teal);cursor:pointer;}
+  .gldef{display:inline-block;margin:5px 0;padding:7px 11px;background:rgba(38,86,92,.09);border-left:3px solid var(--teal);border-radius:7px;font-size:12.5px;line-height:1.62;color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">MEDICAL BIOSTATISTICS · INTERMEDIATE</div>
+    <h1>医学統計学 中級編</h1>
+    <p class="sub">理論の土台 ― 検定と推定はなぜ成り立つのか</p>
+  </header>
+  <nav id="nav"></nav>
+  <article id="art"></article>
+  <div class="navbtns"><button id="prev">← 前の章</button><span class="pg" id="pg"></span><button id="next">次の章 →</button></div>
+  <footer>初学者向け「図解テキスト」と研究者向け「上級編」の橋渡しです。点線の付いた専門用語はタップすると平易な定義が出ます。</footer>
+</div>
+<script>
+const COL={ink:"#1b2228",soft:"#646b73",line:"#d3d8d3",red:"#8c2d2d",teal:"#26565c",gold:"#9a7820",green:"#356048",ind:"#2f6b56"};
+const TL=COL.teal,R=COL.red,G=COL.green,GD=COL.gold,SF=COL.soft,L=COL.line,IK=COL.ink,IN=COL.ind;
+function scaler(xd,yd,W,H,pad){const[x0,x1]=xd,[y0,y1]=yd;return{x:v=>pad+(v-x0)/(x1-x0)*(W-2*pad),y:v=>H-pad-(v-y0)/(y1-y0)*(H-2*pad)};}
+function path(p,sc){return p.map((q,i)=>(i?'L':'M')+sc.x(q[0]).toFixed(1)+' '+sc.y(q[1]).toFixed(1)).join(' ');}
+
+/* ===== figures ===== */
+function fCLT(){const W=320,H=165,sc=scaler([0,9],[0,1.2],W,H,24),mean=3.3,popsd=2.0;
+ const ln=x=>x<=0?0:Math.exp(-Math.pow(Math.log(x)-1.0,2)/0.72)/(x*0.6*2.5066);
+ const nm=(x,sd)=>Math.exp(-Math.pow(x-mean,2)/(2*sd*sd))/(sd*2.5066);
+ const par=[],n5=[],n30=[];
+ for(let x=0.05;x<=9;x+=0.1)par.push([x,ln(x)]);
+ for(let x=0;x<=9;x+=0.08){n5.push([x,nm(x,popsd/Math.sqrt(5))]);n30.push([x,nm(x,popsd/Math.sqrt(30))]);}
+ return `<svg viewBox="0 0 ${W} ${H}"><path d="${path(par,sc)}" fill="${SF}" fill-opacity=".14" stroke="${SF}" stroke-width="1.6"/><path d="${path(n5,sc)}" fill="none" stroke="${TL}" stroke-width="1.9"/><path d="${path(n30,sc)}" fill="none" stroke="${R}" stroke-width="2.1"/><text x="${sc.x(6.9)}" y="${sc.y(0.2)}" font-size="9" fill="${SF}">元データ(右に歪む)</text><text x="${sc.x(6.0)}" y="${sc.y(0.5)}" font-size="9" fill="${TL}">n=5の平均</text><text x="${sc.x(4.6)}" y="${sc.y(1.06)}" font-size="9" fill="${R}">n=30の平均</text><text x="${sc.x(4.5)}" y="${H-6}" font-size="9" fill="${SF}" text-anchor="middle">値 →</text></svg>`;}
+function fSE(){const W=320,H=160,sc=scaler([0,100],[0,1.05],W,H,30),p=[];for(let n=1;n<=100;n++)p.push([n,1/Math.sqrt(n)]);
+ let m='';[4,16,64].forEach(n=>{const y=1/Math.sqrt(n);m+=`<circle cx="${sc.x(n)}" cy="${sc.y(y)}" r="3" fill="${R}"/><text x="${sc.x(n)+4}" y="${sc.y(y)-3}" font-size="8.5" fill="${R}">n=${n}</text>`;});
+ return `<svg viewBox="0 0 ${W} ${H}"><path d="${path(p,sc)}" fill="none" stroke="${TL}" stroke-width="2"/>${m}<text x="${sc.x(50)}" y="${H-6}" font-size="9" fill="${SF}" text-anchor="middle">人数 n →</text><text x="6" y="18" font-size="9" fill="${SF}">標準誤差(相対)</text></svg>`;}
+function fT(){const W=320,H=150,sc=scaler([-4,4],[0,0.42],W,H,18),nm=x=>Math.exp(-x*x/2)/2.5066,tp=x=>(2/(Math.sqrt(3)*Math.PI))*Math.pow(1+x*x/3,-2),a=[],b=[];
+ for(let x=-4;x<=4;x+=0.1){a.push([x,nm(x)]);b.push([x,tp(x)]);}
+ return `<svg viewBox="0 0 ${W} ${H}"><path d="${path(a,sc)}" fill="none" stroke="${SF}" stroke-width="1.6" stroke-dasharray="4 3"/><path d="${path(b,sc)}" fill="none" stroke="${R}" stroke-width="2.1"/><text x="${sc.x(1.1)}" y="${sc.y(0.36)}" font-size="9" fill="${SF}">正規分布</text><text x="${sc.x(1.7)}" y="${sc.y(0.11)}" font-size="9" fill="${R}">t分布(自由度3)は裾が重い</text><text x="${sc.x(0)}" y="${H-5}" font-size="9" fill="${SF}" text-anchor="middle">標準化した値 →</text></svg>`;}
+function fDistMap(){const node=(x,y,t,c)=>`<rect x="${x-34}" y="${y-13}" width="68" height="26" rx="6" fill="#fff" stroke="${c}" stroke-width="1.4"/><text x="${x}" y="${y+4}" font-size="10" fill="${IK}" text-anchor="middle">${t}</text>`;
+ const ar=(x1,y1,x2,y2,t)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${SF}" stroke-width="1.3" marker-end="url(#dm)"/>`+(t?`<text x="${(x1+x2)/2}" y="${(y1+y2)/2-3}" font-size="8" fill="${SF}" text-anchor="middle">${t}</text>`:'');
+ return `<svg viewBox="0 0 320 185"><defs><marker id="dm" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="${SF}"/></marker></defs>
+  ${node(58,32,"二項分布",TL)}${node(58,92,"ポアソン分布",TL)}${node(160,62,"正規分布",R)}${node(264,26,"カイ二乗分布",GD)}${node(264,92,"t分布",G)}${node(264,154,"F分布",GD)}
+  ${ar(92,36,126,56,"n大")}${ar(92,88,126,68,"λ大")}
+  ${ar(194,52,230,32,"二乗和")}${ar(194,68,230,88,"σ推定")}${ar(290,38,290,142,"比")}
+  <text x="160" y="178" font-size="8.5" fill="${SF}" text-anchor="middle">正規分布が結節点。そこからカイ二乗・t・Fが派生する</text></svg>`;}
+function fChi(){const W=320,H=150,sc=scaler([0,12],[0,0.5],W,H,24),f=x=>0.5*Math.exp(-x/2),p=[];for(let x=0;x<=12;x+=0.1)p.push([x,f(x)]);
+ const crit=5.99,seg=p.filter(q=>q[0]>=crit);let area='M'+sc.x(crit)+' '+sc.y(0);seg.forEach(q=>area+=' L'+sc.x(q[0]).toFixed(1)+' '+sc.y(q[1]).toFixed(1));area+=' L'+sc.x(12)+' '+sc.y(0)+' Z';
+ return `<svg viewBox="0 0 ${W} ${H}"><path d="${area}" fill="${R}" fill-opacity=".2"/><path d="${path(p,sc)}" fill="none" stroke="${TL}" stroke-width="2"/><line x1="${sc.x(crit)}" y1="${sc.y(0)}" x2="${sc.x(crit)}" y2="${sc.y(0.34)}" stroke="${R}" stroke-dasharray="3 3"/><text x="${sc.x(crit)+3}" y="${sc.y(0.32)}" font-size="9" fill="${R}">棄却域(右の裾)</text><text x="${sc.x(6)}" y="${H-5}" font-size="9" fill="${SF}" text-anchor="middle">χ²の値 → (ズレが大きいほど右へ)</text></svg>`;}
+function fANOVA(){const W=320,H=160,sc=scaler([0,4],[0,10],W,H,24),grand=5;
+ const groups=[{x:1,m:3,pts:[2.4,3.0,3.5,2.7,3.3]},{x:2,m:5,pts:[4.5,5.2,4.8,5.5,5.0]},{x:3,m:7,pts:[6.4,7.1,6.8,7.4,6.9]}];
+ let dots='',means='';groups.forEach(g=>{g.pts.forEach((v,i)=>{dots+=`<circle cx="${sc.x(g.x)+(i-2)*5}" cy="${sc.y(v)}" r="2.4" fill="${TL}" opacity=".7"/>`;});means+=`<line x1="${sc.x(g.x)-16}" y1="${sc.y(g.m)}" x2="${sc.x(g.x)+16}" y2="${sc.y(g.m)}" stroke="${R}" stroke-width="2"/>`;});
+ return `<svg viewBox="0 0 ${W} ${H}"><line x1="${sc.x(0.4)}" y1="${sc.y(grand)}" x2="${sc.x(3.6)}" y2="${sc.y(grand)}" stroke="${SF}" stroke-dasharray="4 3"/><text x="${sc.x(3.6)}" y="${sc.y(grand)-3}" font-size="8.5" fill="${SF}" text-anchor="end">全体平均</text>${dots}${means}<text x="${sc.x(1)}" y="${H-6}" font-size="8.5" fill="${SF}" text-anchor="middle">群1</text><text x="${sc.x(2)}" y="${H-6}" font-size="8.5" fill="${SF}" text-anchor="middle">群2</text><text x="${sc.x(3)}" y="${H-6}" font-size="8.5" fill="${SF}" text-anchor="middle">群3</text><text x="6" y="16" font-size="8.5" fill="${R}">赤=群平均</text></svg>`;}
+function fRank(){const W=320,H=130,sc=scaler([0,11],[0,1],W,H,20);
+ const vals=[{v:1.2,r:1,g:0},{v:2.0,r:2,g:1},{v:2.6,r:3,g:0},{v:3.1,r:4,g:1},{v:4.0,r:5,g:0},{v:5.2,r:6,g:1},{v:9.5,r:7,g:0}];
+ let s='';vals.forEach(d=>{const xa=sc.x(d.v),xb=sc.x(d.r*1.3),col=d.g?R:TL;
+  s+=`<circle cx="${xa}" cy="${sc.y(0.8)}" r="3.2" fill="${col}"/><circle cx="${xb}" cy="${sc.y(0.25)}" r="3.2" fill="${col}"/><line x1="${xa}" y1="${sc.y(0.76)}" x2="${xb}" y2="${sc.y(0.29)}" stroke="${L}" stroke-width="0.8"/><text x="${xb}" y="${sc.y(0.05)}" font-size="8" fill="${SF}" text-anchor="middle">${d.r}</text>`;});
+ return `<svg viewBox="0 0 ${W} ${H}"><text x="4" y="${sc.y(0.8)+4}" font-size="8.5" fill="${SF}">実値</text><text x="4" y="${sc.y(0.25)+4}" font-size="8.5" fill="${SF}">順位</text>${s}<text x="${sc.x(8.6)}" y="${sc.y(0.96)}" font-size="8" fill="${SF}" text-anchor="middle">外れ値も順位7に圧縮</text></svg>`;}
+function fReg(){const W=320,H=160,sc=scaler([0,10],[0,10],W,H,24);
+ const pts=[[1,2.2],[2,2.8],[3,4.1],[4,3.9],[5,5.6],[6,5.2],[7,7.0],[8,6.8],[9,8.4]],a=1.4,b=0.78,line=[[0,a],[10,a+b*10]];
+ let res='';pts.forEach(p=>{const yhat=a+b*p[0];res+=`<line x1="${sc.x(p[0])}" y1="${sc.y(p[1])}" x2="${sc.x(p[0])}" y2="${sc.y(yhat)}" stroke="${GD}" stroke-width="1"/>`;});
+ const dots=pts.map(p=>`<circle cx="${sc.x(p[0])}" cy="${sc.y(p[1])}" r="3" fill="${TL}"/>`).join('');
+ return `<svg viewBox="0 0 ${W} ${H}">${res}<path d="${path(line,sc)}" stroke="${R}" stroke-width="2" fill="none"/>${dots}<text x="${sc.x(6.8)}" y="${sc.y(8.6)}" font-size="9" fill="${R}">回帰直線</text><text x="${sc.x(3.3)}" y="${sc.y(2.9)}" font-size="8.5" fill="${GD}">残差(縦のズレ)</text><text x="${sc.x(5)}" y="${H-5}" font-size="9" fill="${SF}" text-anchor="middle">x →</text></svg>`;}
+function fMLE(){const W=320,H=150,sc=scaler([0,10],[0,1],W,H,22),f=x=>Math.exp(-Math.pow(x-6,2)/(2*1.4*1.4)),p=[];for(let x=0;x<=10;x+=0.1)p.push([x,f(x)]);
+ const peak=6;return `<svg viewBox="0 0 ${W} ${H}"><path d="${path(p,sc)}" fill="${TL}" fill-opacity=".12" stroke="${TL}" stroke-width="2"/><line x1="${sc.x(peak)}" y1="${sc.y(0)}" x2="${sc.x(peak)}" y2="${sc.y(1)}" stroke="${R}" stroke-dasharray="3 3"/><circle cx="${sc.x(peak)}" cy="${sc.y(1)}" r="3.5" fill="${R}"/><text x="${sc.x(peak)+5}" y="${sc.y(0.94)}" font-size="9" fill="${R}">最尤推定値(尤度が最大)</text><text x="${sc.x(5)}" y="${H-5}" font-size="9" fill="${SF}" text-anchor="middle">パラメータ θ →</text><text x="6" y="16" font-size="9" fill="${SF}">尤度</text></svg>`;}
+function fPower(){const W=320,H=160,sc=scaler([-4,7],[0,0.42],W,H,18),nm=(x,m)=>Math.exp(-Math.pow(x-m,2)/2)/2.5066,h0=[],h1=[],c=1.645;
+ for(let x=-4;x<=7;x+=0.1){h0.push([x,nm(x,0)]);h1.push([x,nm(x,3)]);}
+ const aSeg=h0.filter(q=>q[0]>=c);let aA='M'+sc.x(c)+' '+sc.y(0);aSeg.forEach(q=>aA+=' L'+sc.x(q[0]).toFixed(1)+' '+sc.y(q[1]).toFixed(1));aA+=' L'+sc.x(7)+' '+sc.y(0)+' Z';
+ const bSeg=h1.filter(q=>q[0]<=c);let bA='M'+sc.x(-4)+' '+sc.y(0);bSeg.forEach(q=>bA+=' L'+sc.x(q[0]).toFixed(1)+' '+sc.y(q[1]).toFixed(1));bA+=' L'+sc.x(c)+' '+sc.y(0)+' Z';
+ return `<svg viewBox="0 0 ${W} ${H}"><path d="${bA}" fill="${SF}" fill-opacity=".25"/><path d="${aA}" fill="${R}" fill-opacity=".3"/><path d="${path(h0,sc)}" fill="none" stroke="${SF}" stroke-width="1.8"/><path d="${path(h1,sc)}" fill="none" stroke="${TL}" stroke-width="1.8"/><line x1="${sc.x(c)}" y1="${sc.y(0)}" x2="${sc.x(c)}" y2="${sc.y(0.41)}" stroke="${IK}" stroke-dasharray="3 3"/><text x="${sc.x(0)}" y="${sc.y(0.41)}" font-size="9" fill="${SF}" text-anchor="middle">差なし(H0)</text><text x="${sc.x(3)}" y="${sc.y(0.41)}" font-size="9" fill="${TL}" text-anchor="middle">差あり(H1)</text><text x="${sc.x(2.5)}" y="${sc.y(0.05)}" font-size="8" fill="${R}">α</text><text x="${sc.x(0.6)}" y="${sc.y(0.05)}" font-size="8" fill="${SF}">β</text><text x="${sc.x(1.5)}" y="${H-4}" font-size="8.5" fill="${SF}" text-anchor="middle">検出力 = 1 − β (H1の右側)</text></svg>`;}
+const FIGS={fCLT,fSE,fT,fDistMap,fChi,fANOVA,fRank,fReg,fMLE,fPower};
+
+/* ===== glossary (tap a highlighted term to see a plain definition) ===== */
+const GLOSS={
+"中心極限定理":"元データがどんな形でも、標本平均を多数集めるとその分布が正規分布に近づく性質。",
+"標本平均":"標本から計算した平均。多数集めると正規分布に近づく。",
+"標本分布":"ある統計量(平均など)を繰り返し計算したときの、その値の分布。",
+"標準偏差":"データそのもののばらつきの大きさ(SD)。nを増やしても基本的に縮まない。",
+"標準誤差":"平均などの推定値の不確かさ(SE)。SD÷√n で、nを増やすと縮む。",
+"自由度":"自由に動ける情報の数。n個から平均を1つ推定するとn−1。分布の形を決める。",
+"t分布":"正規分布に似た釣鐘型だが裾が重い。σを推定する不確かさを織り込んだ分布。",
+"対応のあるt検定":"同じ対象の前後など、ペアになった2群の平均を比べる検定。",
+"二標本t検定":"独立した2群の平均を比べる検定。",
+"Welchのt検定":"2群の分散が等しいと仮定しないt検定。既定で使ってよい安全策。",
+"二項分布":"成功/失敗をn回繰り返したときの成功数の分布。発症あり/なしの土台。",
+"ポアソン分布":"一定期間に稀な出来事が何回起きるかの分布。件数や発生率の土台。",
+"正規分布":"左右対称の釣鐘型。多くの平均値が従う。各分布の結節点。",
+"カイ二乗分布":"正規変数の二乗和が従う分布。分割表やばらつきの検定に登場。",
+"カイ二乗検定":"カテゴリ同士の関連を、観測度数と期待度数のズレで調べる検定。",
+"F分布":"2つのばらつきの比が従う分布。分散分析(ANOVA)の土台。",
+"期待度数":"関連がない(独立)と仮定したとき、各マスに来るはずの人数。",
+"Fisherの正確検定":"期待度数が小さいときに使う、近似に頼らない正確な検定。",
+"多重性":"たくさん検定するほど偽陽性が積み上がる問題。",
+"分散分析":"3群以上の平均差を、群間と群内のばらつきの比で一度に検定する手法(ANOVA)。",
+"群間のばらつき":"群の平均どうしがどれだけ開いているか。大きいほど差ありの証拠。",
+"群内のばらつき":"同じ群の中での散らばり。これに比べて群間が大きいかを見る。",
+"F比":"群間のばらつきを群内のばらつきで割った値。大きいほど平均に差。",
+"多重比較":"どの群間に差があるかを、検定数を考慮して調整しつつ調べる方法(Tukeyなど)。",
+"ノンパラメトリック検定":"分布の形を仮定せず、順位に基づいて比べる頑健な検定群。",
+"順位":"値を大きさの順に並べた番号。極端な外れ値の影響を受けにくい。",
+"相関":"2つの量が一緒に動く度合い(−1〜+1)。因果ではない。",
+"回帰":"一方の変数から他方を予測・説明する手法。直線なら単回帰。",
+"残差":"各データ点と回帰直線との、縦方向のズレ。",
+"最小二乗法":"残差の二乗和が最小になるように直線を当てはめる方法。",
+"決定係数":"yのばらつきのうち回帰で説明できた割合(R²、0〜1)。",
+"最尤推定":"手元のデータが最も起こりやすくなるパラメータを選ぶ推定原理(MLE)。",
+"尤度":"あるパラメータのもとでデータが生じる起こりやすさ。最大化する点がMLE。",
+"検出力":"本当に差があるとき、それを見つけられる確率(1−β)。通常0.8以上を目標。",
+"効果量":"差の大きさそのものを表す指標。p値とは別に重要。",
+"サンプルサイズ設計":"必要な人数を、効果量・α・検出力・ばらつきから逆算すること。",
+"等分散":"群どうしのばらつき(分散)が等しい、という前提。"
+};
+function gloss(w){for(var k in GLOSS){if(w.indexOf(k)>=0)return GLOSS[k];}return null;}
+
+/* ===== markup ===== */
+function md(t){return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\*\*([^*]+)\*\*/g,function(m,w){var d=gloss(w);return d?'<span class="kw gl" data-d="'+d+'">'+w+'</span>':'<strong class="kw">'+w+'</strong>';}).replace(/\n/g,"<br>");}
+function block(b){
+ if(b.p)return `<p>${md(b.p)}</p>`;
+ if(b.box)return `<div class="box" style="border-left-color:${b.box.c||TL}"><div class="bt" style="color:${b.box.c||TL}">${md(b.box.t)}</div><div class="bb">${md(b.box.b)}</div></div>`;
+ if(b.fig)return `<figure><div class="figbox">${FIGS[b.fig.html]?FIGS[b.fig.html]():''}</div><figcaption><b>図${b.fig.n}.</b> ${md(b.fig.cap)}</figcaption></figure>`;
+ if(b.formula)return `<div class="formula">${b.formula}</div>`;
+ if(b.eg)return `<div class="eg"><div class="et">論文・実務での見え方</div>${md(b.eg)}</div>`;
+ if(b.rows)return `<div class="rows">`+b.rows.map(r=>`<div><span class="k">${r[0]}</span><span>${md(r[1])}</span></div>`).join("")+`</div>`;
+ return "";
+}
+
+/* ===== content ===== */
+const CH=[
+{t:"1. 中心極限定理 ― なぜ平均は正規分布に近づくのか",b:[
+ {p:"統計の検定や信頼区間の多くは「正規分布」を土台にしています。ところが現実のデータ(在院日数・検査値など)は正規分布とは限りません。それでも多くの手法が使えるのはなぜか——その答えが**中心極限定理**です。"},
+ {p:"中心極限定理が言うのは、『元のデータがどんな形をしていても、その**標本平均**をたくさん集めると、その平均値の分布は人数が増えるほど正規分布に近づく』ということ。注意したいのは、近づくのは**標本分布**(平均という値の分布)であって、元データそのものではない点です。ここを取り違えると誤読します。"},
+ {formula:"標本平均の分布:\n  中心 = 母平均 μ\n  ばらつき(標準誤差) = σ / √n"},
+ {fig:{n:"1-1",cap:"元データが右に歪んでいても(灰)、n=5の平均(青)はすでに対称に近づき、n=30の平均(赤)はほぼ正規で、しかも幅が狭い。",html:"fCLT"}},
+ {p:"図のように、元データが歪んでいてもnが増えるほど平均の分布は正規に近づき、同時に幅も狭くなります。経験則として**n≧30**ならかなり安心、と言われるのはここから来ています(ただし元の歪みが極端なほど、より大きなnが要ります)。"},
+ {box:{t:"いちばん誤解しやすい点",c:R,b:"中心極限定理が言うのは「平均の分布が正規に近づく」こと。元のデータが正規になるわけでも、nを増やせばデータのばらつき(SD)が小さくなるわけでもありません。小さくなるのは平均の不確かさ(標準誤差)だけです。"}},
+ {eg:"「在院日数は右に歪んでいたが、群あたり50例あり中心極限定理により平均の比較にt検定を用いた。」"}
+]},
+{t:"2. 標準誤差と自由度 ― SDとSEの違い",b:[
+ {p:"初学者がいちばん混同するのが**標準偏差**(SD)と**標準誤差**(SE)です。SDは『データそのもののばらつき』、SEは『平均という推定値の不確かさ』。まったくの別物です。"},
+ {formula:"標準誤差 SE = SD / √n\n自由度 df = n − (推定したパラメータの数)"},
+ {fig:{n:"2-1",cap:"標準誤差は人数nの平方根に反比例して縮む。n=4→16→64と4倍ずつ増やすと、SEは半分ずつになる。",html:"fSE"}},
+ {p:"SEはnの平方根で縮みます(図)。だから精度を倍にするには人数を4倍に。いっぽうSDは集団そのものの性質なので、nを増やしても基本的に縮みません。論文の「平均±◯◯」が**SD**か**SE**かで意味がまるで違うので、必ず確認します。"},
+ {box:{t:"自由度とは何か",c:TL,b:"**自由度**は『自由に動ける情報の数』のこと。n個のデータからまず平均を1つ推定すると、最後の1個は残りで自動的に決まってしまう。そのためばらつきの計算に使える自由度はn−1になります。t分布やカイ二乗分布など、多くの分布はこの自由度で形が決まります。"}},
+ {eg:"「平均収縮期血圧は134(SD 18, n=64, SE 2.25)。表ではばらつきとしてSDを併記した。」"}
+]},
+{t:"3. t分布 ― 小標本の不確かさを正直に扱う",b:[
+ {p:"母集団のばらつき(σ)が分かっていれば、正規分布で信頼区間を作れます。でも実際にはσも分からず、標本から推定するしかありません。その『推定の不確かさ』を上乗せして正直に扱うのが**t分布**です。"},
+ {fig:{n:"3-1",cap:"t分布(赤)は正規分布(灰破線)に似た釣鐘型だが、裾がやや重い。自由度が増える(nが増える)と正規分布に近づく。",html:"fT"}},
+ {p:"t分布は正規分布に似ていますが、**裾が重い**(極端な値がやや出やすい)。これは小標本でσの推定が不安定なぶん、用心して幅を広く取っているからです。自由度が増えると、t分布はなめらかに正規分布へ近づきます。"},
+ {formula:"一標本:  t = (標本平均 − 基準値) / SE ,  df = n − 1\n二標本:  t = (2群の平均差) / (差の標準誤差)"},
+ {box:{t:"3つのt検定の使い分け",c:TL,b:"同じ人の前後など対応がある→**対応のあるt検定**。独立した2群→**二標本t検定**。2群のばらつきが違いそうなら、等分散を仮定しない**Welchのt検定**が安全で、最初からこれを既定にしてもかまいません。"}},
+ {box:{t:"前提と限界",c:R,b:"t検定は『平均の分布が正規』であることを前提にします(中心極限定理のおかげで、中〜大標本ならデータが多少歪んでいても使えます)。小標本で強く歪む・外れ値が多いときは、順位ベースのノンパラ検定(第7章)を検討します。"}},
+ {eg:"「2群の平均差は5.2 mmHg(95%CI 1.1–9.3, Welchのt検定 p=0.014)。」"}
+]},
+{t:"4. 主要な確率分布の地図",b:[
+ {p:"検定の名前は数多くても、その背後にある確率分布は数えるほどしかありません。地図を1枚持っておくと、初見の手法も「ああ、あの分布の仲間か」と見えてきます。"},
+ {fig:{n:"4-1",cap:"分布どうしのつながり。二項やポアソンも数が増えると正規へ。正規からカイ二乗・t・Fが派生する。正規分布が結節点。",html:"fDistMap"}},
+ {rows:[
+  ["二項分布","成功/失敗をn回繰り返したときの成功数。発症あり/なしの土台。"],
+  ["ポアソン分布","一定期間に稀な出来事が何回起きるか。件数・発生率の土台。"],
+  ["正規分布","連続量の左右対称な山。多くの平均値が従う(中心極限定理)。"],
+  ["カイ二乗分布","正規変数の二乗和。分割表やばらつきの検定に登場。"],
+  ["t分布","正規をσ推定の不確かさで太らせたもの。平均の検定。"],
+  ["F分布","2つのばらつきの比。分散分析(ANOVA)の土台。"]
+ ]},
+ {p:"矢印のように、二項分布やポアソン分布も数が大きくなると正規分布に近づき、正規分布からカイ二乗・t・Fが派生します。つまり**正規分布が結節点**で、そこから検定の道具が枝分かれしているわけです。"},
+ {box:{t:"アウトカムと分布の対応",c:GD,b:"連続量の平均→t、件数→ポアソン(ばらつきが大きければ負の二項)、割合→二項・カイ二乗、ばらつきの比→F。アウトカムの型を見れば、使う分布のあたりがつきます。"}}
+]},
+{t:"5. カイ二乗検定と分割表",b:[
+ {p:"「治療の有無」と「再発の有無」のような**カテゴリ同士の関連**を見るのが、クロス表(分割表)と**カイ二乗検定**です。"},
+ {formula:"χ² = Σ (観測度数 − 期待度数)² / 期待度数\ndf = (行数 − 1) × (列数 − 1)"},
+ {fig:{n:"5-1",cap:"カイ二乗分布(自由度2の例)。観測と期待のズレが大きいほどχ²は右へ動き、右の裾(棄却域)に入るとp<0.05。",html:"fChi"}},
+ {p:"考え方はシンプルです。『もし関連がない(独立)なら、各マスに何人来るはずか』という**期待度数**を計算し、実際の観測度数とのズレを二乗して足し上げる。ズレが大きいほどχ²が大きくなり、p値が小さくなります。"},
+ {box:{t:"小さなマスに注意",c:R,b:"期待度数の小さい(目安5未満)マスがあると、カイ二乗近似が崩れます。そのときは**Fisherの正確検定**を使います。2×2表での連続性が気になればYatesの補正もありますが、近年はFisherか補正なしが一般的です。"}},
+ {box:{t:"関連の大きさは別に示す",c:TL,b:"検定で「関連あり」と分かっても、その大きさは別問題。2×2表ではオッズ比やリスク比、一般の表ではCramérのVなどで、関連の強さを併せて示します。p値だけでは大きさが伝わりません。"}},
+ {eg:"「治療群と対照群で再発割合に有意差(χ²検定 p=0.008)。オッズ比は0.52(95%CI 0.32–0.85)であった。」"}
+]},
+{t:"6. 分散分析(ANOVA)と多群比較",b:[
+ {p:"3群以上の平均を比べたいとき、2群ずつt検定を繰り返すと**多重性**で偽陽性が増えてしまいます。これを一度に扱うのが**分散分析**(ANOVA)です。"},
+ {p:"名前は「分散」分析ですが、見たいのは平均の差です。仕組みは、『**群間のばらつき**(平均どうしの開き)が、**群内のばらつき**(同じ群の中の散らばり)に比べて十分大きいか』を**F比**で評価する、というもの。"},
+ {formula:"F = 群間のばらつき(平均平方) / 群内のばらつき(平均平方)"},
+ {fig:{n:"6-1",cap:"3群の点(青)と各群の平均(赤)。群平均が大きく開き(群間大)、各群はまとまっている(群内小)ほどFが大きく、平均に差ありと判断する。",html:"fANOVA"}},
+ {p:"図のように、群の平均が大きく開いているのに各群内はまとまっているほどFは大きくなり、『平均に差がある』と判断します。逆に群内がばらばらだと、多少平均が開いても誤差に埋もれてしまいます。"},
+ {box:{t:"ANOVAのあとにやること",c:TL,b:"ANOVAは『どこかに差がある』までしか言いません。具体的にどの群間かは**多重比較**(Tukey法など、検定の数を考慮して基準を調整)で調べます。最初からペアごとにt検定を乱発しないのが作法です。"}},
+ {box:{t:"前提と代替",c:R,b:"各群が正規・**等分散**・独立であることが前提です。等分散が怪しければWelchのANOVA、強い歪みや順序尺度にはKruskal-Wallis検定(第7章)を用います。"}},
+ {eg:"「3用量群で奏効スコアに差(一元配置ANOVA F(2,87)=6.4, p=0.003)。Tukey法による多重比較で、高用量群が対照群より有意に高かった。」"}
+]},
+{t:"7. ノンパラメトリック検定 ― 順位で比べる",b:[
+ {p:"t検定やANOVAは「平均」と「正規分布」を前提にします。データが強く歪む・外れ値が多い・そもそも順序尺度(痛みの5段階など)というときは、値そのものではなく**順位**に置き換えて比べる**ノンパラメトリック検定**が頑健です。"},
+ {fig:{n:"7-1",cap:"実際の値(上)を順位(下)に置き換える。右端の大きな外れ値も「順位7」に圧縮され、影響が和らぐ。",html:"fRank"}},
+ {p:"発想は『大きさの順位だけを使えば、極端な外れ値に振り回されにくい』ということ。分布の形を仮定せずに、中央値まわりの違いを検出できます。"},
+ {rows:[
+  ["Mann-WhitneyのU検定","独立した2群(対応のないt検定のノンパラ版)。"],
+  ["Wilcoxonの符号順位検定","対応のある2群(対応のあるt検定のノンパラ版)。"],
+  ["Kruskal-Wallis検定","3群以上(一元配置ANOVAのノンパラ版)。"],
+  ["Spearmanの順位相関","順位に基づく相関(外れ値や非直線に頑健)。"]
+ ]},
+ {box:{t:"頑健さの代償",c:R,b:"頑健である代わりに、データが本当に正規ならt検定よりわずかに**検出力**が落ちます。また結果を単純に「中央値の差」と言えない場合もあるので、解釈は丁寧に。p値だけでなく、中央値や効果量(順位に基づく差の指標)も示します。"}},
+ {eg:"「疼痛スコア(0–10)は順序尺度のためMann-WhitneyのU検定を用い、群間に有意差(p=0.02, 中央値 4 対 6)。」"}
+]},
+{t:"8. 相関と単回帰の数理",b:[
+ {p:"2つの連続量の関係を要約するのが**相関**と**回帰**です。相関は『一緒に動く度合い』、回帰は『一方から他方を予測する直線』を与えます。"},
+ {formula:"相関係数 r ∈ [−1, +1]\n回帰直線 y = a + b x   (傾きb = xが1増えるとyがb動く)"},
+ {fig:{n:"8-1",cap:"散布図と回帰直線(赤)。各点から直線までの縦のズレ(金=残差)の二乗和が最小になるように直線を引く。",html:"fReg"}},
+ {p:"回帰直線は、各点から直線までの縦のズレ——**残差**——の二乗和が最小になるように引きます(**最小二乗法**)。当てはまりの良さは**決定係数**R²(0〜1、yのばらつきのうち何割を説明できたか)で測ります。"},
+ {box:{t:"よくある落とし穴",c:R,b:"相関は因果ではありません(交絡の可能性)。またrは**直線関係**の強さで、曲がった関係や外れ値に弱い。必ず散布図を見ること。R²が高くても予測が当たるとは限らず、外れ値1点でr・傾きは大きく動きます。"}},
+ {box:{t:"多変量への入り口",c:TL,b:"説明変数が複数になれば重回帰、結果が二値ならロジスティック回帰……と、回帰は交絡の調整や予測の土台へ広がります。ここから先が上級編の世界です。"}},
+ {eg:"「BMIとHbA1cは正の相関(r=0.42, p<0.001)。単回帰でBMI1増加あたりHbA1cが0.08%上昇(95%CI 0.05–0.11, R²=0.18)。」"}
+]},
+{t:"9. 最尤推定の考え方",b:[
+ {p:"t検定や回帰の裏側で、パラメータ(平均・傾きなど)を求める最も標準的な原理が**最尤推定**(MLE)です。考え方は素直で、『手元の**データが最も起こりやすくなる**ようなパラメータを選ぶ』というもの。"},
+ {p:"その『起こりやすさ』を、パラメータの関数として表したのが**尤度**です。尤度を最大にする点がMLE——図でいえば山の頂上です。多くの場面で、MLEは平均や割合といった見慣れた推定値とぴたりと一致します。"},
+ {fig:{n:"9-1",cap:"パラメータθを動かしたときの尤度。データが最も起こりやすくなる頂上(赤)が最尤推定値。山が尖るほど推定は精密。",html:"fMLE"}},
+ {formula:"尤度 L(θ) = 観測データが θ のもとで生じる確率(の積)\n最尤推定値 = L(θ) を最大にする θ"},
+ {box:{t:"なぜ重要か",c:TL,b:"ロジスティック回帰・Cox回帰・混合モデルなど、式を直接は解けない手法はみな最尤推定(やその親戚)で係数を求めます。尤度はモデル比較(AICや尤度比検定)の土台にもなります。山の尖り具合が推定の精度(標準誤差)に対応する、というのも効きどころです。"}},
+ {box:{t:"混同しやすい点",c:R,b:"尤度は『データが起こる確率』であって、『パラメータが正しい確率』ではありません(後者はベイズの事後確率)。ここはp値の誤解とまったく同じ落とし穴です。"}},
+ {eg:"「ロジスティック回帰の係数は最尤法で推定し、モデル全体の有意性は尤度比検定で評価した。」"}
+]},
+{t:"10. 検出力とサンプルサイズ設計",b:[
+ {p:"研究を始める前にいちばん大切な計算が、**サンプルサイズ設計**です。人数が足りなければ、本当は効果があっても見逃します(検出力不足)。逆に多すぎれば、無駄や倫理的な問題が生じます。"},
+ {fig:{n:"10-1",cap:"差がない世界(H0, 灰)と差がある世界(H1, 青)。右の濃い塗りがα(偽陽性)、左の薄い塗りがβ(見逃し)。検出力=1−β。",html:"fPower"}},
+ {p:"図の2つの山は、『差がない世界(帰無仮説H0)』と『本当に差がある世界(対立仮説H1)』。右の塗りが**α**(第一種の過誤＝差がないのに有意としてしまう確率)、左の塗りが**β**(第二種の過誤＝差を見逃す確率)。そして**検出力**＝1−β(本当の差を見つけられる確率)です。"},
+ {formula:"必要人数は次のときほど増える:\n  効果量が小さい / αを厳しくする / 検出力を高くする / ばらつきが大きい"},
+ {p:"設計では普通、α=0.05、検出力=0.8(8割)を置き、見込む**効果量**とばらつきから必要人数を逆算します。効果量を楽観的に大きく見積もると、終わってみたら人数が足りなかった、という失敗につながるので注意します。"},
+ {box:{t:"終わってからの検出力計算は無意味",c:R,b:"研究が終わってから「有意でなかったのは検出力不足のせい」と事後に検出力を計算するのは、p値の言い換えにすぎず新しい情報を生みません。代わりに**信頼区間の幅**で『どこまで否定できたか』を語るのが正しい姿勢です。"}},
+ {box:{t:"実務のひと工夫",c:TL,b:"脱落を見込んで必要数に上乗せします(例:2割脱落なら計算値の約1.25倍)。連続量はt検定ベース、割合はカイ二乗ベース、生存はイベント数ベースと、アウトカムの型で設計式が変わります。"}},
+ {eg:"「効果量 d=0.5、両側α=0.05、検出力0.8で各群64例が必要と算出。20%の脱落を見込み、各群80例を登録した。」"}
+]}
+];
+
+/* ===== render ===== */
+let cur=0;
+function wireGloss(){document.querySelectorAll("#art .gl").forEach(function(el){el.onclick=function(){if(el._d){el._d.remove();el._d=null;return;}var s=document.createElement("span");s.className="gldef";s.textContent="▸ "+el.getAttribute("data-d");el.after(s);el._d=s;};});}
+function render(){
+  const nav=document.getElementById("nav");
+  nav.innerHTML=CH.map((c,i)=>`<button class="tab${i===cur?' on':''}" data-i="${i}">${c.t.split(".")[0]}</button>`).join("");
+  nav.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{cur=+b.dataset.i;render();window.scrollTo(0,0);});
+  document.getElementById("art").innerHTML=`<h2>${CH[cur].t}</h2><div class="uline"></div>`+CH[cur].b.map(block).join("");
+  wireGloss();
+  document.getElementById("pg").textContent=(cur+1)+" / "+CH.length;
+  document.getElementById("prev").disabled=cur===0;
+  document.getElementById("next").disabled=cur===CH.length-1;
+}
+document.getElementById("prev").onclick=()=>{if(cur>0){cur--;render();window.scrollTo(0,0);}};
+document.getElementById("next").onclick=()=>{if(cur<CH.length-1){cur++;render();window.scrollTo(0,0);}};
+render();
+</script>
+</body>
+</html>
