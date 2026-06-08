@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>医学統計学 図解テキスト</title>
+<style>
+  :root{--bg:#f3efe6;--paper:#fcfbf7;--ink:#20262a;--soft:#6c685c;--line:#ded7c7;--red:#9a3324;--teal:#2f5d62;--gold:#a8842c;--green:#3a6b4a;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Helvetica Neue",sans-serif;font-size:16px;line-height:1.75;}
+  .wrap{max-width:680px;margin:0 auto;padding:20px 16px 70px;}
+  header{border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:16px;}
+  .kicker{font-size:11px;letter-spacing:2px;color:var(--gold);}
+  h1{font-family:Georgia,serif;font-size:27px;margin:2px 0 0;}
+  .sub{font-size:13px;color:var(--soft);margin:4px 0 0;}
+  nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;}
+  .tab{padding:7px 10px;font-size:13px;border-radius:7px;background:transparent;color:var(--soft);border:1px solid var(--line);cursor:pointer;}
+  .tab.on{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  h2{font-family:Georgia,serif;font-size:22px;margin:0 0 2px;}
+  .uline{width:46px;height:4px;background:var(--red);margin-bottom:6px;border-radius:2px;}
+  p{margin:14px 0;}
+  .kw{color:var(--red);}
+  .box{margin:18px 0;border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:9px;background:var(--paper);padding:14px 16px;}
+  .box .bt{font-weight:700;font-size:14px;margin-bottom:4px;}
+  .box .bb{font-size:14.5px;line-height:1.7;}
+  figure{margin:20px 0;}
+  .figbox{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px;}
+  figcaption{font-size:12px;color:var(--soft);margin-top:8px;padding-left:2px;}
+  figcaption b{color:var(--red);}
+  svg{display:block;width:100%;height:auto;}
+  .rows>div{display:flex;gap:10px;padding:8px;border-radius:6px;background:rgba(0,0,0,.025);margin:5px 0;font-size:14px;}
+  .rows .k{font-weight:700;flex:0 0 34%;}
+  .pyr>div{margin:0 auto 4px;border-radius:5px;text-align:center;font-size:12px;padding:6px 4px;color:var(--ink);}
+  .corr{display:flex;gap:6px;}
+  .corr>div{flex:1;text-align:center;}
+  .corr .lab{font-size:11px;color:var(--soft);margin-top:2px;}
+  .navbtns{display:flex;justify-content:space-between;align-items:center;margin-top:26px;padding-top:14px;border-top:1px solid var(--line);}
+  .navbtns button{background:none;border:none;color:var(--teal);font-size:14px;cursor:pointer;font-family:inherit;}
+  .navbtns button:disabled{opacity:.3;}
+  .pg{font-size:12px;color:var(--soft);}
+  footer{margin-top:28px;text-align:center;font-size:12px;color:var(--soft);}
+  .quiz{margin:22px 0 6px;border:1px solid var(--line);border-radius:11px;background:#eef0ea;padding:15px;}
+  .quiz .qh{font-weight:700;font-size:15px;color:var(--teal);margin-bottom:4px;}
+  .quiz .qsub{font-size:12px;color:var(--soft);margin-bottom:10px;}
+  .qitem{margin:12px 0;}
+  .qq{font-size:14.5px;font-weight:600;margin-bottom:6px;}
+  .qq b{color:var(--red);}
+  .choice{display:block;width:100%;text-align:left;padding:9px 11px;margin:5px 0;border:1px solid var(--line);background:#fff;border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit;color:var(--ink);line-height:1.5;}
+  .choice.ok{border-color:var(--green);background:rgba(58,107,74,.1);}
+  .choice.ng{border-color:var(--red);background:rgba(154,51,36,.08);}
+  .qexpl{margin-top:7px;padding:11px;border-radius:8px;background:rgba(168,132,44,.12);font-size:13.5px;line-height:1.65;}
+  .iact{margin:18px 0;border:1px solid var(--line);border-radius:11px;background:#eef2ee;padding:13px;}
+  .iact-t{font-weight:700;font-size:14px;color:var(--green);margin-bottom:6px;}
+  .ir{display:flex;align-items:center;gap:10px;margin-top:8px;font-size:13px;color:var(--soft);}
+  .ir input[type=range]{flex:1;accent-color:var(--teal);}
+  .ip{margin-top:6px;font-family:ui-monospace,Menlo,monospace;font-size:15px;color:var(--red);font-weight:700;}
+  .ihint{font-size:12px;color:var(--soft);margin-top:6px;}
+  .nntrow{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;}
+  .nntrow label{font-size:13px;color:var(--soft);}
+  .nntrow input{width:80px;padding:6px;border:1px solid var(--line);border-radius:7px;text-align:right;}
+  .lk{cursor:pointer;border-bottom:1px dotted var(--red);}
+  .lk:hover{background:rgba(154,51,36,.08);}
+  .gsearch input{width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;font-size:15px;margin-bottom:10px;}
+  .gitem{padding:10px 0;border-bottom:1px solid var(--line);}
+  .gt{font-weight:700;color:var(--teal);font-size:15px;}
+  .gd{font-size:14px;color:var(--ink);margin-top:2px;line-height:1.65;}
+  .gflash{background:rgba(168,132,44,.18);border-radius:8px;padding:8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">MEDICAL BIOSTATISTICS · TEXTBOOK</div>
+    <h1>医学統計学 図解テキスト</h1>
+    <p class="sub">図でつかむ、臨床研究のための統計（初学者向け・iPhone対応）</p>
+  </header>
+  <nav id="nav"></nav>
+  <article id="art"></article>
+  <div class="navbtns">
+    <button id="prev">← 前の章</button>
+    <span class="pg" id="pg"></span>
+    <button id="next">次の章 →</button>
+  </div>
+  <footer>学習用テキスト。図中の数値・散布図は概念説明のためのイメージです。</footer>
+</div>
+
+<script>
+const COL={ink:"#20262a",soft:"#6c685c",line:"#ded7c7",red:"#9a3324",teal:"#2f5d62",gold:"#a8842c",green:"#3a6b4a"};
+const npdf=(x,m=0,s=1)=>Math.exp(-((x-m)**2)/(2*s*s))/(s*Math.sqrt(2*Math.PI));
+
+/* ---- SVG helpers ---- */
+function scaler(xd,yd,W,H,pad){const[x0,x1]=xd,[y0,y1]=yd;return{
+  x:v=>pad+(v-x0)/(x1-x0)*(W-2*pad), y:v=>H-pad-(v-y0)/(y1-y0)*(H-2*pad)};}
+function path(pts,sc){return pts.map((p,i)=>(i?"L":"M")+sc.x(p[0]).toFixed(1)+" "+sc.y(p[1]).toFixed(1)).join(" ");}
+
+function fNormal(){
+  const W=320,H=150,pad=22,sc=scaler([-4,4],[0,0.42],W,H,pad);
+  const pts=[];for(let x=-4;x<=4;x+=0.1)pts.push([x,npdf(x)]);
+  const band=(a,b,o)=>`<rect x="${sc.x(a)}" y="${pad}" width="${sc.x(b)-sc.x(a)}" height="${H-2*pad}" fill="${COL.teal}" opacity="${o}"/>`;
+  let ticks="";[-3,-2,-1,0,1,2,3].forEach(t=>{ticks+=`<text x="${sc.x(t)}" y="${H-6}" font-size="9" fill="${COL.soft}" text-anchor="middle">${t===0?"中心":(t>0?"+":"")+t}</text>`;});
+  return `<svg viewBox="0 0 ${W} ${H}">${band(-1,1,.28)}${band(-2,-1,.16)}${band(1,2,.16)}${band(-3,-2,.07)}${band(2,3,.07)}<path d="${path(pts,sc)}" fill="none" stroke="${COL.ink}" stroke-width="1.6"/>${ticks}</svg>`;
+}
+function fError(){
+  const W=320,H=160,pad=20,sc=scaler([-4,8],[0,0.42],W,H,pad);
+  const a=[],b=[];for(let x=-4;x<=8;x+=0.15){a.push([x,npdf(x,0,1)]);b.push([x,npdf(x,3,1)]);}
+  const cx=sc.x(1.96);
+  return `<svg viewBox="0 0 ${W} ${H}">
+    <rect x="${cx}" y="${pad}" width="${W-pad-cx}" height="${H-2*pad}" fill="${COL.red}" opacity=".22"/>
+    <rect x="${pad}" y="${pad}" width="${cx-pad}" height="${H-2*pad}" fill="${COL.gold}" opacity=".14"/>
+    <path d="${path(a,sc)}" fill="none" stroke="${COL.teal}" stroke-width="1.6"/>
+    <path d="${path(b,sc)}" fill="none" stroke="${COL.red}" stroke-width="1.6"/>
+    <line x1="${cx}" y1="${pad}" x2="${cx}" y2="${H-pad}" stroke="${COL.ink}" stroke-dasharray="4 3"/>
+    <text x="${cx}" y="${pad-4}" font-size="9" fill="${COL.ink}" text-anchor="middle">境界線</text>
+    <text x="${sc.x(0)}" y="${H-6}" font-size="9" fill="${COL.soft}" text-anchor="middle">差がない世界</text>
+    <text x="${sc.x(3)}" y="${H-6}" font-size="9" fill="${COL.soft}" text-anchor="middle">差がある世界</text></svg>`;
+}
+function fCI(){
+  const data=[[4.8,1],[5.4,1],[3.9,1],[6.1,0],[5.0,1],[4.2,1],[5.7,1],[4.6,1],[3.7,0],[5.1,1]];
+  let bars="";data.forEach((d,i)=>{const y=26+i*14,x=d[0]*40,w=26,c=d[1]?COL.teal:COL.red;
+    bars+=`<line x1="${x-w}" y1="${y}" x2="${x+w}" y2="${y}" stroke="${c}" stroke-width="2"/><line x1="${x-w}" y1="${y-3}" x2="${x-w}" y2="${y+3}" stroke="${c}" stroke-width="2"/><line x1="${x+w}" y1="${y-3}" x2="${x+w}" y2="${y+3}" stroke="${c}" stroke-width="2"/><circle cx="${x}" cy="${y}" r="2.5" fill="${c}"/>`;});
+  return `<svg viewBox="0 0 320 180"><line x1="200" y1="10" x2="200" y2="172" stroke="${COL.green}" stroke-dasharray="4 3"/><text x="204" y="18" font-size="9" fill="${COL.green}">本当の値</text>${bars}</svg>`;
+}
+function fFlow(){
+  const node=(x,y,w,t,f)=>`<rect x="${x}" y="${y}" width="${w}" height="30" rx="6" fill="${f}" stroke="${COL.line}"/><text x="${x+w/2}" y="${y+19}" font-size="10" fill="${COL.ink}" text-anchor="middle">${t}</text>`;
+  const arr=(a,b,c,d)=>`<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="${COL.soft}" stroke-width="1.2" marker-end="url(#ar)"/>`;
+  return `<svg viewBox="0 0 340 262"><defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="${COL.soft}"/></marker></defs>
+   ${node(108,6,124,"何を測っている？","#efeadc")}${arr(140,36,70,60)}${arr(200,36,272,60)}
+   <text x="86" y="52" font-size="9" fill="${COL.soft}">量</text><text x="246" y="52" font-size="9" fill="${COL.soft}">種類分け</text>
+   ${node(18,62,112,"グループ数は？","#e6efe9")}${node(232,62,100,"カイ二乗検定","#f3e6e2")}
+   ${arr(50,92,50,116)}${arr(106,92,152,116)}<text x="26" y="108" font-size="9" fill="${COL.soft}">2つ</text><text x="120" y="108" font-size="9" fill="${COL.soft}">3つ+</text>
+   ${node(8,118,86,"t検定","#dde8ec")}${node(112,118,96,"分散分析","#dde8ec")}
+   ${arr(50,148,50,174)}${node(8,176,116,"順位で比べる検定","#efeadc")}${arr(160,148,160,174)}${node(116,176,116,"順位で比べる検定","#efeadc")}</svg>`;
+}
+function fCorr(){
+  const W=110,H=100,pad=8,sc=scaler([0,10],[-2,14],W,H,pad);
+  const mk=(r,col)=>{let dots="";for(let i=0;i<34;i++){const x=Math.random()*10,n=(Math.random()-0.5)*10*(1-Math.abs(r)),y=r*x+5+n;dots+=`<circle cx="${sc.x(x).toFixed(1)}" cy="${sc.y(y).toFixed(1)}" r="2.4" fill="${col}" opacity=".7"/>`;}return `<svg viewBox="0 0 ${W} ${H}"><rect x="${pad}" y="${pad}" width="${W-2*pad}" height="${H-2*pad}" fill="none" stroke="${COL.line}"/>${dots}</svg>`;};
+  return `<div class="corr"><div>${mk(0.9,COL.teal)}<div class="lab">強い正の関係</div></div><div>${mk(0.3,COL.gold)}<div class="lab">弱い関係</div></div><div>${mk(-0.8,COL.red)}<div class="lab">負の関係</div></div></div>`;
+}
+function fKM(){
+  const W=320,H=150,pad=24,sc=scaler([0,27],[0,1],W,H,pad);
+  const A=[[0,1],[3,.92],[6,.88],[9,.8],[12,.75],[16,.68],[22,.6],[26,.55]];
+  const B=[[0,1],[3,.88],[6,.75],[9,.6],[12,.48],[16,.35],[22,.28],[26,.2]];
+  const step=a=>{let d="M"+sc.x(a[0][0])+" "+sc.y(a[0][1]);for(let i=1;i<a.length;i++){d+=" L"+sc.x(a[i][0])+" "+sc.y(a[i-1][1])+" L"+sc.x(a[i][0])+" "+sc.y(a[i][1]);}return d;};
+  return `<svg viewBox="0 0 ${W} ${H}"><line x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}" stroke="${COL.line}"/>
+    <path d="${step(A)}" fill="none" stroke="${COL.teal}" stroke-width="2"/><path d="${step(B)}" fill="none" stroke="${COL.red}" stroke-width="2"/>
+    <text x="${W-pad}" y="${sc.y(.55)-4}" font-size="10" fill="${COL.teal}" text-anchor="end">治療群</text>
+    <text x="${W-pad}" y="${sc.y(.2)+12}" font-size="10" fill="${COL.red}" text-anchor="end">対照群</text>
+    <text x="${pad}" y="${H-6}" font-size="9" fill="${COL.soft}">経過した時間 →</text></svg>`;
+}
+function fPower(){
+  const W=320,H=150,pad=26,sc=scaler([0,200],[0,1],W,H,pad);
+  const pts=[];for(let n=4;n<=200;n+=4)pts.push([n,Math.min(.99,1-Math.exp(-n/45))]);
+  return `<svg viewBox="0 0 ${W} ${H}"><line x1="${pad}" y1="${sc.y(.8)}" x2="${W-pad}" y2="${sc.y(.8)}" stroke="${COL.red}" stroke-dasharray="4 3"/>
+    <text x="${W-pad}" y="${sc.y(.8)-4}" font-size="9" fill="${COL.red}" text-anchor="end">目標(8割)</text>
+    <path d="${path(pts,sc)}" fill="none" stroke="${COL.teal}" stroke-width="2"/>
+    <text x="${sc.x(100)}" y="${H-6}" font-size="9" fill="${COL.soft}" text-anchor="middle">人数 →</text>
+    <text x="10" y="${pad}" font-size="9" fill="${COL.soft}">力</text></svg>`;
+}
+function fROC(){
+  const W=300,H=150,pad=26,sc=scaler([0,1],[0,1],W,H,pad);
+  const pts=[[0,0]];for(let i=1;i<=20;i++){const x=i/20;pts.push([x,Math.pow(x,.35)]);}
+  return `<svg viewBox="0 0 ${W} ${H}"><line x1="${sc.x(0)}" y1="${sc.y(0)}" x2="${sc.x(1)}" y2="${sc.y(1)}" stroke="${COL.soft}" stroke-dasharray="4 3"/>
+    <path d="${path(pts,sc)}" fill="none" stroke="${COL.teal}" stroke-width="2.2"/>
+    <text x="${sc.x(.5)}" y="${H-6}" font-size="9" fill="${COL.soft}" text-anchor="middle">巻き込み(偽陽性) →</text>
+    <text x="10" y="${pad}" font-size="9" fill="${COL.soft}">拾い上げ</text></svg>`;
+}
+function fMulti(){
+  const W=320,H=150,pad=26,n=20,sc=scaler([0,n+1],[0,80],W,H,pad),bw=(W-2*pad)/n*0.7;
+  let bars="";for(let k=1;k<=n;k++){const v=(1-Math.pow(0.95,k))*100,x=sc.x(k)-bw/2,y=sc.y(v);
+    bars+=`<rect x="${x}" y="${y}" width="${bw}" height="${H-pad-y}" fill="${COL.red}" opacity=".75"/>`;}
+  return `<svg viewBox="0 0 ${W} ${H}">${bars}<text x="${sc.x(10)}" y="${H-6}" font-size="9" fill="${COL.soft}" text-anchor="middle">検定の回数 →</text><text x="8" y="${pad}" font-size="9" fill="${COL.soft}">偽陽性%</text></svg>`;
+}
+function fBayes(){
+  const W=320,H=120,pad=14,lab=96,sc={x:v=>lab+v/100*(W-lab-30)};
+  const bar=(y,v,c,t)=>`<text x="${pad}" y="${y+14}" font-size="11" fill="${COL.ink}">${t}</text><rect x="${lab}" y="${y}" width="${sc.x(v)-lab}" height="20" rx="4" fill="${c}"/><text x="${sc.x(v)+4}" y="${y+15}" font-size="11" fill="${COL.soft}">${v}%</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}">${bar(26,10,COL.soft,"検査前")}${bar(66,64,COL.teal,"陽性後")}</svg>`;
+}
+function pyramid(rows){return `<div class="pyr">`+rows.map((r,i)=>`<div style="width:${r[1]*100}%;background:rgba(154,51,36,${0.15+i*0.02})">${r[0]}</div>`).join("")+`</div>`;}
+function fConfound(){
+  const W=320,H=150;
+  const node=(x,y,t,c)=>`<rect x="${x-52}" y="${y-15}" width="104" height="30" rx="6" fill="#fff" stroke="${c}" stroke-width="1.5"/><text x="${x}" y="${y+4}" font-size="10.5" fill="${COL.ink}" text-anchor="middle">${t}</text>`;
+  const arr=(x1,y1,x2,y2,dash)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${COL.soft}" stroke-width="1.4" ${dash?'stroke-dasharray="4 3"':''} marker-end="url(#cf)"/>`;
+  return `<svg viewBox="0 0 ${W} ${H}"><defs><marker id="cf" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="${COL.soft}"/></marker></defs>
+   ${node(160,26,"交絡因子(例:年齢)",COL.gold)}
+   ${node(72,118,"原因とされるもの",COL.teal)}
+   ${node(248,118,"結果",COL.red)}
+   ${arr(138,38,92,104)}${arr(182,38,236,104)}${arr(124,118,196,118,true)}
+   <text x="160" y="136" font-size="9" fill="${COL.soft}" text-anchor="middle">見かけの関係かも?</text></svg>`;
+}
+function fLogistic(){
+  const W=320,H=150,pad=24,sc=scaler([-6,6],[0,1],W,H,pad);
+  const pts=[];for(let x=-6;x<=6;x+=0.2)pts.push([x,1/(1+Math.exp(-x))]);
+  return `<svg viewBox="0 0 ${W} ${H}"><line x1="${pad}" y1="${sc.y(0.5)}" x2="${W-pad}" y2="${sc.y(0.5)}" stroke="${COL.line}" stroke-dasharray="3 3"/>
+   <path d="${path(pts,sc)}" fill="none" stroke="${COL.teal}" stroke-width="2.2"/>
+   <text x="${pad}" y="${H-6}" font-size="9" fill="${COL.soft}">要因(リスクの強さ) →</text>
+   <text x="8" y="${pad}" font-size="9" fill="${COL.soft}">発症の確率</text>
+   <text x="${W-pad}" y="${sc.y(0.96)}" font-size="9" fill="${COL.soft}" text-anchor="end">1(必ず起こる)</text></svg>`;
+}
+function fForest(){
+  const W=320,padR=12,top=12;
+  const studies=[["研究A",0.80,0.60,1.06],["研究B",0.70,0.50,0.98],["研究C",0.92,0.72,1.18],["研究D",0.62,0.44,0.88]];
+  const pooled=["統合(全部まとめて)",0.75,0.65,0.87];
+  const x0=Math.log(0.4),x1=Math.log(1.7),plotL=118,plotR=W-padR;
+  const sx=v=>plotL+(Math.log(v)-x0)/(x1-x0)*(plotR-plotL);
+  let rows="",y=top+16;
+  studies.forEach(s=>{rows+=`<text x="8" y="${y+4}" font-size="10" fill="${COL.ink}">${s[0]}</text>`+
+    `<line x1="${sx(s[2])}" y1="${y}" x2="${sx(s[3])}" y2="${y}" stroke="${COL.teal}" stroke-width="1.6"/>`+
+    `<rect x="${sx(s[1])-3}" y="${y-3}" width="6" height="6" fill="${COL.teal}"/>`;y+=24;});
+  const cx=sx(pooled[1]),dl=sx(pooled[2]),dr=sx(pooled[3]);
+  rows+=`<text x="8" y="${y+4}" font-size="10" fill="${COL.red}" font-weight="bold">${pooled[0]}</text>`+
+    `<polygon points="${dl},${y} ${cx},${y-5} ${dr},${y} ${cx},${y+5}" fill="${COL.red}"/>`;
+  const l1=sx(1);
+  return `<svg viewBox="0 0 ${W} ${y+24}"><line x1="${l1}" y1="${top}" x2="${l1}" y2="${y+8}" stroke="${COL.soft}" stroke-dasharray="3 3"/>
+   <text x="${l1}" y="${y+20}" font-size="9" fill="${COL.soft}" text-anchor="middle">1.0(差なし)</text>
+   <text x="${plotL}" y="${top-2}" font-size="9" fill="${COL.green}">←効く</text>${rows}</svg>`;
+}
+function fITT(){
+  const W=320,H=132,bar=(y,label,segs)=>{let x=118,s=`<text x="8" y="${y+15}" font-size="10" fill="${COL.ink}">${label}</text>`;
+    segs.forEach(g=>{s+=`<rect x="${x}" y="${y}" width="${g[0]}" height="22" fill="${g[1]}" opacity="${g[3]||1}"/>`+(g[2]?`<text x="${x+g[0]/2}" y="${y+15}" font-size="9" fill="${g[4]||'#fff'}" text-anchor="middle">${g[2]}</text>`:"");x+=g[0];});return s;};
+  return `<svg viewBox="0 0 ${W} ${H}">
+   ${bar(18,"割付通り全員",[[184,COL.teal,"100人すべてを解析"]])}
+   ${bar(54,"完遂者のみ",[[126,COL.gold,"70人のみ"],[58,COL.line,"脱落30人を除外",.6,COL.soft]])}
+   <text x="8" y="100" font-size="10" fill="${COL.red}">脱落者を除くと「都合のよい人」だけ残り、</text>
+   <text x="8" y="116" font-size="10" fill="${COL.red}">効果を過大評価しやすい(これがバイアス)。</text></svg>`;
+}
+function fManhattan(){
+  const W=320,H=150,pad=22,sc=scaler([0,100],[0,9],W,H,pad);
+  let dots="";for(let i=0;i<130;i++){const x=Math.random()*100;let y=Math.random()*2.6;
+    if(Math.abs(x-30)<2.2)y=5.2+Math.random()*2.8;if(Math.abs(x-72)<2.2)y=5.6+Math.random()*2.6;
+    const col=y>5?COL.red:(Math.floor(x/12)%2?COL.teal:COL.soft);
+    dots+=`<circle cx="${sc.x(x).toFixed(1)}" cy="${sc.y(y).toFixed(1)}" r="2" fill="${col}" opacity=".75"/>`;}
+  return `<svg viewBox="0 0 ${W} ${H}"><line x1="${pad}" y1="${sc.y(5)}" x2="${W-pad}" y2="${sc.y(5)}" stroke="${COL.red}" stroke-dasharray="4 3"/>
+   <text x="${W-pad}" y="${sc.y(5)-3}" font-size="9" fill="${COL.red}" text-anchor="end">ゲノム全体の厳しい基準</text>${dots}
+   <text x="${sc.x(50)}" y="${H-6}" font-size="9" fill="${COL.soft}" text-anchor="middle">染色体上の位置 →</text>
+   <text x="6" y="${pad}" font-size="9" fill="${COL.soft}">関連の強さ</text></svg>`;
+}
+function fNonInf(){
+  const W=320,plotL=66,plotR=300,top=16,x0=-3,x1=3,sx=v=>plotL+(v-x0)/(x1-x0)*(plotR-plotL);
+  const zero=sx(0),marg=sx(-1.5);
+  const bars=[["優越",1.2,0.4,2.0,COL.green],["非劣性",-0.3,-1.1,0.6,COL.teal],["判定不能",-1.0,-2.2,0.3,COL.gold],["劣る",-2.1,-2.8,-1.4,COL.red]];
+  let rows="",y=top+24;bars.forEach(b=>{rows+=`<text x="6" y="${y+4}" font-size="10" fill="${b[4]}">${b[0]}</text><line x1="${sx(b[2])}" y1="${y}" x2="${sx(b[3])}" y2="${y}" stroke="${b[4]}" stroke-width="2"/><circle cx="${sx(b[1])}" cy="${y}" r="3" fill="${b[4]}"/>`;y+=30;});
+  return `<svg viewBox="0 0 ${W} ${y}"><line x1="${zero}" y1="${top}" x2="${zero}" y2="${y-16}" stroke="${COL.ink}" stroke-dasharray="3 3"/><text x="${zero}" y="${top-3}" font-size="9" fill="${COL.ink}" text-anchor="middle">差なし</text><line x1="${marg}" y1="${top}" x2="${marg}" y2="${y-16}" stroke="${COL.red}" stroke-dasharray="3 3"/><text x="${marg}" y="${top-3}" font-size="9" fill="${COL.red}" text-anchor="middle">許容限界</text>${rows}</svg>`;
+}
+function fSpaghetti(){
+  const W=320,H=150,pad=24,sc=scaler([0,4],[0,10],W,H,pad),t=[0,1,2,3,4];let lines="";
+  for(let i=0;i<7;i++){const base=2+Math.random()*4,slope=0.5+Math.random()*1.3,pts=t.map(x=>[x,base+slope*x+(Math.random()-0.5)]);lines+=`<path d="${path(pts,sc)}" fill="none" stroke="${COL.teal}" stroke-width="1" opacity=".4"/>`;}
+  lines+=`<path d="${path(t.map(x=>[x,3+1.1*x]),sc)}" fill="none" stroke="${COL.red}" stroke-width="2.6"/>`;
+  return `<svg viewBox="0 0 ${W} ${H}">${lines}<text x="${sc.x(2)}" y="${H-6}" font-size="9" fill="${COL.soft}" text-anchor="middle">時間(受診回) →</text><text x="6" y="${pad}" font-size="9" fill="${COL.soft}">値</text><text x="${W-pad}" y="${sc.y(7.6)}" font-size="9" fill="${COL.red}" text-anchor="end">全体の平均</text></svg>`;
+}
+function fOverfit(){
+  const W=320,H=150,pad=26,sc=scaler([0,10],[0,10],W,H,pad),tr=[],va=[];
+  for(let c=0;c<=10;c+=0.5){const t=8*Math.exp(-c/2.2)+0.4;tr.push([c,t]);va.push([c,t+0.16*Math.pow(Math.max(0,c-3),1.8)]);}
+  return `<svg viewBox="0 0 ${W} ${H}"><path d="${path(tr,sc)}" fill="none" stroke="${COL.teal}" stroke-width="2"/><path d="${path(va,sc)}" fill="none" stroke="${COL.red}" stroke-width="2"/><text x="${W-pad}" y="${sc.y(0.8)}" font-size="9" fill="${COL.teal}" text-anchor="end">学習データ(暗記)</text><text x="${W-pad}" y="${sc.y(6.5)}" font-size="9" fill="${COL.red}" text-anchor="end">新しいデータ</text><text x="${sc.x(5)}" y="${H-6}" font-size="9" fill="${COL.soft}" text-anchor="middle">モデルの複雑さ →</text><text x="6" y="${pad}" font-size="9" fill="${COL.soft}">誤差</text></svg>`;
+}
+function fDiD(){
+  const W=320,H=150,pad=28,sc=scaler([0,3],[0,10],W,H,pad);
+  const tPre=[1,4],tPost=[2,8],cPre=[1,5],cPost=[2,6.2],cf=[2,4+(6.2-5)];
+  const L=(a,b,col,w,d)=>`<path d="M${sc.x(a[0])} ${sc.y(a[1])} L${sc.x(b[0])} ${sc.y(b[1])}" stroke="${col}" stroke-width="${w}" ${d?'stroke-dasharray="4 3"':''} fill="none"/>`;
+  return `<svg viewBox="0 0 ${W} ${H}">${L(cPre,cPost,COL.soft,2)}${L(tPre,tPost,COL.teal,2.4)}${L(tPre,cf,COL.gold,2,true)}<line x1="${sc.x(2)}" y1="${sc.y(cf[1])}" x2="${sc.x(2)}" y2="${sc.y(tPost[1])}" stroke="${COL.red}" stroke-width="2"/><text x="${sc.x(2)-4}" y="${sc.y((cf[1]+tPost[1])/2)}" font-size="9" fill="${COL.red}" text-anchor="end">本当の効果</text><text x="${sc.x(0.6)}" y="${H-6}" font-size="9" fill="${COL.soft}">介入前</text><text x="${sc.x(2)}" y="${H-6}" font-size="9" fill="${COL.soft}" text-anchor="end">介入後</text><text x="${sc.x(2)+4}" y="${sc.y(tPost[1])+3}" font-size="9" fill="${COL.teal}">介入群</text><text x="${sc.x(2)+4}" y="${sc.y(cPost[1])+3}" font-size="9" fill="${COL.soft}">対照群</text><text x="${sc.x(2)+4}" y="${sc.y(cf[1])+3}" font-size="9" fill="${COL.gold}">もし介入なしなら</text></svg>`;
+}
+function fPhack(){
+  const W=320,H=150,pad=26,n=20,sc=scaler([0,1],[0,26],W,H,pad),bw=(W-2*pad)/n*0.82;
+  let bars="";for(let i=0;i<n;i++){let h=(i===0)?24:Math.max(2,9-i*0.35);const x=sc.x(i/n)+((W-2*pad)/n-bw)/2,y=sc.y(h),col=(i===0)?COL.red:COL.teal;bars+=`<rect x="${x}" y="${y}" width="${bw}" height="${H-pad-y}" fill="${col}" opacity=".78"/>`;}
+  const cut=sc.x(0.05);
+  return `<svg viewBox="0 0 ${W} ${H}"><line x1="${cut}" y1="${pad}" x2="${cut}" y2="${H-pad}" stroke="${COL.ink}" stroke-dasharray="3 3"/><text x="${cut+3}" y="${pad+8}" font-size="9" fill="${COL.ink}">0.05</text>${bars}<text x="${sc.x(0.5)}" y="${H-6}" font-size="9" fill="${COL.soft}" text-anchor="middle">p値 →</text><text x="6" y="${pad}" font-size="9" fill="${COL.soft}">研究数</text></svg>`;
+}
+function fBox(){const W=320,H=150,pad=26,sc=scaler([0,100],[0,1],W,H,pad);
+ const min=15,q1=35,med=50,q3=68,max=86,out=97;
+ const yT=sc.y(0.7),yB=sc.y(0.3),ym=sc.y(0.5);
+ const vl=(x,c,w)=>`<line x1="${sc.x(x)}" y1="${yT}" x2="${sc.x(x)}" y2="${yB}" stroke="${c}" stroke-width="${w}"/>`;
+ return `<svg viewBox="0 0 ${W} ${H}"><line x1="${sc.x(min)}" y1="${ym}" x2="${sc.x(q1)}" y2="${ym}" stroke="${COL.soft}"/><line x1="${sc.x(q3)}" y1="${ym}" x2="${sc.x(max)}" y2="${ym}" stroke="${COL.soft}"/><rect x="${sc.x(q1)}" y="${yT}" width="${sc.x(q3)-sc.x(q1)}" height="${yB-yT}" fill="${COL.teal}" opacity=".16" stroke="${COL.teal}"/>${vl(min,COL.soft,1)}${vl(max,COL.soft,1)}${vl(med,COL.red,2.2)}<circle cx="${sc.x(out)}" cy="${ym}" r="3" fill="${COL.red}"/><text x="${sc.x(q1)}" y="${yT-4}" font-size="8" fill="${COL.teal}" text-anchor="middle">Q1</text><text x="${sc.x(med)}" y="${yT-4}" font-size="8" fill="${COL.red}" text-anchor="middle">中央値</text><text x="${sc.x(q3)}" y="${yT-4}" font-size="8" fill="${COL.teal}" text-anchor="middle">Q3</text><text x="${sc.x((q1+q3)/2)}" y="${yB+12}" font-size="8" fill="${COL.teal}" text-anchor="middle">四分位範囲</text><text x="${sc.x(out)}" y="${ym-7}" font-size="8" fill="${COL.red}" text-anchor="middle">外れ値</text><text x="${sc.x(50)}" y="${H-4}" font-size="9" fill="${COL.soft}" text-anchor="middle">検査値 →</text></svg>`;}
+function fMislead(){const W=320,H=160,A=52,B=56;
+ const panel=(ox,ymin,ymax,title)=>{const h=H-46,top=24,bw=30,gap=16,x1=ox+24,x2=x1+bw+gap;
+  const y=v=>top+h-(v-ymin)/(ymax-ymin)*h, base=top+h;
+  return `<g><text x="${ox+70}" y="16" font-size="9" fill="${COL.ink}" text-anchor="middle">${title}</text><rect x="${x1}" y="${y(A)}" width="${bw}" height="${base-y(A)}" fill="${COL.teal}" opacity=".75"/><rect x="${x2}" y="${y(B)}" width="${bw}" height="${base-y(B)}" fill="${COL.gold}" opacity=".85"/><line x1="${ox+14}" y1="${base}" x2="${ox+126}" y2="${base}" stroke="${COL.ink}"/><text x="${ox+10}" y="${base+3}" font-size="7" fill="${COL.soft}" text-anchor="end">${ymin}</text><text x="${ox+10}" y="${top+4}" font-size="7" fill="${COL.soft}" text-anchor="end">${ymax}</text></g>`;};
+ return `<svg viewBox="0 0 ${W} ${H}">${panel(0,0,100,"軸0から：正直")}${panel(160,48,58,"軸を切る：誇張")}<text x="${W/2}" y="${H-4}" font-size="8" fill="${COL.soft}" text-anchor="middle">同じ52対56でも軸の取り方で印象が激変</text></svg>`;}
+const FIGS={fNormal,fError,fCI,fFlow,fCorr,fKM,fPower,fROC,fMulti,fBayes,fConfound,fLogistic,fForest,fITT,fManhattan,fNonInf,fSpaghetti,fOverfit,fDiD,fPhack,fBox,fMislead};
+
+/* ---- markup ---- */
+function md(t){return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\*\*([^*]+)\*\*/g,(m,w)=>(typeof GTERMS!=="undefined"&&GTERMS.has(w))?`<span class="kw lk" data-term="${w}">${w}</span>`:`<strong class="kw">${w}</strong>`).replace(/\n/g,"<br>");}
+function block(b){
+  if(b.p)return `<p>${md(b.p)}</p>`;
+  if(b.box)return `<div class="box" style="border-left-color:${b.box.c||COL.teal}"><div class="bt" style="color:${b.box.c||COL.teal}">${md(b.box.t)}</div><div class="bb">${md(b.box.b)}</div></div>`;
+  if(b.fig){let inner=b.fig.pyr?pyramid(b.fig.pyr):(b.fig.html?FIGS[b.fig.html]():"");
+    return `<figure><div class="figbox">${inner}</div><figcaption><b>図${b.fig.n}.</b> ${md(b.fig.cap)}</figcaption></figure>`;}
+  if(b.rows)return `<div class="rows">`+b.rows.map(r=>`<div><span class="k" style="color:${r[2]||COL.teal}">${r[0]}</span><span>${md(r[1])}</span></div>`).join("")+`</div>`;
+  if(b.iact)return `<div class="iact" data-kind="${b.iact}"></div>`;
+  if(b.gloss)return `<div id="glossWrap"></div>`;
+  return "";
+}
+
+/* ---- content ---- */
+const G=COL.green,R=COL.red,GD=COL.gold,TL=COL.teal;
+const CH=[
+{t:"1. 統計学の全体像とデータの種類",b:[
+ {p:"統計学と聞くと難しい数式を思い浮かべるかもしれませんが、出発点はとても素朴な悩みです。「目の前で見えている一部の人たちの結果から、まだ見ていない大勢の人について、どこまで言ってよいのか?」——これに答えるのが統計学です。"},
+ {p:"たとえば新しい胃薬を100人に使って、80人で症状が良くなったとします。本当に知りたいのは「この薬を使う**すべての患者**でどうなるか」です。でも全患者を試すことはできません。手元の100人(=**標本**、抜き取った一部)から、世の中全体(=**母集団**、知りたい対象の全員)を推し量る——この一部から全体を見通す手つきが本書のテーマです。"},
+ {box:{t:"たとえると",c:G,b:"味噌汁の味見に似ています。鍋全体を飲み干さなくても、ひとさじ(標本)すくえば鍋全体(母集団)の塩加減がだいたい分かります。ただし、よくかき混ぜずに上澄みだけすくえば判断を誤る——統計でも「どう抜き取るか」が結果を左右します。"}},
+ {p:"統計の作業は二段階です。まず手元のデータを整理する段階(**記述統計**＝集めた数字を要約して眺める)、次にそこから全体について述べる段階(**推測統計**＝一部から全体を推し量る)です。前半はデータの記念写真、後半はそこからの推理だとイメージしてください。"},
+ {p:"最初に必ず確認したいのが、扱っている数字が「どんな種類か」です。同じ「3」でも、「体温37.3℃」の3と「がんのステージ3」の3はまるで別物。前者は足し引きに意味がありますが、後者は順番を表すだけで、ステージ1と3を足して2で割っても無意味です。ここを取り違えると後の計算がすべて狂います。"},
+ {fig:{n:"1-1",cap:"数字には4つの性格があります。上にいくほど情報が豊かで、できる計算も増えます。自分のデータがどれかを見極めるのが第一歩です。",rows:true}},
+ {rows:[["比率尺度","0が「まったく無い」を意味し、足し算も割り算も自由(身長・血圧・検査値)",TL],["間隔尺度","目盛りの間隔は等しいが、0が「無」ではない(摂氏の体温・西暦)",TL],["順序尺度","順番だけに意味がある(がんのステージ・痛みの5段階)",GD],["名義尺度","区別するだけで順番もない(血液型・性別・病名)",R]]},
+ {box:{t:"よくあるつまずき",c:R,b:"10人の年収を平均したら2000万円——でも実は9人は400万円で、1人だけ大富豪が混ざっていた、という状況を考えてください。「平均2000万円」はみんなの実感とズレます。こういう極端な値があるときは、真ん中の人の値である**中央値**(この例なら400万円)のほうが実態を表します。検査値は一部の人で異常に高くなりがちなので、中央値が役立つ場面が多いのです。"}},
+ {p:"まとめると、解析を始める前に「①連続した量か、種類分けか ②比べるグループは1つ・2つ・3つ以上か ③同じ人を前後で測っているか」の3点を確認します。これさえ決まれば、この先どの道具を使うかがほぼ自動的に決まります。地味だけれど最も大事な準備です。"}
+]},
+{t:"2. 正規分布と「平均は山型になる」",b:[
+ {p:"たくさんの人のデータを集めてグラフ(横軸に値、縦軸に人数)にすると、多くの場合、真ん中が一番高く左右になだらかに低くなる富士山のような形になります。これが**正規分布**(自然界でよく現れる左右対称の山型)です。健診の基準値や偏差値も、この山型を土台にしています。"},
+ {p:"この山型の便利な点は、たった2つの数字——「山の中心(平均)」と「裾の広がり(**標準偏差**＝ばらつきの大きさを表す物差し)」——を決めれば形が完全に決まることです。"},
+ {fig:{n:"2-1",cap:"中心から左右に「ばらつき1個ぶん」に全体の約7割、「2個ぶん」に約95%、「3個ぶん」にほぼ全員が入ります。健診の基準範囲の多くは、この2個ぶん(約95%)の枠です。",html:"fNormal"}},
+ {box:{t:"いちばん心強い性質 — 平均そのものも山型になる",c:G,b:"元のデータがデコボコでも、「何人か選んで平均をとる」操作を繰り返すと、その平均たちの分布は富士山型に近づきます(人数が多いほどきれいに)。おかげで多少いびつなデータでも「平均を比べる」場面では山型を前提にした計算が使えます。サイコロ1個の目はバラバラでも、10個振った平均は3〜4に集中するのと同じ理屈です。"}},
+ {p:"ここで必ず混乱する2つの言葉を整理します。一つは「データそのもののばらつき」、もう一つは「平均という推定のあやふやさ」。前者は一人ひとりの散らばり、後者は集めた平均値がどれくらい信用できるか。人数を増やすと、データ自体のばらつきは変わりませんが、平均の信用度はぐんぐん上がります。"},
+ {box:{t:"たとえると",b:"体重計に1回乗ると、その日の食事や水分で数字がぶれます(データのばらつき)。でも毎日測って平均すれば、その平均は本当の体重にかなり近いと安心できます(平均の信用度)。測る回数を増やすほど平均は信頼できる——人数を増やす意味はここにあります。論文の棒グラフのヒゲが、どちらを表すかで図の印象は大きく変わるので必ず確認を。"}},
+ {p:"「富士山型」「中心」「裾の広がり」「人数を増やすと平均は信用できる」——この4つを、まず体に入れてください。次に出てくる信頼区間や検定のすべての土台になります。"}
+]},
+{t:"3. 推定と信頼区間（正直な「幅」）",b:[
+ {p:"研究で「平均血圧は130でした」と一つの数字を出しても、別の人たちで測れば131や128になります。つまり一つの数字(=**点推定**、ピンポイントの見積もり)は必ず多少ズレます。そこで「だいたいこのあたりからこのあたりの間に本当の値がありそう」と幅で示すのが**信頼区間**(本当の値がありそうな範囲)です。"},
+ {box:{t:"たとえると",c:G,b:"天気予報の「最高気温は28〜31℃の見込み」に似ています。ピンポイントで「29℃」と言い切るより、幅をもって示すほうが正直で役に立ちます。信頼区間は、研究結果に正直な幅を付ける作法です。"}},
+ {p:"よく使う「95%信頼区間」の読み方には注意が必要です。「本当の値がこの幅に入る確率が95%」と言いたくなりますが、厳密には違います。正しくは「同じ研究を100回やり直すと、毎回少し違う幅が100本でき、そのうち約95本が本当の値を含む」という意味です。"},
+ {fig:{n:"3-1",cap:"同じ研究を繰り返すと毎回少し違う幅ができます(横棒)。緑の縦線が本当の値。100本引けば約95本がこの線をまたぎ、たまに外す棒(赤)も出ます。これが「95%」の意味です。",html:"fCI"}},
+ {p:"とはいえ実務では、そこまで厳密でなくて大丈夫。「幅が狭い＝よく分かっている」「幅が広い＝まだあやふや」「幅の位置＝効果の大きさ」と読めば十分です。そして人数を増やすほど幅は狭まります。"},
+ {box:{t:"ここがポイント — 幅が「ある値」をまたぐか",c:GD,b:"2つの治療の差を調べ、その差の信頼区間が「0」をまたいでいたら(例:−2〜+5)、「差がない可能性も十分残っている」という意味です。効果の倍率(何倍か)を見るときは「1」をまたぐかが分かれ目です(1倍＝変わらない、だから)。論文ではまずこの「またいでいるか」を見るだけで、ずいぶん中身が分かります。"}},
+ {p:"近年の論文が「効果あり/なし」と言い切るより信頼区間を重視するのは、幅を見れば「効果の大きさ」と「どれくらい確かか」を一度に読めるから。一つの数字より、幅のある正直な報告のほうが臨床判断に役立ちます。"}
+]},
+{t:"4. 仮説検定の考え方（裁判に似ている）",b:[
+ {p:"「この薬は効くのか、たまたま良くなっただけか?」を判断する手続きが**仮説検定**です。考え方は裁判の「推定無罪」に似ています。最初はわざと「差はない(薬は効いていない)」という立場(=**帰無仮説**、とりあえず差なしと仮定する出発点)に立ちます。"},
+ {box:{t:"たとえると",c:G,b:"裁判ではまず「無罪」と仮定し、よほど強い証拠が出て初めて有罪にします。統計も同じで、「差はない」と仮定したうえで、もし本当に差がないなら「こんな結果はめったに起きない」という強い証拠が出たときだけ、「やっぱり差がある」と結論します。最初から決めつけない、慎重な態度です。"}},
+ {p:"その「めったに起きなさ」を数字にしたのが**p値**です。p値は「もし本当は差がなかったとして、今回くらい目立つ結果が偶然だけで起きる確率」。これが小さい(ふつう5%未満)と、「偶然では起きにくい→差がないという仮定のほうが怪しい」と考え、差があると判断します。"},
+ {box:{t:"よくあるつまずき",c:R,b:"p値は「薬が効く確率」でも「差がない確率」でもありません。「差がないと仮定したときに、この結果が偶然出る珍しさ」です。p＝0.03は「差がないなら、こんな結果は100回に3回しか起きない珍しさ。さすがに偶然とは思えない」という意味だと覚えてください。"}},
+ {p:"ただし判断には2種類の間違いがつきまといます。一つは「本当は差がないのに、あると早とちりする」間違い(あわてもの・偽陽性)。もう一つは「本当は差があるのに見逃す」間違い(ぼんやりもの・偽陰性)です。下の図で、2つの山の重なりがこれに対応します。"},
+ {fig:{n:"4-1",cap:"左の山が「差がない世界」、右が「差がある世界」。境界線より右に出たら「差あり」と判定。差がない世界なのに右に出る部分が早とちり(赤)、差がある世界なのに左に残って見逃す部分が見逃し(金色)です。",html:"fError"}},
+ {p:"困ったことに、早とちりを減らそうと判定を厳しくすると、今度は見逃しが増えます。あちらを立てればこちらが立たず。両方を同時に減らす唯一の現実的な方法が「人数を増やすこと」で、これが第9章につながります。"}
+]},
+{t:"5. 検定の使い分け（地図がある）",b:[
+ {p:"検定の種類は多くて最初は圧倒されますが、選び方は機械的です。料理で「材料が決まればメニューが絞れる」のと同じ。次の4つを確認するだけ。①測っているのは「量」か「種類分け」か ②比べるグループはいくつか ③同じ人を前後で測っているか ④データが富士山型に近いか。"},
+ {fig:{n:"5-1",cap:"検定選びの地図。まず「量か種類分けか」で二手に分かれ、次にグループ数で枝分かれします。富士山型からひどく外れていたら、下の「順位で比べる検定」に乗り換えます。",html:"fFlow"}},
+ {box:{t:"具体例で考える",b:"・薬Aと薬Bで「血圧の下がり方」を別々の患者で比べる → t検定\n・同じ患者の「治療前と後」を比べる → 対応のあるt検定\n・3種類の食事療法で「体重の減り」を比べる → 分散分析\n・「治療した/しない」と「再発した/しない」の関係 → カイ二乗検定\n・「飲酒量」と「肝機能の値」の連動 → 相関"}},
+ {p:"④の富士山型かどうかも大事。山型に近ければ平均を使う**ふつうの検定**(山型を前提にする方法)が使え、少ない人数でも差を見つけやすい長所があります。山型から大きく外れたり人数がごく少ないときは、値そのものでなく**順位**に置きかえて比べる方法(山型を仮定しない方法)が安全です。"},
+ {box:{t:"たとえると",c:G,b:"順位で比べる方法は、テストの点数そのものでなく「クラスで何番か」で比べるようなもの。1人だけ極端な満点や0点がいても順位は大きく動かないので、外れ値に強いのです。データがいびつなときは、点数より順位、と覚えましょう。"}},
+ {p:"迷ったら、まずデータをグラフに描いて形を見る。それから地図をたどる。この順番を守れば、検定選びで大きく外すことはありません。"}
+]},
+{t:"6. p値の誤解と「効果の大きさ」",b:[
+ {p:"p値が答えてくれるのは「差があるかどうか」だけで、「その差がどれくらい大きいか」は教えてくれません。ここを混同すると論文の読み方を大きく誤ります。"},
+ {box:{t:"よくあるつまずき",c:R,b:"人数をうんと増やすと、ほんのわずかな差でもp値は小さくなり「統計的に差あり」と出ます。1万人で「血圧が平均0.5だけ下がった」でも、その低下に臨床的な意味はほぼありません。逆に人数が少ないと、意味のある差も「差なし」と出ます。「統計的に差あり」と「臨床的に大事」はまったく別物です。"}},
+ {p:"そこで「差の大きさそのもの」を表す指標を、p値と一緒に必ず見ます。とくに治療効果では、次の分かりやすい言い換えが役立ちます。"},
+ {fig:{n:"6-1",cap:"効果の大きさを表す指標。倍率で言うか(相対)、実数の差で言うか(絶対)で、受ける印象がまるで変わります。患者さんへの説明にはとくに絶対の指標が誠実です。",rows:true}},
+ {rows:[["相対リスク(倍率)","治療した人の発症率が、しない人の何倍か。0.5なら半分に減る"],["絶対的な差","発症率そのものの引き算。2%が1%になったなら「1%の差」"],["治療必要数","1人の発症を防ぐのに何人を治療すればよいか。少ないほど効率的"]]},
+ {box:{t:"「半分に減る」の正体",c:GD,b:"「リスクが50%減!」は劇的に聞こえます。でも、もともと2%が1%になっただけなら、救われるのは100人に1人(1人防ぐのに100人の治療が必要)。一方、40%が20%になる「50%減」なら5人に1人が救われ、はるかに価値が高い。同じ50%減でも中身は大違いです。倍率(相対)は誇張されがちなので、必ず実数の差(絶対)もセットで確認を。"}},
+ {p:"論文を読むときは「p＜0.05か?」で満足せず、「で、効果はどれくらい大きいの?」「100人治療したら何人救われるの?」と必ず問い直す。この一手間が、数字に振り回されないための最大のコツです。"}
+]},
+{t:"7. 相関と回帰（関係≠原因）",b:[
+ {p:"「お酒をよく飲む人ほど肝臓の数値が高い」のように、2つの量が一緒に動く度合いを表すのが**相関**です。強さは −1〜+1 で表し、+1に近いほど「片方が増えると、もう片方もきれいに増える」、−1に近いほど「片方が増えると減る」、0に近いほど「関係がはっきりしない」を意味します。"},
+ {fig:{n:"7-1",cap:"点が右肩上がりの一直線に近いほど「強い正の関係」。バラけているほど関係は弱く、右肩下がりなら負の関係です。点を目で見ることがとても大切です。",html:"fCorr"}},
+ {box:{t:"いちばん大事な注意 — 関係があっても原因とは限らない",c:R,b:"「アイスがよく売れる日は水の事故も多い」——事実ですが、アイスが事故を起こすわけではありません。どちらも「夏の暑さ」という第三の原因のせいで一緒に増えているだけ(隠れた共通の原因)。医学でも「コーヒーをよく飲む人は◯◯病が多い」とき、本当の原因は喫煙かもしれません。「一緒に動く(相関)」と「原因である(因果)」はまったく別物だと肝に銘じてください。"}},
+ {p:"相関が「2つの量の連動」を見るのに対し、複数の要因から結果を予測・説明する仕組みが**回帰**です。いくつもの要因を同時に式に入れると、たとえば「年齢の影響を差し引いたうえで、本当にこの薬に効果があるか」を調べられます。先ほどの隠れた共通の原因を計算で打ち消す、強力な道具です。"},
+ {box:{t:"どんなとき何を使うか",b:"結果が「量」(血圧など) → ふつうの回帰(要因が1増えると結果がいくつ変わるか)\n結果が「あり/なし」 → ロジスティック回帰(オッズという倍率が出る)\n結果が「起きるまでの時間」 → 生存解析の回帰(次章)"}},
+ {p:"ただし要因を欲ばって入れすぎると、その研究だけにしか当てはまらない「こじつけの式」ができます(**過剰適合**＝合わせすぎて応用が利かない状態)。目安は「起きた出来事の件数の1割程度まで」。発症が20件なら要因は2つまで、というイメージです。多ければよいわけではありません。"}
+]},
+{t:"8. 生存解析と研究デザイン",b:[
+ {p:"がんの再発や生存のように「いつ起きるか(起きるまでの時間)」を調べたい場面があります。ふつうの平均で扱いにくいのは、研究終了まで「まだ起きていない人」や、途中で通院しなくなり「その後不明の人」がいるから。この「最後まで見届けられなかった」状態を**打ち切り**と呼びます。"},
+ {box:{t:"たとえると",c:G,b:"マラソンで全員のゴールタイムを知りたいが、5時間で観測を打ち切ると、まだ走っている人は「少なくとも5時間はかかっている(正確なタイムは不明)」としか言えません。この「少なくともここまでは大丈夫だった」情報を捨てずに活かすのが、生存解析の賢いところです。"}},
+ {p:"その結果を描いたのが下の階段状のグラフ(**生存曲線**＝時間とともに「まだ起きていない人」の割合がどう減るかを示す線)です。誰かに出来事(再発など)が起きるたびに線がカクッと下がります。横ばいは「脱落した人がいただけで出来事は起きていない」を表します。2本が離れていれば、2グループで経過に差があります。"},
+ {fig:{n:"8-1",cap:"上にある線(治療群)ほど「まだ起きていない人」が多く、経過が良いことを示します。線の差を確かめる方法や「危険度が何倍か」を出す方法もありますが、まずは「階段が下がる」イメージを押さえれば十分です。",html:"fKM"}},
+ {p:"ここから「その研究はどれくらい信用できるか?」というデザインの話へ。同じ「効果あり」でも、組み立て方しだいで信頼度はまるで違います。下は、上にいくほど信頼度が高い研究の種類です。"},
+ {fig:{n:"8-2",cap:"信頼度のピラミッド。上ほど「原因と結果」を強く言えます。ただし種類が上だから無条件に正しいのではなく、一つひとつの研究がていねいに行われているかが何より大切です。",pyr:[["たくさんの研究を統合(最上位)",1],["くじ引きで群分けする試験",0.82],["集団を長期間追いかける研究",0.64],["病気の人と健康な人を比べる研究",0.5],["ある時点で一斉に調べる研究",0.36],["症例報告・専門家の意見",0.24]]}},
+ {box:{t:"なぜ「くじ引き」が強いのか",c:GD,b:"新薬の試験で患者さんをくじ引き(ランダム)で薬グループとそうでないグループに分けるのには理由があります。くじ引きなら、年齢・重症度・生活習慣など、私たちが気づいていない違いまで2グループにほぼ均等にばらまかれます。だから後で差が出れば「薬のおかげ」と強く言える。これがくじ引き試験(ランダム化比較試験)が上位にある最大の理由です。"}}
+]},
+{t:"9. 必要な人数と「差を見つける力」",b:[
+ {p:"研究を始める前に必ず考えること——「何人集めれば、知りたい差をちゃんと見つけられるか?」です。少なすぎれば本当は効く薬でも「差なし」と見逃し、参加者の負担が無駄に。多すぎれば不要な人にまで負担をかけ、費用も時間も浪費します。ちょうどよい人数を前もって見積もるのが**必要人数の計算**です。"},
+ {p:"必要な人数は主に4つで決まります。①どれくらいの「早とちり」を許すか ②どれくらい確実に差を見つけたいか(=**検出力**、差があるときそれを見つけられる力。ふつう8割以上が目標) ③見つけたい差の大きさ ④データのばらつき。「小さな差を」「ばらつきの大きいデータで」「確実に見つけたい」ほど、たくさんの人数が要ります。"},
+ {fig:{n:"9-1",cap:"人数(横軸)を増やすほど、差を見つける力(縦軸)は上がります。ただしある程度から伸びは鈍り頭打ちに。多くの研究は「8割の力」(赤線)を目標に、それを満たす最小限の人数を選びます。",html:"fPower"}},
+ {box:{t:"たとえると",c:G,b:"暗い部屋で文字を読むのに似ています。文字が大きければ(差が大きければ)少しの明かりでも読めますが、小さい文字(小さな差)を確実に読むにはたっぷりの明かり(多くの人数)が必要。始める前に「どれくらいの明るさが要るか」を計算しておくわけです。"}},
+ {box:{t:"いちばん大事 — 「差がなかった」の落とし穴",c:R,b:"人数が足りない研究は、本当は効く薬でも「差は出ませんでした」を量産します。だから論文で「有意差なし」とあっても、それは「効かない」証明ではありません。「差を見つけるには人数が足りなかっただけ」かもしれない。「差がなかった」と「差を見つけられなかった」はまったく違う——陰性結果を読むときは、その研究に十分な人数があったか必ず確かめましょう。"}},
+ {p:"実際の計算は専用ソフトがやってくれますが、大切なのは考え方です。「結果が出てから人数を考える」のではなく「始める前に必要人数を見積もる」。この順番が、信頼できる研究の出発点です。"}
+]},
+{t:"10. 検査の評価（感度・特異度）",b:[
+ {p:"この章は臨床に直結します。「ある検査が陽性。さて本当に病気なのか?」に数字で答える考え方です。出発点はたった4マスの表。実際に病気がある/ない × 検査が陽性/陰性、の組み合わせで人を分けます。"},
+ {p:"ここから2つの力が出てきます。一つは**感度**(病気の人をちゃんと陽性と拾い上げる力＝見逃さない力)。もう一つは**特異度**(病気でない人をきちんと陰性と判定する力＝無関係な人を巻き込まない力)です。"},
+ {box:{t:"覚え方のコツ",c:G,b:"感度の高い検査が「陰性」なら、病気はほぼ無いと安心(見逃さない力が高いので、すり抜けて陰性なら本当にいない)。逆に特異度の高い検査が「陽性」なら、病気はほぼ確実(無関係な人を巻き込まないので、陽性なら本物)。「感度高→陰性で除外」「特異度高→陽性で確定」とセットで覚えると実践で迷いません。"}},
+ {p:"検査には「どこからを陽性とするか」の境目があり、それを動かすと感度と特異度はシーソーのように一方が上がれば他方が下がります。このバランス全体を一枚で見るのが下の曲線。左上にふくらむほど、感度も特異度も両立できる優秀な検査です。"},
+ {fig:{n:"10-1",cap:"境目を変えたときの検査の成績を一筆書きにしたもの。左上の角に近づくほど「見逃さず、巻き込まず」の理想に近い。点線(斜め)は「コイン投げと同じ＝役に立たない」検査を表します。",html:"fROC"}},
+ {box:{t:"いちばんの落とし穴 — 同じ検査でも集団で意味が変わる",c:R,b:"「精度99%の検査が陽性なら99%病気」——これは間違い。1万人に1人の珍しい病気を症状のない大勢に検査すると、陽性の大半は「本当は病気でない人(偽陽性)」になります。もともと病気の人がごくわずかしかいないからです。もともと病気が多い集団(症状のある人)に使うのと、少ない集団(無症状の健診)に使うのとでは、陽性の重みがまるで違う。検査結果は「その人がもともとどれくらい病気らしいか」とセットで解釈する——これが次章につながります。"}},
+ {p:"つまり「良い検査」も、使う相手を間違えると役に立たないどころか害になります。数字そのものだけでなく「誰に使うのか」を常に意識する——臨床で最も実践的な教訓です。"}
+]},
+{t:"11. たくさん比べると「偶然の当たり」が出る",b:[
+ {p:"くじを思い浮かべてください。一回でアタリ(偶然の差)が出る確率は低くても、何十回も引けばどこかで一回くらいアタリが出ます。検定も同じで、たくさん繰り返すほど「本当は差がないのに偶然「差あり」と出る」当たりくじを、いつか引いてしまう。これが**多重比較**の問題です。"},
+ {fig:{n:"11-1",cap:"検定の回数(横軸)が増えるほど、「どこかで偶然の差が出てしまう」確率(縦軸)はぐんぐん上がります。20回比べれば、すべて差がなくても6割以上の確率で「偶然のアタリ」を引く計算です。",html:"fMulti"}},
+ {box:{t:"具体例で考える",c:R,b:"ある食品が「がんを減らすか」を、胃がん・大腸がん・肺がん…と20種類で別々に検定したとします。本当はどれにも効果がなくても、20回調べれば偶然どれか1つで「効果あり!」が出ます。そこだけ取り上げて「この食品はがんに効く」と宣伝するのは、ハズレ19回を隠してアタリ1回だけ見せるようなもの。あやしい健康情報にはこの手のものが多く紛れています。"}},
+ {p:"これを防ぐには、たくさん検定するならその分だけ判定の基準を厳しくします(回数が多いほど、当たりと認める線を引き上げる)。やり方にはいくつか流儀がありますが、難しい名前は今は覚えなくて構いません。「たくさん比べたら、その分きびしくする」という発想だけ持ち帰ってください。"},
+ {box:{t:"後出しの注意",b:"全体では効果がなかったとき、「でも高齢者だけ見ると効いていた」「男性だけなら有効」と後から部分集団を探すのは、まさに当たりくじ探し。こうした後出しの発見は偶然の可能性が高く、そのまま信じるのは危険です。あらかじめ「この集団で調べる」と決めてあった分析かどうかが、信頼できるかの分かれ目です。"}},
+ {p:"だからこそ良い研究は、最初に「いちばん知りたいこと」を1つに絞って宣言します。あれもこれもと欲ばらず本命を一つ決めておく——これが偶然のアタリに惑わされないための研究設計の知恵です。"}
+]},
+{t:"12. ベイズの考え方（医師の思考そのもの）",b:[
+ {p:"これまでの考え方(従来の主流のやり方)は「もし差がなかったら、この結果はどれくらい珍しいか」を問うものでした。一方**ベイズの考え方**は、もっと直感に近い問い方をします。「最初の見込みを、新しい情報でどう更新するか」。じつはこれは、医師が毎日やっている思考そのものです。"},
+ {box:{t:"医師は毎日ベイズをしている",c:G,b:"外来で患者さんを診るとき、問診の段階で「この症状ならたぶん風邪だろう(最初の見込み)」とあたりを付けます。そこに検査結果が加わると、「やっぱり風邪だ」または「いや別の病気かも」と見込みを更新します。最初の印象を新しい証拠で書き換えていく。この自然な流れを、きちんと数字でやるのがベイズです。"}},
+ {p:"ポイントは、検査結果は確率を「ゼロか100か」にするのではなく、もともとの見込みを更新するだけ、という点。同じ陽性結果でも、出発点(その人がもともとどれくらい病気らしいか)が違えば、たどり着く結論はまったく変わります。"},
+ {fig:{n:"12-1",cap:"珍しい病気(もともと1割の見込み)の人が陽性結果を得たときの更新。検査前1割が、検査後には6割強まで跳ね上がる——でも100%にはなりません。検査は「見込みの更新」であって断定ではないのです。",html:"fBayes"}},
+ {box:{t:"いちばん大事 — 出発点で結論が変わる",c:GD,b:"まったく同じ「陽性」でも、「健診でたまたま見つかった症状ゼロの人」と「いかにもその病気らしい症状がある人」とでは意味が大違い。前者はもともとの見込みが低いので、陽性でもまだそこまで濃厚ではないかもしれない。後者はもともと濃厚なので陽性ならほぼ確定に近い。だから検査を見るときは、いつも「この人はそもそもどれくらい病気らしかったか?」を先に考える——これがベイズ的なものの見方です。"}},
+ {p:"従来のやり方とベイズは対立ではなく、得意分野が違う道具です。「データから珍しさを測る」のが従来流、「最初の見込みを情報で更新する」のがベイズ流。最近はベイズを取り入れた臨床試験も増えています。難しい計算は専門家に任せてよいので、「検査は断定でなく見込みの更新」という発想を、ぜひ日々の診療に持ち込んでみてください。"}
+]}
+,
+{t:"13. 交絡 ―「見かけの関係」をどう取り除くか",b:[
+ {p:"第7章で「関係があっても原因とは限らない」と学びました。その犯人の多くが**交絡因子**です。これは、原因とされるものと結果の「両方」に影響する、横から口を出す第三者のこと。これがいると、本当は無関係でも関係があるように見えたり、逆に本物の効果が隠れたりします。"},
+ {fig:{n:"13-1",cap:"年齢のような交絡因子は、「原因とされるもの」と「結果」の両方に矢印を伸ばします。そのせいで、下の点線(本当は無いかもしれない関係)があるように見えてしまうのです。",html:"fConfound"}},
+ {box:{t:"具体例",c:R,b:"「コーヒーをよく飲む人は心臓病が多い」というデータが出たとします。でも実は、コーヒー好きには喫煙者が多かっただけかもしれません。ここでの黒幕は**喫煙**。喫煙はコーヒー量とも心臓病とも結びつくので、コーヒー自体は無実なのに「コーヒー→心臓病」という見かけの関係を作り出します。"}},
+ {p:"では、この黒幕をどう追い払うか。くじ引き(ランダム化)ができる試験なら自動的に均せます(第8章)。しかし、すでに集まったデータ(観察研究)では、計算で打ち消すしかありません。代表的な手立てが3つあります。"},
+ {box:{t:"交絡を取り除く3つの手立て",b:"・**層別化**：年齢層ごと・喫煙の有無ごとに分けて、それぞれの中で比べる(黒幕を固定してしまう)\n・**多変量調整**：黒幕も一緒に式に入れて、その影響を差し引く(第14章の回帰)\n・**傾向スコア**：「この人がどれくらい治療を受けそうか」を一つの点数にまとめ、似た者同士で比べる"}},
+ {box:{t:"ここに注意",c:GD,b:"調整できるのは「測れた黒幕」だけです。測り忘れた要因や、そもそも気づいていない要因は打ち消せません。だから観察研究は、どれだけ丁寧に調整しても「原因と断定」まではいきにくい。くじ引き試験が今も別格に強いのは、測れない黒幕まで均してくれるからです。"}},
+ {p:"論文を読むときは「どんな交絡因子を、どうやって調整したか」を必ず確認しましょう。調整前と調整後で結果が大きく変わっていたら、その関係はかなり交絡に左右されていた、というサインです。"}
+]}
+,
+{t:"14. ロジスティック回帰 ―「あり/なし」を読み解く",b:[
+ {p:"第7章で、結果が「発症あり/なし」のような2択のときは**ロジスティック回帰**を使うと触れました。ここをもう少し掘り下げます。ふつうの回帰は「血圧がいくつ変わるか」を直線で予測しますが、確率は0〜1の間しかとれないので、直線だと1を超えたり0を下回ったりして不都合です。"},
+ {fig:{n:"14-1",cap:"そこで、なめらかなS字カーブを当てはめます。要因が弱いうちは発症確率がほぼ0、強くなるとぐっと立ち上がり、やがて1に近づく。0と1の間にきれいに収まるのがミソです。",html:"fLogistic"}},
+ {p:"この方法から出てくるのが**オッズ比**という倍率です。「オッズ」は耳慣れませんが、競馬のオッズと同じで「起こりやすさ÷起こりにくさ」のこと。オッズ比は、要因が1段階増えたときにそのオッズが何倍になるかを表します。"},
+ {box:{t:"読み方のコツ",c:G,b:"オッズ比が2なら「その要因があると、発症のオッズが約2倍」。1なら影響なし、1より小さければ予防的。そして第3章で学んだ信頼区間が「1」をまたいでいなければ、統計的に意味のある関連と読めます。たとえば「オッズ比2.1(95%信頼区間 1.3〜3.4)」なら、1をまたいでいないので関連あり、と判断します。"}},
+ {box:{t:"よくあるつまずき",c:R,b:"オッズ比は、病気がまれなときはリスクの倍率(相対リスク)に近い値ですが、病気がありふれているとオッズ比はリスクの倍率より大げさに出ます。「オッズ比3倍」を「リスクが3倍」と早合点しないこと。とくにありふれた病気では要注意です。"}},
+ {p:"さらに進むと、「ある要因の効果が、別の要因によって変わる」という**交互作用**も扱えます。たとえば「この薬は若い人には効くが高齢者には効かない」といった具合。式の中で要因どうしを掛け合わせて調べます。多くの要因を同時に入れて交絡も調整できる(第13章)——これがロジスティック回帰が観察研究の主役である理由です。"}
+]}
+,
+{t:"15. Cox回帰とハザード比 ― 時間を味方につける",b:[
+ {p:"第8章の生存曲線を覚えていますか。あれは2グループを「見た目」で比べる方法でした。では「年齢や重症度の違いを差し引いたうえで、治療そのものの効果はどれくらいか」を知りたいときは? そこで登場するのが**Cox回帰**です。生存解析版の多変量回帰、と思ってください。"},
+ {p:"ここから出てくるのが**ハザード比**という倍率です。ハザードとは「ちょうど今この瞬間に、その出来事が起きる勢い」のこと。ハザード比は、その勢いがグループ間で何倍違うかを表します。"},
+ {box:{t:"読み方のコツ",c:G,b:"ハザード比が0.7なら「治療群では、出来事が起きる勢いが対照の0.7倍(=3割ほど抑えられている)」。1なら差なし、1より大きいと悪化。これも信頼区間が「1」をまたぐかどうかで意味を判断します。論文では「ハザード比0.68(95%信頼区間 0.55〜0.84)」のように書かれます。"}},
+ {fig:{n:"15-1",cap:"Cox回帰がうまく働くには、2グループの「勢いの差」が観察期間を通じてだいたい一定であることが前提です(下の2本の線のように、開いた差が途中で逆転したりしない)。",html:"fKM"}},
+ {box:{t:"いちばん大事な前提 ― 比例ハザード",c:GD,b:"ハザード比という「1つの倍率」で語れるのは、「勢いの差が時間によらず一定」という前提があるからです(これを比例ハザードと呼びます)。もし途中で2本の生存曲線が交差するような状況だと、この前提は崩れ、「全期間で◯倍」という単一の数字では語れません。論文ではこの前提が確認されているかが、地味ですが重要なチェックポイントです。"}},
+ {box:{t:"打ち切りの落とし穴",c:R,b:"第8章の「打ち切り」は便利な仕組みですが、脱落の理由が結果と関係していると話が狂います。たとえば「具合が悪化した人ほど通院をやめてしまう」場合、その人たちを単なる打ち切りとして扱うと、治療を実際より良く見せてしまいます。脱落が「たまたま」なのか「理由あり」なのかは要注意です。"}}
+]}
+,
+{t:"16. メタ解析 ― たくさんの研究を束ねる",b:[
+ {p:"一つの研究だけでは、人数が少なかったり、たまたまの結果だったりします。そこで、同じ問いを扱った複数の研究をかき集めて統合するのが**メタ解析**です。第8章のピラミッドの頂点に位置する、最も信頼度の高い方法とされます。"},
+ {p:"その結果を一枚にまとめた図が**フォレストプロット**(森のように線が並ぶ図)です。各研究の結果を、点(効果の中心)と横線(信頼区間)で表し、最後に全部を束ねた結論をひし形で示します。"},
+ {fig:{n:"16-1",cap:"各研究の四角が効果の中心、横線が信頼区間。縦の点線(1.0)をまたぐ研究は単独では「差あり」と言い切れません。しかし下の赤いひし形(統合結果)は線が細く1.0をまたがない――束ねることで結論がはっきりしました。",html:"fForest"}},
+ {box:{t:"統合の威力",c:G,b:"上の図では、研究AやCは単独だと信頼区間が1.0をまたいで「はっきりしない」のに、全部束ねると幅の狭いひし形になり「効果あり」と読めます。小さな研究をたくさん集めて、まるで一つの大規模研究のように扱える――これがメタ解析の強みです。"}},
+ {box:{t:"気をつける2点",c:R,b:"・**ばらつき(異質性)**：集めた研究の結果がてんでバラバラだと、無理に束ねても意味が薄い。「研究間の食い違いがどれくらいか」を表す指標(I²など)を確認します。\n・**出版バイアス**：「効果あり」の研究は論文になりやすく、「効果なし」はお蔵入りしがち。すると都合のよい研究ばかり集まり、効果を過大評価します。これを点検する図(ファネルプロット)が左右対称かどうかも見どころです。"}},
+ {p:"つまりメタ解析は万能ではなく、「何を集めたか」「集め方に偏りはないか」で質が決まります。きれいなフォレストプロットを見たら、その裏で異質性と出版バイアスがどう検討されているかまで確認するのが、一歩進んだ読み方です。"}
+]}
+,
+{t:"17. 欠測データとITT ― 抜けた人をどう扱うか",b:[
+ {p:"現実の研究では、必ず誰かが抜けます。通院をやめた、引っ越した、副作用で中断した――こうした**欠測**(データが抜けること)や脱落の扱いは、結果を大きく左右する、地味だけれど決定的な論点です。"},
+ {box:{t:"なぜ「抜けた人」が問題か",c:R,b:"脱落には理由があることが多いからです。「効かないからやめた」「副作用がつらくてやめた」人を解析から外すと、最後まで続けられた「都合のよい人」だけが残り、治療を実際より良く見せてしまいます。抜けはランダムに起きるとは限らない――ここが落とし穴です。"}},
+ {p:"この問題への王道の答えが**ITT解析**(割り付けられた通りに全員を解析する、という原則)です。途中でやめた人も、最初に割り当てられたグループの一員として最後まで数える。一見おかしいようですが、これが現実の効果を正直に映します。"},
+ {fig:{n:"17-1",cap:"上は割付通り全員を解析する考え方。下は完遂者だけを解析する考え方。脱落者を外すと「都合のよい人」だけが残り、効果が過大に見えがちです。だから慎重な試験ほど全員解析を主役に据えます。",html:"fITT"}},
+ {box:{t:"たとえると",c:G,b:"ダイエット器具の効果を調べるのに、「最後まで続けられた人だけ」で平均すると、もともと根性のある人ばかりが残って効果が立派に見えます。でも実生活では多くの人が三日坊主。「買った人全員」で評価するほうが、世の中での本当の効果に近いのです。"}},
+ {p:"抜けた部分を埋める工夫(欠測値を統計的に推測して補う方法など)もありますが、いちばん大切なのは「そもそも脱落を減らす設計」と「脱落者がどんな人だったかを正直に報告すること」。論文では脱落率と、その人たちの扱いが明記されているかを必ず確認しましょう。"}
+]}
+,
+{t:"18. 遺伝統計入門 ― 究極の「たくさん比べる」世界",b:[
+ {p:"最後は、研究の最前線に近い話です。病気に関わる遺伝子を探すとき、ヒトのゲノム全体にある数十万〜数百万か所を、一気に病気との関連で調べます(ゲノムワイド関連解析、略してGWAS)。ここで第11章の「たくさん比べると偶然の当たりが出る」問題が、極限まで膨れ上がります。"},
+ {p:"100万か所を別々に検定すれば、すべて無関係でも、ふつうの基準(5%)では5万か所も「偶然のアタリ」が出てしまいます。これでは本物が埋もれます。そこで基準を桁違いに厳しくします。"},
+ {fig:{n:"18-1",cap:"横軸はゲノム上の位置、縦軸は関連の強さを表すマンハッタンプロット。大半は低い雑音ですが、ところどころ高くそびえる「山」があります。赤い線(ゲノム全体用の超厳しい基準)を超えた山だけが、本物の候補です。",html:"fManhattan"}},
+ {box:{t:"どれくらい厳しいのか",c:GD,b:"GWASでよく使う基準は「p＜0.00000005」(5×10⁻⁸)という途方もない厳しさです。第11章で学んだ「たくさん比べたら、その分きびしくする」という発想を、100万回ぶんに適用した結果がこれ。ふつうの研究の0.05とは桁が10個近く違います。"}},
+ {box:{t:"偽陽性率という別の物差し",c:G,b:"何十万も調べる世界では、「1つも間違えない」を目指すと厳しすぎて何も見つかりません。そこで発想を変え、「見つけた当たりのうち、間違いが何割までなら許すか」を管理する方法(偽発見率の制御)もよく使われます。遺伝子解析やオミクスの大量データでは、こちらの考え方が主役になります。"}},
+ {p:"こうして見つかった候補は、それだけでは「関連がある」止まり。本当に病気の原因かは、別の集団で再現できるか(第16章のメタ解析的な検証)、生物学的に説明がつくかを積み重ねて確かめます。膨大な「たくさん比べる」を制御しつつ、本物を選り分ける――統計の知恵が研究の生命線になる領域です。"}
+]}
+,
+{t:"19. 臨床試験の発展デザイン",b:[
+ {p:"くじ引き試験(第8章)にも、目的に応じた発展形があります。代表が**非劣性試験**。新薬が既存薬より「優れている」ことを示すのが難しくても、「実用上、明らかに劣ってはいない」と示せれば十分なことがあります。たとえば効果は同程度でも、副作用が軽い・安い・飲みやすい薬なら、それだけで価値があります。"},
+ {fig:{n:"19-1",cap:"横軸は新薬と既存薬の差。0が「差なし」、赤い線が「ここまでの劣りなら許容できる」という事前に決めた限界。信頼区間がこの限界をはみ出さなければ「非劣性」と判定します。",html:"fNonInf"}},
+ {box:{t:"非劣性試験の落とし穴",c:R,b:"「許容限界」をゆるく設定すると、本当はかなり劣る薬でも「非劣性」と言えてしまいます。限界をどこに引いたか、その根拠は妥当かが命。また「優越性は示せなかった→だから同等」と言い換えるのも誤りです。最初から非劣性を目的に設計したのか、後付けかを見抜く必要があります。"}},
+ {box:{t:"その他の発展形",c:G,b:"・**クロスオーバー試験**：同じ患者に両方の治療を順番に試し、自分自身を対照にする(個人差を消せて効率的だが、治る病気や進行する病気には不向き。前の治療の影響を抜く休薬期間も必要)\n・**中間解析**：試験の途中で結果をのぞき見し、明らかに有効/有害/見込みなしなら早めに中止する。ただし何度ものぞき見は偽陽性を増やす(第11章)ので、止める基準を事前に厳密に決めておく必要があります。"}},
+ {p:"デザインは「何を証明したいか」から逆算して選びます。論文を読むときは、まず「この試験は優越性を狙ったのか、非劣性なのか」を確認するだけで、結果の意味の重さが変わってきます。"}
+]}
+,
+{t:"20. 縦断データと混合効果モデル",b:[
+ {p:"同じ患者さんを何度も繰り返し測ること(通院ごとの検査値など)はよくあります。これを**縦断データ**と呼びます。ここで素朴な方法を使うと、思わぬ落とし穴にはまります。"},
+ {box:{t:"なぜ問題か",c:R,b:"1人の患者を10回測ったデータを、「10人ぶんの独立したデータ」として扱うと、実際よりずっと多くの情報があるように錯覚します。すると本当は不確かなのに「差あり」と出やすくなる。同じ人の繰り返しは互いに似ている(独立でない)ので、ふつうの方法の前提が崩れるのです。"}},
+ {p:"これを正しく扱うのが**混合効果モデル**です。「全体に共通する傾向」と「一人ひとり固有のクセ(高めの人・低めの人、効きやすい人・にくい人)」を、同じ式の中で別々に見積もります。途中の受診が抜けても、ある分のデータを活かせる柔軟さも長所です。"},
+ {fig:{n:"20-1",cap:"細い線が一人ひとりの推移(出発点も傾きもバラバラ)、太い赤線が全体の平均的な傾向。個人差を無視して平均線だけ見ると、大事な「人によって違う」情報を捨ててしまいます。",html:"fSpaghetti"}},
+ {box:{t:"クラスターも同じ話",c:G,b:"「同じ病院の患者は似た傾向を持つ」「同じ家族・地域はまとまる」といった集団(クラスター)構造でも同じ問題が起きます。これを無視すると精度を過信します。患者が病院にぶら下がる入れ子の構造も、混合効果モデルでうまく扱えます。"}},
+ {p:"繰り返し測定や入れ子のデータを見たら、「独立として扱っていないか?」と一度立ち止まる。これが縦断データを読み解く第一歩です。"}
+]}
+,
+{t:"21. 予測モデルと機械学習の基礎",b:[
+ {p:"ここまでは主に「何が効くか・関係するか」を**説明**する統計でした。最近は「この患者は再発しそうか」を**予測**する方向も盛んです。考え方の土台は同じですが、評価のしかたが変わります。"},
+ {p:"最大の敵が**過学習**(オーバーフィッティング)です。手元のデータに合わせ込みすぎたモデルは、そのデータは完璧に言い当てるのに、新しい患者ではまるで当たらない——丸暗記した生徒が応用問題で崩れるのと同じです。"},
+ {fig:{n:"21-1",cap:"モデルを複雑にするほど、学習に使ったデータの誤差(青)は下がり続けます。しかし新しいデータの誤差(赤)は途中から逆に増える。この赤が最小になるあたりが、ちょうどよい複雑さです。",html:"fOverfit"}},
+ {box:{t:"いちばん大事 — 交差検証",c:G,b:"モデルの本当の実力は、「学習に使っていない別のデータ」で試して初めて分かります。データを学習用と検証用に分けて試す**交差検証**は、過学習にだまされないための必須の作法。学習に使ったデータでの成績(=暗記の出来)を実力と勘違いしないこと。"}},
+ {box:{t:"2つの良し悪し",c:GD,b:"・**見分ける力(AUC)**：高リスクと低リスクをどれだけ順序よく区別できるか。第10章のROC曲線の下の面積そのものです。\n・**確率の正確さ(キャリブレーション)**：「20%の人」と予測した集団で、実際に約20%が発症するか。見分ける力が高くても、確率がズレていれば臨床では危険です。"}},
+ {p:"予測モデルの論文では、「別の集団でも通用するか(外部検証)」まで確かめられているかが質の分かれ目。手元データの好成績だけで飛びつかないのが、賢い読み方です。膨大なゲノムや画像データの時代に、ますます重要になる視点です。"}
+]}
+,
+{t:"22. 因果推論の発展 ― 観察データから原因に迫る",b:[
+ {p:"第13章で交絡を学びました。くじ引きができない観察データから、それでも「原因」に少しでも近づくための、進んだ道具を紹介します。発想はどれも「擬似的にくじ引きの状況を作り出す」ことです。"},
+ {box:{t:"傾向スコア(再訪)",c:G,b:"「この人がどれくらい治療を受けそうか」を背景情報から1つの点数にまとめ、同じくらいの点数の人同士(治療した人・しなかった人)を突き合わせて比べます。多くの交絡因子を一度に揃えられるので、観察研究で広く使われます。"}},
+ {box:{t:"操作変数 ― 自然のくじ引き",c:GD,b:"治療の受けやすさだけを左右し、結果には直接は影響しない「てこ」を見つける方法です。たとえば「住んでいる地域でたまたま受けやすさが違う」など。医学では、生まれつきの**遺伝子の違い**をてこに使う方法(メンデル無作為化)が有名で、第18章の遺伝統計とつながります。生まれ持った遺伝子はくじ引きに近い、という発想です。"}},
+ {p:"もう一つが**差分の差分**。介入を受けた群と受けない群で、「介入の前後の変化」を比べます。世の中全体のトレンド(時間がたてば皆よくなる/悪くなる)を差し引いて、介入だけの効果を取り出せます。"},
+ {fig:{n:"22-1",cap:"対照群(灰)の変化から「介入がなければこうなったはず」(金の点線)を推測し、実際の介入群(青)との差(赤)を本当の効果と見なします。背景トレンドを引き算するのがミソです。",html:"fDiD"}},
+ {box:{t:"それでも限界はある",c:R,b:"これらは強力ですが、いずれも検証しきれない「お約束」(対照群と介入群が同じトレンドだったはず、てこが本当に結果に直接影響しない、など)の上に成り立ちます。観察データからの因果は、どこまでいっても「もっともらしい」止まり——この謙虚さが大切です。"}}
+]}
+,
+{t:"23. 研究の再現性とp-hacking",b:[
+ {p:"近年、「有名な研究をやり直したら同じ結果が出ない」という**再現性の危機**が問題になっています。原因の多くは、悪意ではなく、無自覚な「都合のよい分析の選び方」にあります。"},
+ {p:"その代表が**p-hacking**。一つの研究の中で、解析方法・対象の絞り込み・評価項目・調整する要因…と何通りも試し、たまたまp＜0.05になった組み合わせだけを報告する——第11章の「たくさん比べると当たりが出る」を、無意識にやってしまうのです。"},
+ {fig:{n:"23-1",cap:"本来なめらかなはずのp値の分布に、0.05のすぐ手前だけ不自然な山(赤)ができる。これは「ぎりぎり有意」を狙って分析をいじった痕跡で、p-hackingの典型的なサインとされます。",html:"fPhack"}},
+ {box:{t:"もう一つの罠 — 後付けの仮説",c:R,b:"データを見てから「最初からこれを調べるつもりでした」と仮説を作るのも危険です(HARKingと呼ばれます)。偶然の発見を、さも予測していた本物の発見のように語ってしまう。探索して見つけた仮説は、別のデータで検証して初めて意味を持ちます。"}},
+ {box:{t:"防ぐ仕組み",c:G,b:"・**事前登録**：解析計画や主要評価項目を、データを見る前に公開しておく(後出しを封じる)\n・**主要評価項目を1つに絞る**(第11章)\n・**データやコードの公開**で、第三者が再現できるようにする\nこれらは研究者の良心を「制度」で支える工夫です。"}},
+ {p:"読者としては、「驚くほど都合のよい単一研究」「p＝0.04のような、ぎりぎりの結果」「事前に決めていなさそうなサブグループの発見」には、ひと呼吸おいて懐疑的になること。よい統計とは、派手な結論を出す技術ではなく、自分の結果を正直に・控えめに扱う態度のことです。これが本書全体を貫く、いちばん伝えたい考え方です。"}
+]}
+,
+{t:"付録A. 消化器・IBDの統計事例",b:[
+ {p:"ここまでの考え方を、消化器・炎症性腸疾患(IBD)の研究でどう使うかを具体例で見ます。まず大切なのは、「測っているアウトカムの型」を見極めること(第1章・第5章)。それで使う手法がほぼ決まります。"},
+ {box:{t:"IBD研究のアウトカムと手法",c:TL,b:"・**臨床的寛解**(あり/なし) → 割合の比較。**相対リスク**や**オッズ比**、群間はカイ二乗検定\n・内視鏡スコア(Mayo内視鏡サブスコア0〜3など、順序) → 順位で比べる検定や、順序に対応した回帰\n・**再燃までの時間** → **生存曲線**(KM)とlog-rank、調整は**ハザード比**(Cox)\n・便回数・CRP・カルプロテクチン(連続) → t検定や、通院ごとの反復測定なら**混合効果モデル**"}},
+ {p:"近年のUC/CD試験では、「臨床的寛解かつ内視鏡的改善」のように複数条件を束ねた**複合エンドポイント**がよく使われます。条件を厳しくするほど臨床的に意味は増しますが、達成者が減って検出力が下がる・解釈が複雑になる、というトレードオフがあります。"},
+ {p:"生物学的製剤どうしの比較は、直接対決した試験(ヘッドツーヘッド)が少ないのが実情です。そこで複数の試験を間接的につなぐ**ネットワークメタ解析**で順位づけされることがありますが、これは間接比較ゆえの前提に依存するため、直接比較より慎重に読む必要があります(第16章)。"},
+ {box:{t:"レジストリ・実臨床データの注意",c:R,b:"診療データやレジストリの観察研究は、重症な人ほど強い治療を受けるといった**交絡**が大きく出ます(第13章)。傾向スコアや多変量Coxで調整しますが、測れていない重症度などは消せません。「実臨床で効いた」も、交絡をどう扱ったかで重みが変わります。"}},
+ {p:"先生の研究テーマに引きつければ、IBDの再燃予測モデル(第21章)や、疾患感受性遺伝子の探索(第18章・付録B)は、いずれもこれまでの章の延長線上にあります。アウトカムの型→手法→交絡と多重性への配慮、という流れは共通です。"}
+]}
+,
+{t:"付録B. ゲノム統計の実践",b:[
+ {p:"遺伝子やRNAの発現など、一度に数千〜数百万の項目を検定する解析では、第11章の「たくさん比べると当たりが出る」が主役級の問題になります。ここでの作法を、もう少し実践的に整理します。"},
+ {box:{t:"多重比較の二大対策",c:TL,b:"・**Bonferroni**：有意水準を検定回数で割る。「1つも間違えたくない」厳格な発想(FWER制御)。検定数が膨大だと厳しすぎる。\n・**Benjamini-Hochberg(FDR)**：「見つけた当たりのうち、間違いを何割まで許すか」を管理(第18章)。大量比較のRNA-seqやメタボロームで主流。"}},
+ {p:"GWASで使う厳しい基準 **p＜5×10⁻⁸** は、ヒトゲノム上のおよそ100万個の独立した検定に対するBonferroni補正(0.05÷100万)に相当する、という見積もりから来ています。途方もなく見えますが、由来をたどれば第11章の発想そのものです。"},
+ {p:"見つかる一つひとつの遺伝子の効果はたいてい小さく、それだけでは予測に使いにくいものです。そこで多数の効果を足し合わせた**ポリジェニックスコア**で、個人のなりやすさを総合的に評価する研究が進んでいます(第21章の予測モデルの考え方とつながります)。"},
+ {box:{t:"因果に迫る ― メンデル無作為化",c:GD,b:"生まれ持った遺伝子は「くじ引き」に近い、という性質を利用して、観察データから因果に迫るのが**メンデル無作為化**(第22章の操作変数の一種)。強力ですが、その遺伝子が別経路でも結果に影響する場合は前提が崩れます。"}},
+ {p:"そして何より、見つかった関連は**別の集団で再現**できて初めて確からしさが増します(第23章)。膨大な比較を制御し、効果量を見て、再現で確かめる——統計の基本姿勢が、最先端の解析でもそのまま生きています。"}
+]}
+,
+{t:"付録C. 散らばりを測る道具",b:[
+ {p:"第1章で平均と中央値に触れました。ここではもう一歩進んで、データの『散らばり(ばらつき)』をどう数値にするかを整理します。中心がどこかと同じくらい、どれだけ散らばっているかは大切な情報です。"},
+ {p:"最も基本は**標準偏差**(SD)で、平均からの離れ具合を表します。ただし外れ値に引っぱられやすいのが弱点。そこで順位に基づく**四分位範囲**(IQR)が役立ちます。データを小さい順に並べ、下から25%(Q1)と75%(Q3)で挟まれた、真ん中50%が収まる幅です。"},
+ {fig:{n:"C-1",cap:"箱ひげ図。箱の両端がQ1とQ3(その幅が四分位範囲)、箱の中の線が中央値、ひげが概ねの最小・最大、離れた点が外れ値。分布の形と外れ値が一目で分かります。",html:"fBox"}},
+ {box:{t:"箱ひげ図の読み方",c:G,b:"箱が広いほど中央のばらつきが大きく、箱の中で中央値が片寄っていれば分布が左右非対称(歪んでいる)サイン。複数グループを横に並べると、ばらつきと外れ値を一度に比較できます。"}},
+ {p:"単位の違うデータのばらつきを比べたいときは**変動係数**(CV＝標準偏差÷平均)が便利です。身長(cm)と体重(kg)のように物差しが違っても、平均に対する相対的なばらつきとして比較できます。また順位の位置を表す**パーセンタイル**も、成長曲線などで日常的に使われます。"},
+ {rows:[["標準偏差(SD)","平均からの離れ具合。左右対称データ向き",TL],["四分位範囲(IQR)","中央50%の幅。外れ値に強い",TL],["変動係数(CV)","SD÷平均。単位の違うばらつきを比較",GD],["パーセンタイル","下から何%の位置か。中央値=50%",GD]]},
+ {box:{t:"使い分けの目安",c:GD,b:"左右対称で外れ値が少なければ『平均±標準偏差』。歪んでいたり外れ値があれば『中央値＋四分位範囲(箱ひげ図)』。まずヒストグラムや箱ひげ図で形を見てから、要約の仕方を選ぶのが安全です。"}}
+]},
+{t:"付録D. グラフの読み方とだまされ方",b:[
+ {p:"統計でだまされる場面の多くは、難しい計算ではなく一枚のグラフで起こります。同じ数字でも、見せ方しだいで印象は大きく変わるからです。作る側にも読む側にも、最低限のグラフリテラシーが必要です。"},
+ {fig:{n:"D-1",cap:"同じ『52対56』でも、左のように軸を0から描けば差はわずか。右のように縦軸の途中(48〜58)だけを切り取ると、差が何倍にも誇張されて見えます。",html:"fMislead"}},
+ {box:{t:"いちばん多い手口：軸を切る",c:R,b:"棒グラフは『長さ』で量を比べます。だから縦軸は原則0から。途中を省略(truncated axis)すると、ごくわずかな差が劇的な差に化けます。広告やニュースでよく見かける手です。"}},
+ {p:"ほかにも、左右で目盛りの違う二重y軸で無関係な2本を『連動して見せる』、3D円グラフで手前を大きく錯覚させる、面積や絵の大きさで倍率を誇張する、といった手口があります。**対数目盛**は便利な反面、『一目盛り=10倍』と気づかないと変化を小さく見誤ります。"},
+ {box:{t:"良いグラフのチェックリスト",c:G,b:"・縦軸はどこから始まっているか(棒グラフは0起点か)。\n・軸の範囲や目盛りは妥当か。\n・グラフの種類は目的に合っているか(割合は円や帯、推移は折れ線)。\n・対数目盛など特殊な軸が使われていないか。"}},
+ {rows:[["軸の起点","棒グラフは0から。切ると差を誇張",R],["軸の範囲","狭めると小さな差が大きく見える",R],["グラフ種類","目的に合っているか(割合・推移・分布)",TL],["対数目盛","一目盛りが倍率。読み違いに注意",GD]]},
+ {p:"グラフは主張を伝える道具であり、ときに誤解を誘う道具にもなります。きれいな図ほど、まず軸と目盛りを確かめる——その一手間が、数字に振り回されないための最良の防具です。"}
+]},
+{t:"用語集",gloss:true,b:[
+ {p:"本書で太字になっている主な用語の早見表です。下の検索ボックスで絞り込めます。また本文中の太字用語をタップすると、この用語集の該当項目にジャンプします。"},
+ {gloss:true}
+]}
+];
+
+/* ---- 追加解説（各章の拡充） ---- */
+const EXTRA=[
+ [{box:{t:"さらに一歩",c:GD,b:"順序尺度(痛みの5段階・ステージなど)を、数値とみなして平均してしまう誤りは現場でも多く見られます。たとえば痛みスコアの「平均2.7」は意味が曖昧。順序尺度は中央値や、各段階の人数分布で示すのが無難です。"}}],
+ [{p:"いっぽうで、世の中には山型にならないデータも多くあります。在院日数や検査の待ち時間は右に長く裾を引きがち。そういうデータは、対数(けた)に変換すると山型に近づくことがあり、ひと手間かけてから扱うと見通しがよくなります。"}],
+ [{p:"信頼区間の幅は、人数の平方根に反比例して縮みます。つまり幅を半分にしたければ人数は4倍必要。精度を上げるコストは思った以上に大きく、ここが研究計画での悩みどころになります。"}],
+ [{box:{t:"片側か両側か",c:GD,b:"「良くなる方向だけ」を見る片側検定は、見かけ上p値が出やすく(基準が甘く)なります。よほど明確な理由がない限り、両方向を見る両側検定が無難。論文で片側を使っているときは、その正当性に注意を払いましょう。"}}],
+ [{p:"なお「正規性の検定が有意だから即ノンパラ」と機械的に決めるのは考えもの。人数が多いと、ごくわずかなズレでも有意になってしまいます。最後はヒストグラムで形を自分の目で見て判断するのが、いちばん確かです。"}],
+ [{p:"現代の論文では、効果量を信頼区間つきで示すのが標準です(例:平均差5.0、95%CI 1.2〜8.8)。点推定だけのときより、「効果の大きさ」と「確からしさ」が同時に伝わり、はるかに情報量が多くなります。"}],
+ [{box:{t:"散布図を必ず見る",c:R,b:"相関係数は、たった1つの外れ値で大きく変わります。数字(r)だけを信じず、必ず散布図を描いて、直線的な関係か・外れ値はないか・カーブしていないかを自分の目で確かめる習慣をつけましょう。"}}],
+ [{p:"生存の要約には、平均より中央生存期間(半数がその出来事に到達する時点)がよく使われます。打ち切りが多いと平均は計算すらできないことがあり、中央値のほうが頑健で報告しやすいためです。"}],
+ [{p:"実務では、脱落を見込んで必要人数に上乗せします(例:2割の脱落を想定するなら計算値の約1.25倍)。理論上の必要人数そのままで集めると、終わってみたら足りなかった、ということが起こります。"}],
+ [{box:{t:"カットオフは1つに固定しない",c:GD,b:"CRPのような連続値の検査は、陽性の境目を1つに決め打ちせず、いくつかの閾値での感度・特異度や尤度比を示すと、臨床の場面に応じて使い分けられて便利です。患者や状況で「どこで切るか」は変わるからです。"}}],
+ [{p:"主要評価項目を1つに絞り、それ以外は「探索的」と明記するのが定石です。副次的な項目でp<0.05が出ても、それは確証ではなく次の研究で確かめるべき仮説として、控えめに扱うのが誠実な姿勢です。"}],
+ [{p:"検査前確率の見積もりには、その病気の有病率や、確立された臨床予測スコアが役立ちます。勘だけに頼らず数字の土台を持っておくと、検査後の確率(事後確率)の判断がぶれにくくなります。"}],
+ [{box:{t:"調整で関連が「強まる」とき",c:GD,b:"調整したら関連が消える場合だけでなく、逆に強まる場合もあります。後者は、交絡因子が本当の効果を隠していた(打ち消していた)サイン。調整前後で結果がどう動いたかを見ると、交絡の正体が見えてきます。"}}],
+ [{p:"論文の表に出てくるオッズ比は、「調整済み(adjusted)」か「未調整(crude)」かで意味が違います。交絡を考慮した調整済みの値かどうかを必ず確認してから読み取りましょう。"}],
+ [{p:"ハザード比は「全期間を通じた平均的な比」です。初期だけ効く治療のように、効果が時間とともに変わる場合は、1つのハザード比だけでは実態を捉えきれないことがあります。"}],
+ [{box:{t:"固定効果かランダム効果か",c:GD,b:"効果が研究間でばらつくとき(異質性が高いとき)は、すべて同じ真の効果と仮定する固定効果モデルより、ばらつきを織り込むランダム効果モデルで控えめに統合するのが一般的です。"}}],
+ [{p:"古い穴埋め法(最後の値をそのまま引き延ばすLOCFなど)は偏りを生みやすいことが分かっています。近年は、もっともらしい値を複数とおりに埋めて結果を平均する「多重代入」が好まれます。"}],
+ [{p:"見つかる遺伝子の多くは、一つひとつの効果はごく小さいものです。そこで、多数の効果を足し合わせた「ポリジェニック(多遺伝子)スコア」で、リスクを総合的に評価する研究が進んでいます。"}],
+ [{box:{t:"優越性も見たいとき",c:GD,b:"非劣性を示せた後に「ついでに優越性も」と欲張るのは、検定の順番を事前に決めておけば(まず非劣性、満たせば次に優越性)、多重性を増やさずに行えます。後付けでなく事前計画が鍵です。"}}],
+ [{p:"「個人ごとの傾き」までばらつきを許すか(ランダム傾き)は、データ量との相談です。モデルを複雑にしすぎると推定が不安定になるため、データ量に見合った「ほどよさ」が大切になります。"}],
+ [{box:{t:"AUCだけで判断しない",c:GD,b:"高機能なAIモデルでも、予測確率のズレ(キャリブレーション不良)は起こります。「20%」と出した集団で実際に約20%が発症するか——臨床導入の前に、この点検は見分ける力(AUC)とは別に必須です。"}}],
+ [{p:"メンデル無作為化(生まれ持った遺伝子をてことして使う)は強力ですが万能ではありません。その遺伝子が別の経路を通じても結果に影響する場合、「てこ」としての前提が崩れてしまいます。"}],
+ [{p:"1つの研究だけで結論を出さないこと。独立した別の集団で「再現」されて初めて、確からしさは増します。驚くような新発見ほど、すぐ飛びつかず追試を待つ——この姿勢が、本書全体を通じての結論です。"}],
+ [],
+ [],
+ [{box:{t:"さらに一歩",c:GD,b:"四分位範囲はデータを4等分する発想です。箱ひげ図を横に並べれば、複数グループのばらつきと外れ値を一目で比較でき、論文の図として重宝します。"}}],
+ [{p:"棒グラフの軸は原則0から。一方、折れ線で変化の様子を見たいときは0起点が最善とは限りません。目的に応じて軸を選び、読む側はまず目盛りを確認する習慣をつけましょう。"}],
+];
+
+/* ---- 確認問題 ---- */
+const QUIZ=[
+ [{q:"「がんのステージ(I〜IV)」はどの種類の数字?",o:["比率尺度","間隔尺度","順序尺度","名義尺度"],a:2,e:"順番には意味がありますが間隔は等しくないので順序尺度。平均をとっても意味をなしません。"},
+  {q:"極端な外れ値があるデータの代表値に適切なのは?",o:["平均","中央値","合計","最大値"],a:1,e:"外れ値に引きずられにくい中央値が実態を表します。"}],
+ [{q:"正規分布で平均±2SDにおよそ何%が入る?",o:["68%","95%","99.7%","50%"],a:1,e:"±1SD≈68%、±2SD≈95%、±3SD≈99.7%。"},
+  {q:"中心極限定理が述べているのは?",o:["元データは必ず正規分布","標本平均の分布が正規に近づく","SDが0になる","p値が下がる"],a:1,e:"人数が増えるほど、標本平均の分布が山型(正規)に近づきます。"}],
+ [{q:"95%信頼区間の解釈として正しいのは?",o:["真値が95%の確率でこの中にある","繰り返せば約95%の区間が真値を含む","データの95%がこの中にある","有意水準が95%"],a:1,e:"区間のほうがランダム。繰り返し作れば約95本が真値を含む、という意味です。"},
+  {q:"人数を増やすと信頼区間の幅は?",o:["広がる","狭まる","変わらない","0になる"],a:1,e:"人数の平方根に反比例して狭まります(精度が上がる)。"}],
+ [{q:"p値の意味として正しいのは?",o:["帰無仮説が正しい確率","差がない前提で、今回以上に極端な結果が偶然出る確率","効果の大きさ","検出力"],a:1,e:"差がないと仮定したときの「結果の珍しさ」です。"},
+  {q:"第一種の過誤(α)とは?",o:["差がないのに差ありと判定(偽陽性)","差があるのに見逃す","効果量の誤り","サンプル不足"],a:0,e:"αは偽陽性。差があるのに見逃すのが第二種(β)です。"},
+  {q:"p値と効果量の関係は?",o:["同じもの","別物。p値は有意性、効果量は差の大きさ","p値が小さいほど効果量が大きい","互いに無関係に決まる"],a:1,e:"p値は『偶然らしさ』、効果量は『差の大きさ』。両方を見て判断します。"}],
+ [{q:"同じ患者の治療前後(連続量)を比べるのに適切なのは?",o:["対応のあるt検定","カイ二乗検定","相関","Fisher検定"],a:0,e:"同一人物の前後比較なので、対応のあるt検定。"},
+  {q:"データが大きく歪んでいるとき安全な選択は?",o:["平均を使う検定","順位を使う検定","検定しない","人数を減らす"],a:1,e:"外れ値に強い、順位に基づくノンパラメトリック検定が無難です。"}],
+ [{q:"大標本で「p<0.001だが平均差は0.3」。妥当な解釈は?",o:["臨床的にも重要","統計的に有意でも臨床的意義は小さい可能性","効果量が大きい","検出力不足"],a:1,e:"大標本では小さな差でも有意になります。効果量で意義を判断します。"},
+  {q:"治療必要数(NNT)の意味は?",o:["1人の利益を得るのに治療すべき人数","副作用が出る人数","相対リスク","オッズ"],a:0,e:"NNT=1/絶対リスク減少。少ないほど効率的です。"}],
+ [{q:"「アイスの売上と水難事故に相関」。最も適切な解釈は?",o:["アイスが事故を起こす","共通原因(暑さ)による見かけの関係","完全な偶然","因果が確定"],a:1,e:"夏の暑さという第三の原因が両方を動かしています(交絡)。"},
+  {q:"二値アウトカム(発症あり/なし)を説明する回帰は?",o:["線形回帰","ロジスティック回帰","Cox回帰","Poisson回帰"],a:1,e:"あり/なしの予測にはロジスティック回帰(オッズ比が出る)。"}],
+ [{q:"生存曲線の横ばい区間が意味するのは?",o:["全員にイベント発生","その間は打ち切りのみ(イベントなし)","人数が増えた","治癒"],a:1,e:"横ばいは、脱落(打ち切り)があっただけでイベントは起きていないことを表します。"},
+  {q:"因果を最も強く言えるデザインは?",o:["症例報告","横断研究","ランダム化比較試験","専門家の意見"],a:2,e:"くじ引きで未知の交絡まで均せるRCTが最上位です。"}],
+ [{q:"「有意差なし」の解釈として正しいのは?",o:["効果がないと証明された","差を検出できなかっただけかもしれない","検出力が高い証拠","p=1である"],a:1,e:"人数不足で見逃した可能性があります。「ない」の証明ではありません。"},
+  {q:"検出力(1−β)は通常どれくらいを目標にする?",o:["0.05","0.5","0.8以上","必ず1.0"],a:2,e:"一般に0.8(8割)以上を目標に必要人数を設計します。"}],
+ [{q:"感度が高い検査が「陰性」のとき言えるのは?",o:["ほぼ確実に病気","病気をほぼ除外できる","何も言えない","特異度も高い"],a:1,e:"見逃しが少ない検査なので、陰性なら除外に有用(SnNout)。"},
+  {q:"有病率が低い集団に検査するとどうなりがち?",o:["陽性的中率が下がる(偽陽性が増える)","感度が上がる","特異度が下がる","何も変わらない"],a:0,e:"病気の人が少ないため、陽性の多くが偽陽性になりやすいです。"},
+  {q:"陽性的中率(PPV)を最も左右するのは?",o:["検査の値段","検査前確率(有病率)","測定者","採血量"],a:1,e:"同じ感度・特異度でも、有病率が低いとPPVは下がります。"}],
+ [{q:"20回独立に検定(すべて本当は差なし)。偶然どれかが有意になる確率は約?",o:["約5%","ほぼ0%","約64%","100%"],a:2,e:"1−0.95²⁰≈0.64。たくさん比べると偽陽性が積み上がります。"},
+  {q:"後付けのサブグループ解析の問題点は?",o:["計算が重い","偶然の偽陽性が出やすい","人数が増える","盲検化できない"],a:1,e:"多数の部分集団を後から探すのは当たりくじ探しと同じです。"}],
+ [{q:"ベイズの考え方の核心は?",o:["最初の見込みを新しい情報で更新する","p値をひたすら下げる","人数を増やす","正規分布を仮定する"],a:0,e:"事前の見込み×新情報=事後の見込み、という更新です。"},
+  {q:"同じ陽性結果でも結論が変わる主な要因は?",o:["検査の値段","検査前確率(出発点)","曜日","測定者の気分"],a:1,e:"もともとの病気らしさ(事前確率)で、事後の確率は大きく変わります。"}],
+ [{q:"交絡因子とは?",o:["結果だけに影響するもの","原因とされるものと結果の両方に影響する第三者","単なる測定誤差","標本の一部"],a:1,e:"両方に矢印を伸ばし、見かけの関係を作る黒幕です。"},
+  {q:"観察研究で交絡を減らす方法でないのは?",o:["層別化","多変量調整","傾向スコア","p値を下げる"],a:3,e:"p値を下げることは交絡対策ではありません。"},
+  {q:"中間因子(曝露→これ→結果)を調整するとどうなる?",o:["交絡が消える","総合効果の一部まで消してしまう","必ず精度が上がる","因果が確定する"],a:1,e:"中間因子は効果の通り道。総合効果を見たいなら調整しません(媒介分析は別の話)。"}],
+ [{q:"ロジスティック回帰から得られる指標は?",o:["ハザード比","オッズ比","相関係数","平均差"],a:1,e:"係数の指数がオッズ比になります。"},
+  {q:"オッズ比2.0、95%CIが0.8〜5.0。判定は?",o:["有意な関連あり","1を跨ぐので有意とは言えない","必ず予防的","計算間違い"],a:1,e:"信頼区間が1を含むので、関連ありとは言い切れません。"},
+  {q:"アウトカムが稀でないとき、オッズ比は?",o:["リスク比と一致","リスク比より1から離れて大げさに出る","常に1未満","意味をなさない"],a:1,e:"稀でないほどORはリスク比より誇張されます。読み替えに注意。"}],
+ [{q:"ハザード比0.7の意味は?",o:["勢いが3割増える","出来事の勢いが約3割抑えられている","無関係","2倍悪化"],a:1,e:"HR<1は予防的。0.7は勢いが0.7倍(約3割減)です。"},
+  {q:"Cox回帰の主な前提は?",o:["イベントが正規分布","比例ハザード(勢いの比が時間で一定)","等分散","打ち切りがない"],a:1,e:"全期間で勢いの比がほぼ一定、という比例ハザード性が前提です。"}],
+ [{q:"フォレストプロットのひし形が表すのは?",o:["個々の研究の結果","複数研究を統合した結論","異質性の指標","出版バイアス"],a:1,e:"ひし形は統合(まとめ)の結果と信頼区間を表します。"},
+  {q:"集めた研究の結果がバラバラな状態を指すのは?",o:["感度","異質性","検出力","オッズ比"],a:1,e:"研究間のばらつき=異質性。高いと統合の意味が薄れます。"}],
+ [{q:"ITT解析の原則は?",o:["完遂者だけを解析","割り付けられた通りに全員を解析","脱落者を除いて解析","有効例のみ解析"],a:1,e:"途中でやめた人も割付グループの一員として最後まで数えます。"},
+  {q:"完遂者だけで解析するとどうなりがち?",o:["効果を過小評価","効果を過大評価しやすい","結果は変わらない","人数が増える"],a:1,e:"続けられた都合のよい人だけが残り、効果が立派に見えがちです。"}],
+ [{q:"GWASで基準を桁違いに厳しくする理由は?",o:["計算が速くなる","膨大な検定で偽陽性が激増するから","人数が少ないから","正規分布のため"],a:1,e:"数十万〜数百万回の検定で偽陽性が爆発するため、基準を厳しくします。"},
+  {q:"大量比較で「間違いの割合」を管理する考え方は?",o:["検出力","偽発見率(FDR)の制御","信頼区間","感度"],a:1,e:"見つけた当たりのうち何割の間違いを許すか、を管理するのがFDRです。"}],
+ [{q:"非劣性試験で示したいのは?",o:["明らかに優れていること","実用上、明らかには劣らないこと","差があること","相関があること"],a:1,e:"効果同等でも副作用が軽い・安いなどの利点があれば価値があります。"},
+  {q:"中間解析で最も注意すべきことは?",o:["何度ものぞき見は偽陽性を増やす","人数が減る","盲検化が不要になる","効果量が上がる"],a:0,e:"途中で何度も見ると多重性が生じるため、止める基準を事前に厳密に決めます。"}],
+ [{q:"1人の10回測定を「10人分の独立データ」と扱うと?",o:["精度を過信し有意が出やすくなる","特に問題ない","検出力が下がる","平均が変わる"],a:0,e:"同一人物の繰り返しは互いに似ており独立でないため、過信につながります。"},
+  {q:"混合効果モデルが同時に扱えるのは?",o:["全体の傾向だけ","全体の傾向と個人差の両方","p値だけ","正規性だけ"],a:1,e:"共通の傾向(固定効果)と個人差(ランダム効果)を一緒に見積もります。"}],
+ [{q:"過学習(オーバーフィッティング)とは?",o:["学習データに合わせすぎ、新データで外す","単なる人数不足","正規分布のこと","交絡のこと"],a:0,e:"丸暗記した生徒が応用で崩れるのと同じ状態です。"},
+  {q:"予測モデルの実力を正しく測るには?",o:["学習に使ったデータでの成績","別の検証データで試す(交差検証)","p値","相関係数"],a:1,e:"学習に使っていないデータでの成績が本当の実力です。"}],
+ [{q:"操作変数法の例として有名なのは?",o:["メンデル無作為化(遺伝子をてこにする)","平均を取ること","p値の調整","データの正規化"],a:0,e:"生まれ持った遺伝子はくじ引きに近い、という発想を使います。"},
+  {q:"差分の差分が差し引くのは?",o:["個人差","背景の時間トレンド(全体の変化)","測定誤差","オッズ"],a:1,e:"対照群の変化から背景トレンドを推定し、引き算します。"}],
+ [{q:"p-hackingとは?",o:["多くの分析を試し、有意なものだけ報告する","人数を増やすこと","事前登録すること","盲検化すること"],a:0,e:"無自覚な「都合のよい分析の選び方」で偽陽性を生みます。"},
+  {q:"再現性を高める仕組みは?",o:["事前登録(計画を先に公開)","主要評価項目を後で決める","サブグループを増やす","p値だけ報告する"],a:0,e:"データを見る前に計画を公開し、後出しを封じます。"}],
+ [],
+ [],
+ [{q:"外れ値の影響を受けにくい散らばりの指標は?",o:["標準偏差","分散","四分位範囲","平均"],a:2,e:"順位に基づく四分位範囲(IQR)は外れ値に強い指標です。"},
+  {q:"単位の異なる2群のばらつきを比べるのに有用なのは?",o:["標準偏差","変動係数","中央値","最大値"],a:1,e:"変動係数(SD÷平均)は単位に依存せず比較できます。"}],
+ [{q:"棒グラフの縦軸の起点として原則望ましいのは?",o:["最大値付近","データの平均","0","どこでもよい"],a:2,e:"棒の長さで量を比べるため0起点が原則。途中で切ると差を誇張します。"},
+  {q:"差を実際より大きく見せる代表的な手口は?",o:["軸を0から描く","縦軸の途中を省略する","凡例を付ける","色を統一する"],a:1,e:"軸の途中を省略(truncated axis)すると、わずかな差が大きく見えます。"}],
+];
+
+function quizHTML(idx){
+  const qs=QUIZ[idx]||[];if(!qs.length)return"";
+  let h=`<div class="quiz"><div class="qh">✓ 確認問題</div><div class="qsub">選択肢をタップすると正誤と解説が表示されます</div>`;
+  qs.forEach((q,qi)=>{h+=`<div class="qitem"><div class="qq"><b>Q${qi+1}.</b> ${md(q.q)}</div>`;
+    q.o.forEach((o,ci)=>{h+=`<button class="choice" data-qi="${qi}" data-ci="${ci}">${String.fromCharCode(65+ci)}. ${md(o)}</button>`;});
+    h+=`<div class="qexpl" hidden></div></div>`;});
+  return h+`</div>`;
+}
+function wireQuiz(){
+  document.querySelectorAll('.quiz .choice').forEach(btn=>btn.onclick=()=>{
+    const qi=+btn.dataset.qi,ci=+btn.dataset.ci,q=QUIZ[cur][qi],item=btn.closest('.qitem');
+    if(item.dataset.done)return;item.dataset.done=1;
+    item.querySelectorAll('.choice').forEach((el,j)=>{if(j===q.a)el.classList.add('ok');});
+    if(ci!==q.a)btn.classList.add('ng');
+    const ex=item.querySelector('.qexpl');ex.hidden=false;
+    ex.innerHTML=(ci===q.a?'✓ 正解。':'✗ 不正解。正解は '+String.fromCharCode(65+q.a)+'。')+' '+md(q.e);
+  });
+}
+
+/* ---- interactive widgets + glossary ---- */
+function erf(x){const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+0.3275911*x);const y=1-((((1.061405429*t-1.453152027)*t+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return s*y;}
+const ncdf=z=>0.5*(1+erf(z/Math.SQRT2));
+const INTERACT={1:'spread',3:'tailprob',5:'nnt'};
+function curveSVG(sd){
+  const W=320,H=140,pad=18,xmin=-6,xmax=6,N=120,step=(xmax-xmin)/N,pts=[];let ymax=npdf(0,0,sd)*1.12;
+  for(let i=0;i<=N;i++){const x=xmin+i*step;pts.push([x,npdf(x,0,sd)]);}
+  const sx=v=>pad+(v-xmin)/(xmax-xmin)*(W-2*pad),sy=v=>H-pad-(v/ymax)*(H-2*pad);
+  const d=pts.map((p,i)=>(i?'L':'M')+sx(p[0]).toFixed(1)+' '+sy(p[1]).toFixed(1)).join(' ');
+  const shadeSeg=(lo,hi,col)=>{const seg=pts.filter(p=>p[0]>=lo&&p[0]<=hi);if(seg.length<2)return'';let s='M'+sx(seg[0][0]).toFixed(1)+' '+sy(0);seg.forEach(p=>s+=' L'+sx(p[0]).toFixed(1)+' '+sy(p[1]).toFixed(1));s+=' L'+sx(seg[seg.length-1][0]).toFixed(1)+' '+sy(0)+' Z';return `<path d="${s}" fill="${col}" opacity=".2"/>`;};
+  return {W,H,pad,sx,sy,d,shadeSeg};
+}
+function initInteractives(){
+  document.querySelectorAll('.iact').forEach(el=>{
+    const k=el.dataset.kind;
+    if(k==='tailprob'){
+      let z=1.96;
+      const draw=()=>{const g=curveSVG(1),cx=g.sx(z),cx2=g.sx(-z);
+        el.querySelector('.iv').innerHTML=`<svg viewBox="0 0 ${g.W} ${g.H}">${g.shadeSeg(z,6,COL.red)}${g.shadeSeg(-6,-z,COL.red)}<path d="${g.d}" fill="none" stroke="${COL.teal}" stroke-width="1.8"/><line x1="${cx}" y1="${g.pad}" x2="${cx}" y2="${g.H-g.pad}" stroke="${COL.red}" stroke-dasharray="3 3"/><line x1="${cx2}" y1="${g.pad}" x2="${cx2}" y2="${g.H-g.pad}" stroke="${COL.red}" stroke-dasharray="3 3"/></svg>`;
+        el.querySelector('.iz').textContent=z.toFixed(2);
+        el.querySelector('.ip').textContent='両側 p ≈ '+(2*(1-ncdf(z))).toFixed(4);};
+      el.innerHTML=`<div class="iact-t">▶ 動かせる図：基準値と両側p値</div><div class="iv"></div><div class="ir">基準値 z = <b class="iz"></b><input type="range" min="0.4" max="3.6" step="0.02" value="${z}"></div><div class="ip"></div><div class="ihint">スライダーで基準値を動かすと、両端の色つき面積＝p値が変わります。基準値が大きいほどpは小さく（偶然では起きにくく）なります。z=1.96でおよそ0.05です。</div>`;
+      el.querySelector('input').oninput=e=>{z=+e.target.value;draw();};draw();
+    }else if(k==='spread'){
+      let sd=1;
+      const draw=()=>{const g=curveSVG(sd);
+        el.querySelector('.iv').innerHTML=`<svg viewBox="0 0 ${g.W} ${g.H}">${g.shadeSeg(-2*sd,2*sd,COL.teal)}<path d="${g.d}" fill="none" stroke="${COL.ink}" stroke-width="1.6"/></svg>`;
+        el.querySelector('.iz').textContent=sd.toFixed(1);};
+      el.innerHTML=`<div class="iact-t">▶ 動かせる図：ばらつき(σ)と±2σの範囲</div><div class="iv"></div><div class="ir">ばらつき σ = <b class="iz"></b><input type="range" min="0.6" max="2.4" step="0.05" value="${sd}"></div><div class="ihint">σを変えると山の幅は変わりますが、色のついた「±2σ」の範囲には、いつも全体の約95%が入ります。これが基準範囲の考え方です。</div>`;
+      el.querySelector('input').oninput=e=>{sd=+e.target.value;draw();};draw();
+    }else if(k==='nnt'){
+      el.innerHTML=`<div class="iact-t">▶ 計算してみる：NNT(治療必要数)</div><div class="nntrow"><label>対照群リスク(%)<br><input type="number" class="cr" value="20" min="0" max="100"></label><label>治療群リスク(%)<br><input type="number" class="tr" value="10" min="0" max="100"></label></div><div class="ip" style="margin-top:10px"></div><div class="ihint">同じ「相対的に半減」でも、もとのリスクが高いほどNNTは小さく（効率的に）なります。数値を変えて確かめてみてください。</div>`;
+      const calc=()=>{const cr=+el.querySelector('.cr').value/100,tr=+el.querySelector('.tr').value/100,rr=tr/cr,arr=cr-tr,nnt=1/Math.abs(arr);
+        el.querySelector('.ip').innerHTML=`相対リスク RR ≈ ${isFinite(rr)?rr.toFixed(2):'—'}　/　絶対リスク減少 ARR ≈ ${(arr*100).toFixed(1)}%　/　NNT ≈ ${isFinite(nnt)&&arr!==0?Math.ceil(nnt):'—'}`;};
+      el.querySelectorAll('input').forEach(i=>i.oninput=calc);calc();
+    }
+  });
+  const gw=document.getElementById('glossWrap');if(gw)buildGloss(gw);
+}
+const GLOSS=[
+ {t:"標本",d:"母集団から抜き取った一部のデータ。これを調べて全体を推し量る。"},
+ {t:"母集団",d:"本当に知りたい対象の全員。直接は測れないことが多い。"},
+ {t:"記述統計",d:"集めたデータを平均や図で要約して眺めること。"},
+ {t:"推測統計",d:"一部(標本)から全体(母集団)の性質を推し量る考え方。"},
+ {t:"中央値",d:"小さい順に並べた真ん中の値。外れ値に強い代表値。"},
+ {t:"標準偏差",d:"データのばらつきの大きさを表す物差し(SD)。"},
+ {t:"正規分布",d:"中心が高く左右対称の山型。平均と標準偏差で形が決まる。"},
+ {t:"中心極限定理",d:"標本平均の分布は、人数が増えるほど正規分布に近づくという性質。"},
+ {t:"点推定",d:"「平均は130」のように一つの値で示す見積もり。"},
+ {t:"信頼区間",d:"本当の値がありそうな範囲。95%信頼区間が一般的。"},
+ {t:"帰無仮説",d:"まず「差はない」と仮定する出発点。"},
+ {t:"対立仮説",d:"「差がある」とする、示したい側の仮説。"},
+ {t:"p値",d:"差がないと仮定したとき、今回以上に極端な結果が偶然出る確率。"},
+ {t:"検出力",d:"本当に差があるとき、それを見つけられる力。通常0.8以上を目標。"},
+ {t:"効果量",d:"差の大きさそのものを表す指標。p値とは別に重要。"},
+ {t:"相対リスク",d:"治療群のリスクが対照群の何倍か。1未満で予防的。"},
+ {t:"オッズ比",d:"起こりやすさ÷起こりにくさ、の比。ロジスティック回帰で算出。"},
+ {t:"絶対リスク減少",d:"リスクの実数の差(対照−治療)。"},
+ {t:"治療必要数",d:"1人の利益を得るのに治療すべき人数(NNT)。1÷絶対リスク減少。"},
+ {t:"相関",d:"2つの量が一緒に動く度合い(−1〜+1)。因果ではない。"},
+ {t:"回帰",d:"要因から結果を予測・説明する手法。交絡の調整にも使える。"},
+ {t:"過剰適合",d:"データに合わせすぎて新しいデータで当たらない状態(過学習)。"},
+ {t:"過学習",d:"過剰適合と同じ。学習データに合わせすぎる状態。"},
+ {t:"交差検証",d:"学習に使わない別データで実力を測る、過学習対策の作法。"},
+ {t:"打ち切り",d:"追跡の途中で結果を見届けられなかった状態。生存解析で活用。"},
+ {t:"生存解析",d:"出来事が起きるまでの時間を、打ち切りも活かして分析する手法。"},
+ {t:"生存曲線",d:"時間とともに「まだ起きていない人」の割合を示す階段状の線(Kaplan-Meier)。"},
+ {t:"ハザード比",d:"出来事が起きる勢いの、群間の比。Cox回帰で算出。1未満で予防的。"},
+ {t:"バイアス",d:"結果を一方向に歪める偏り。選択・情報・交絡などがある。"},
+ {t:"交絡",d:"原因とされるものと結果の両方に影響する第三者による、見かけの関係。"},
+ {t:"交絡因子",d:"交絡を生む第三の要因(例:年齢・喫煙)。"},
+ {t:"層別化",d:"交絡因子の値ごとに分けて比べ、その影響を抑える方法。"},
+ {t:"多変量調整",d:"複数の要因を同時に式に入れ、交絡の影響を差し引くこと。"},
+ {t:"傾向スコア",d:"治療の受けやすさを1つの点数に要約し、似た者同士を比べる方法。"},
+ {t:"メタ解析",d:"同じ問いの複数研究を統合する、信頼度の高い方法。"},
+ {t:"フォレストプロット",d:"各研究の結果(点と横線)と統合結果(ひし形)を並べた図。"},
+ {t:"異質性",d:"集めた研究間の結果のばらつき。I²などで評価する。"},
+ {t:"出版バイアス",d:"効果ありの研究ほど世に出やすく、結論が歪む偏り。"},
+ {t:"欠測",d:"データが抜けること。扱い方で結果が大きく変わる。"},
+ {t:"ITT解析",d:"割り付けられた通りに全員を解析する原則(脱落者も含める)。"},
+ {t:"縦断データ",d:"同じ対象を繰り返し測ったデータ。独立として扱うと過信する。"},
+ {t:"混合効果モデル",d:"全体の傾向と個人差を同時に扱う、縦断データ向けの手法。"},
+ {t:"感度",d:"病気の人を正しく陽性とする力(見逃さない力)。"},
+ {t:"特異度",d:"病気でない人を正しく陰性とする力(巻き込まない力)。"},
+ {t:"ベイズの考え方",d:"最初の見込み(事前確率)を、新しい情報で更新する考え方。"},
+ {t:"事前確率",d:"検査前に見積もる、その人の病気らしさ。事後の解釈の土台。"},
+ {t:"非劣性試験",d:"優れているではなく「実用上、明らかには劣らない」ことを示す試験。"},
+ {t:"p-hacking",d:"多くの分析を試し、有意なものだけ報告すること。再現性を損なう。"},
+ {t:"競合リスク",d:"関心のある出来事の前に、それを妨げる別の結末(他病死など)が起こりうる状況。"},
+ {t:"累積発生関数",d:"競合リスク下で、時刻までに実際にその出来事が起きた人の割合(CIF)。"},
+ {t:"二重頑健推定",d:"結果モデルと傾向スコアの両方を作り、どちらか一方が正しければ偏らない推定法。"},
+ {t:"媒介分析",d:"曝露の効果のうち、ある通り道(媒介)を経由する分(間接効果)を切り分ける手法。"},
+ {t:"信用区間",d:"ベイズの区間。真の値が95%の確率でこの中にある、とそのまま言える。"},
+ {t:"ネットワークメタ解析",d:"直接比較のない治療どうしを、共通の相手を介して間接的に比べ順位づける手法。"},
+ {t:"推定対象",d:"解析手法を選ぶ前に『何を推定したいのか』を明示した対象(estimand)。"},
+ {t:"較正",d:"予測確率が実測割合と一致する正確さ。20%予測の集団で実際に約20%が発症するか。"},
+ {t:"多重代入",d:"欠測をもっともらしい値で複数とおり埋め、結果を平均する方法(MICE)。"},
+ {t:"制限付き3次スプライン",d:"連続変数の効果の曲がり(J型・U型)を、なめらかな曲線で表す方法。"},
+ {t:"四分位範囲",d:"小さい順に並べた中央50%が収まる幅(Q1からQ3)。外れ値に強い散らばりの指標(IQR)。"},
+ {t:"箱ひげ図",d:"中央値・四分位・最大最小・外れ値を箱とひげで示す、散らばりの要約図。"},
+ {t:"変動係数",d:"標準偏差を平均で割った値(CV)。単位の違うばらつきを比べられる。"},
+ {t:"パーセンタイル",d:"小さい順で下から何%の位置かを示す値。中央値は50パーセンタイル。"},
+ {t:"対数目盛",d:"等間隔が『○倍』を表す軸。広い範囲や倍率の変化を見やすくする。"},
+];
+const GTERMS=new Set(GLOSS.map(g=>g.t));
+const GIDX=CH.findIndex(c=>c.gloss);
+let pendingTerm='';
+function buildGloss(c){
+  c.innerHTML=`<div class="gsearch"><input type="text" id="gq" placeholder="用語を検索（例：交絡）"></div><div id="glist"></div>`;
+  const q=c.querySelector('#gq'),list=c.querySelector('#glist');
+  const draw=f=>{const ff=(f||'').trim();list.innerHTML=GLOSS.filter(g=>!ff||g.t.indexOf(ff)>=0||g.d.indexOf(ff)>=0).map(g=>`<div class="gitem${pendingTerm&&g.t===pendingTerm?' gflash':''}"><div class="gt">${g.t}</div><div class="gd">${md(g.d)}</div></div>`).join('')||'<div class="gd">該当する用語がありません。</div>';};
+  q.oninput=()=>{pendingTerm='';draw(q.value);};
+  if(pendingTerm){q.value=pendingTerm;draw(pendingTerm);}else draw('');
+}
+function gotoTerm(t){pendingTerm=t;cur=GIDX;render();window.scrollTo(0,0);}
+function wireLinks(){document.querySelectorAll('.lk').forEach(s=>s.onclick=()=>gotoTerm(s.dataset.term));}
+
+/* ---- render ---- */
+let cur=0;
+function render(){
+  const nav=document.getElementById("nav");
+  nav.innerHTML=CH.map((c,i)=>`<button class="tab${i===cur?' on':''}" data-i="${i}">${c.t.split(".")[0]}</button>`).join("");
+  nav.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{cur=+b.dataset.i;render();window.scrollTo(0,0);});
+  document.getElementById("art").innerHTML=`<h2>${CH[cur].t}</h2><div class="uline"></div>`+CH[cur].b.map(block).join("")+(EXTRA[cur]||[]).map(block).join("")+(INTERACT[cur]?`<div class="iact" data-kind="${INTERACT[cur]}"></div>`:"")+quizHTML(cur);
+  wireQuiz();initInteractives();wireLinks();
+  document.getElementById("pg").textContent=(cur+1)+" / "+CH.length;
+  document.getElementById("prev").disabled=cur===0;
+  document.getElementById("next").disabled=cur===CH.length-1;
+}
+document.getElementById("prev").onclick=()=>{if(cur>0){cur--;render();window.scrollTo(0,0);}};
+document.getElementById("next").onclick=()=>{if(cur<CH.length-1){cur++;render();window.scrollTo(0,0);}};
+render();
+</script>
+</body>
+</html>
