@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>医学統計学 上級編（研究者向け）</title>
+<style>
+  :root{--bg:#eef0f1;--paper:#fbfbf9;--ink:#1b2228;--soft:#646b73;--line:#d4d6da;--red:#8c2d2d;--teal:#26565c;--gold:#9a7820;--green:#356048;--ind:#3a3f63;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Helvetica Neue",sans-serif;font-size:16px;line-height:1.78;}
+  .wrap{max-width:700px;margin:0 auto;padding:20px 16px 70px;}
+  header{border-bottom:2px solid var(--ind);padding-bottom:14px;margin-bottom:16px;}
+  .kicker{font-size:11px;letter-spacing:2px;color:var(--gold);}
+  h1{font-family:Georgia,serif;font-size:26px;margin:2px 0 0;color:var(--ind);}
+  .sub{font-size:13px;color:var(--soft);margin:4px 0 0;}
+  nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;}
+  .tab{padding:7px 10px;font-size:13px;border-radius:7px;background:transparent;color:var(--soft);border:1px solid var(--line);cursor:pointer;}
+  .tab.on{background:var(--ind);color:#fff;border-color:var(--ind);}
+  h2{font-family:Georgia,serif;font-size:22px;margin:0 0 2px;color:var(--ind);}
+  .uline{width:48px;height:4px;background:var(--gold);margin-bottom:8px;border-radius:2px;}
+  p{margin:14px 0;}
+  .kw{color:var(--red);font-weight:600;}
+  .box{margin:18px 0;border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:9px;background:var(--paper);padding:14px 16px;}
+  .box .bt{font-weight:700;font-size:14px;margin-bottom:4px;}
+  .box .bb{font-size:14.5px;line-height:1.72;}
+  .formula{font-family:ui-monospace,Menlo,Consolas,monospace;background:#e7e9ec;border:1px solid var(--line);border-radius:8px;padding:11px 13px;margin:14px 0;font-size:14px;overflow-x:auto;color:var(--ink);}
+  figure{margin:20px 0;}
+  .figbox{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px;}
+  figcaption{font-size:12px;color:var(--soft);margin-top:8px;}
+  figcaption b{color:var(--red);}
+  svg{display:block;width:100%;height:auto;}
+  .rows>div{display:flex;gap:10px;padding:8px;border-radius:6px;background:rgba(0,0,0,.03);margin:5px 0;font-size:14px;}
+  .rows .k{font-weight:700;flex:0 0 38%;color:var(--teal);}
+  .eg{margin:14px 0;border:1px dashed var(--ind);border-radius:9px;background:rgba(58,63,99,.05);padding:12px 14px;font-size:13.5px;}
+  .eg .et{font-weight:700;color:var(--ind);font-size:13px;margin-bottom:4px;letter-spacing:.5px;}
+  .navbtns{display:flex;justify-content:space-between;align-items:center;margin-top:26px;padding-top:14px;border-top:1px solid var(--line);}
+  .navbtns button{background:none;border:none;color:var(--teal);font-size:14px;cursor:pointer;font-family:inherit;}
+  .navbtns button:disabled{opacity:.3;}
+  .pg{font-size:12px;color:var(--soft);}
+  footer{margin-top:26px;text-align:center;font-size:12px;color:var(--soft);}
+  .gl{border-bottom:1px dotted var(--teal);cursor:pointer;}
+  .gldef{display:inline-block;margin:5px 0;padding:7px 11px;background:rgba(38,86,92,.09);border-left:3px solid var(--teal);border-radius:7px;font-size:12.5px;line-height:1.62;color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">MEDICAL BIOSTATISTICS · ADVANCED</div>
+    <h1>医学統計学 上級編</h1>
+    <p class="sub">研究者のための応用解析 ― 論文で実際に使われる技法</p>
+  </header>
+  <nav id="nav"></nav>
+  <article id="art"></article>
+  <div class="navbtns"><button id="prev">← 前の章</button><span class="pg" id="pg"></span><button id="next">次の章 →</button></div>
+  <footer>初学者向け「図解テキスト」を前提とした応用編です。点線の付いた専門用語はタップすると平易な定義が出ます。記法・前提・報告作法は分野や雑誌により差があります。</footer>
+</div>
+<script>
+const COL={ink:"#1b2228",soft:"#646b73",line:"#d4d6da",red:"#8c2d2d",teal:"#26565c",gold:"#9a7820",green:"#356048",ind:"#3a3f63"};
+const TL=COL.teal,R=COL.red,G=COL.green,GD=COL.gold,SF=COL.soft,L=COL.line,IK=COL.ink,IN=COL.ind;
+function scaler(xd,yd,W,H,pad){const[x0,x1]=xd,[y0,y1]=yd;return{x:v=>pad+(v-x0)/(x1-x0)*(W-2*pad),y:v=>H-pad-(v-y0)/(y1-y0)*(H-2*pad)};}
+function path(p,sc){return p.map((q,i)=>(i?'L':'M')+sc.x(q[0]).toFixed(1)+' '+sc.y(q[1]).toFixed(1)).join(' ');}
+
+/* ===== figures ===== */
+function fLogit(){const W=320,H=150,sc=scaler([-6,6],[0,1],W,H,24),p=[];for(let x=-6;x<=6;x+=0.2)p.push([x,1/(1+Math.exp(-x))]);
+ return `<svg viewBox="0 0 ${W} ${H}"><line x1="24" y1="${sc.y(0.5)}" x2="${W-24}" y2="${sc.y(0.5)}" stroke="${L}" stroke-dasharray="3 3"/><path d="${path(p,sc)}" fill="none" stroke="${TL}" stroke-width="2.2"/><text x="24" y="${H-6}" font-size="9" fill="${SF}">線形予測子  η = Xβ  →</text><text x="6" y="20" font-size="9" fill="${SF}">P(Y=1)</text></svg>`;}
+function fSpline(){const W=320,H=150,sc=scaler([0,10],[0,10],W,H,24),tru=[];for(let x=0;x<=10;x+=0.3)tru.push([x,2+0.16*(x-5)*(x-5)]);const lin=[[0,4.2],[10,4.2]];
+ return `<svg viewBox="0 0 ${W} ${H}"><path d="${path(tru,sc)}" fill="none" stroke="${TL}" stroke-width="2"/><path d="${path(lin,sc)}" fill="none" stroke="${R}" stroke-width="2" stroke-dasharray="5 3"/><text x="${W-24}" y="${sc.y(8.5)}" font-size="9" fill="${TL}" text-anchor="end">真の関係(J型)</text><text x="${W-24}" y="${sc.y(4.2)-4}" font-size="9" fill="${R}" text-anchor="end">直線の当てはめ</text><text x="24" y="${H-6}" font-size="9" fill="${SF}">共変量(例:年齢) →</text></svg>`;}
+function fCalib(){const W=300,H=160,sc=scaler([0,1],[0,1],W,H,28),cal=[];for(let x=0;x<=1;x+=0.05)cal.push([x,Math.pow(x,1.35)]);
+ return `<svg viewBox="0 0 ${W} ${H}"><line x1="${sc.x(0)}" y1="${sc.y(0)}" x2="${sc.x(1)}" y2="${sc.y(1)}" stroke="${SF}" stroke-dasharray="4 3"/><path d="${path(cal,sc)}" fill="none" stroke="${TL}" stroke-width="2.2"/><text x="${sc.x(0.55)}" y="${sc.y(0.7)}" font-size="9" fill="${SF}">理想(対角線)</text><text x="${sc.x(0.5)}" y="${H-6}" font-size="9" fill="${SF}" text-anchor="middle">予測確率 →</text><text x="8" y="20" font-size="9" fill="${SF}">実測割合</text></svg>`;}
+function fPH(){const W=320,H=150,sc=scaler([0,5],[-2,2],W,H,26),a=[[0.3,1.4],[4.7,-1.4]],b=[[0.3,0.6],[4.7,-2.0]];
+ return `<svg viewBox="0 0 ${W} ${H}"><path d="${path(a,sc)}" fill="none" stroke="${TL}" stroke-width="2"/><path d="${path(b,sc)}" fill="none" stroke="${R}" stroke-width="2"/><text x="${W-26}" y="${sc.y(-1.0)}" font-size="9" fill="${TL}" text-anchor="end">群1</text><text x="${W-26}" y="${sc.y(-1.7)}" font-size="9" fill="${R}" text-anchor="end">群2</text><text x="${sc.x(2.5)}" y="${H-6}" font-size="9" fill="${SF}" text-anchor="middle">log(時間) →</text><text x="6" y="18" font-size="9" fill="${SF}">log(-log S)</text></svg>`;}
+function fDAG(){const node=(x,y,t,c)=>`<rect x="${x-30}" y="${y-13}" width="60" height="26" rx="6" fill="#fff" stroke="${c}" stroke-width="1.4"/><text x="${x}" y="${y+4}" font-size="11" fill="${IK}" text-anchor="middle">${t}</text>`;
+ const ar=(x1,y1,x2,y2,c)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c||SF}" stroke-width="1.4" marker-end="url(#da)"/>`;
+ return `<svg viewBox="0 0 320 180"><defs><marker id="da" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="${SF}"/></marker></defs>
+  ${node(160,26,"交絡 C",GD)}${node(56,86,"曝露 E",TL)}${node(264,86,"結果 O",R)}${node(160,96,"中間 M",G)}${node(160,156,"合流点 K",R)}
+  ${ar(140,36,72,74,GD)}${ar(180,36,248,74,GD)}${ar(86,86,134,92,TL)}${ar(186,92,238,82,G)}${ar(74,98,146,146)}${ar(246,98,174,146)}
+  <text x="160" y="172" font-size="8.5" fill="${SF}" text-anchor="middle">K(合流点)は調整しない / Mも基本は調整しない</text></svg>`;}
+function fOverlap(){const W=320,H=150,sc=scaler([0,1],[0,3.2],W,H,22),np=(x,m,s)=>Math.exp(-((x-m)**2)/(2*s*s))/(s*Math.sqrt(2*Math.PI));
+ const c=[],t=[];for(let x=0;x<=1;x+=0.02){c.push([x,np(x,0.35,0.13)]);t.push([x,np(x,0.62,0.13)]);}
+ return `<svg viewBox="0 0 ${W} ${H}"><path d="${path(c,sc)}" fill="${SF}" fill-opacity=".15" stroke="${SF}" stroke-width="1.6"/><path d="${path(t,sc)}" fill="${TL}" fill-opacity=".15" stroke="${TL}" stroke-width="1.6"/><text x="${sc.x(0.2)}" y="${sc.y(2.6)}" font-size="9" fill="${SF}">対照</text><text x="${sc.x(0.78)}" y="${sc.y(2.6)}" font-size="9" fill="${TL}">治療</text><text x="${sc.x(0.5)}" y="${H-6}" font-size="9" fill="${SF}" text-anchor="middle">傾向スコア(治療を受ける確率) →</text></svg>`;}
+function fForestSub(){const W=320,padR=12,plotL=110,plotR=W-padR,top=12,x0=Math.log(0.4),x1=Math.log(2.6),sx=v=>plotL+(Math.log(v)-x0)/(x1-x0)*(plotR-plotL);
+ const rows=[["全体",0.80,0.68,0.94],["若年層",0.62,0.46,0.84],["高齢層",1.02,0.80,1.30]];let y=top+16,out="";
+ rows.forEach((s,i)=>{out+=`<text x="8" y="${y+4}" font-size="10" fill="${i===0?IN:IK}">${s[0]}</text><line x1="${sx(s[1])}" y1="${y}" x2="${sx(s[3])}" y2="${y}" stroke="${i===0?IN:TL}" stroke-width="1.8"/><rect x="${sx(s[1])-3}" y="${y-3}" width="6" height="6" fill="${i===0?IN:TL}"/>`;y+=26;});
+ const l1=sx(1);return `<svg viewBox="0 0 ${W} ${y+8}"><line x1="${l1}" y1="${top}" x2="${l1}" y2="${y-6}" stroke="${SF}" stroke-dasharray="3 3"/><text x="${l1}" y="${y+2}" font-size="9" fill="${SF}" text-anchor="middle">1.0</text>${out}</svg>`;}
+function fOverfit(){const W=320,H=150,sc=scaler([0,10],[0,10],W,H,26),tr=[],va=[];for(let c=0;c<=10;c+=0.5){const t=8*Math.exp(-c/2.2)+0.5;tr.push([c,t]);va.push([c,t+0.17*Math.pow(Math.max(0,c-3),1.8)]);}
+ return `<svg viewBox="0 0 ${W} ${H}"><path d="${path(tr,sc)}" fill="none" stroke="${TL}" stroke-width="2"/><path d="${path(va,sc)}" fill="none" stroke="${R}" stroke-width="2"/><text x="${W-26}" y="${sc.y(0.9)}" font-size="9" fill="${TL}" text-anchor="end">見かけ(apparent)</text><text x="${W-26}" y="${sc.y(6.2)}" font-size="9" fill="${R}" text-anchor="end">外部/検証</text><text x="${sc.x(5)}" y="${H-6}" font-size="9" fill="${SF}" text-anchor="middle">モデルの複雑さ →</text><text x="6" y="20" font-size="9" fill="${SF}">予測誤差</text></svg>`;}
+function fMediate(){const node=(x,y,t,c)=>`<rect x="${x-32}" y="${y-13}" width="64" height="26" rx="6" fill="#fff" stroke="${c}" stroke-width="1.4"/><text x="${x}" y="${y+4}" font-size="11" fill="${IK}" text-anchor="middle">${t}</text>`;
+ const ar=(x1,y1,x2,y2,c,dash)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c||SF}" stroke-width="1.5" ${dash?'stroke-dasharray="5 3"':''} marker-end="url(#me)"/>`;
+ return `<svg viewBox="0 0 320 150"><defs><marker id="me" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="${SF}"/></marker></defs>
+  ${node(60,112,"曝露 E",TL)}${node(160,38,"媒介 M",G)}${node(262,112,"結果 O",R)}
+  ${ar(80,100,140,50,G)}${ar(180,50,242,100,G)}${ar(92,114,228,114,IN,true)}
+  <text x="92" y="64" font-size="9" fill="${G}">間接効果 (E→M→O)</text>
+  <text x="160" y="130" font-size="9" fill="${IN}" text-anchor="middle">直接効果 (E→O)</text></svg>`;}
+function fBayesPost(){const W=320,H=150,sc=scaler([-4,4],[0,0.62],W,H,18),np=(x,m,s)=>Math.exp(-((x-m)**2)/(2*s*s))/(s*Math.sqrt(2*Math.PI));
+ const pm=-1,ps=1.2,lm=1.5,ls=0.8,pv=1/(1/(ps*ps)+1/(ls*ls)),pmean=pv*(pm/(ps*ps)+lm/(ls*ls)),psd=Math.sqrt(pv);
+ const pr=[],lk=[],po=[];for(let x=-4;x<=4;x+=0.1){pr.push([x,np(x,pm,ps)]);lk.push([x,np(x,lm,ls)]);po.push([x,np(x,pmean,psd)]);}
+ return `<svg viewBox="0 0 ${W} ${H}"><path d="${path(pr,sc)}" fill="none" stroke="${SF}" stroke-width="1.6" stroke-dasharray="4 3"/><path d="${path(lk,sc)}" fill="none" stroke="${GD}" stroke-width="1.6"/><path d="${path(po,sc)}" fill="none" stroke="${TL}" stroke-width="2.4"/>
+  <text x="${sc.x(pm)}" y="${sc.y(np(pm,pm,ps))-4}" font-size="9" fill="${SF}" text-anchor="middle">事前</text>
+  <text x="${sc.x(lm)+18}" y="${sc.y(np(lm,lm,ls))-4}" font-size="9" fill="${GD}" text-anchor="middle">データ(尤度)</text>
+  <text x="${sc.x(pmean)}" y="${sc.y(np(pmean,pmean,psd))+12}" font-size="9" fill="${TL}" text-anchor="middle">事後</text></svg>`;}
+function fDR(){const cell=(x,y,t,ok)=>`<rect x="${x}" y="${y}" width="116" height="40" rx="6" fill="${ok?'rgba(53,96,72,.12)':'rgba(140,45,45,.10)'}" stroke="${ok?G:R}"/><text x="${x+58}" y="${y+25}" font-size="11" fill="${IK}" text-anchor="middle">${t}</text>`;
+ return `<svg viewBox="0 0 320 156"><text x="128" y="14" font-size="9" fill="${SF}" text-anchor="middle">結果モデル◯</text><text x="244" y="14" font-size="9" fill="${SF}" text-anchor="middle">結果モデル✕</text>
+  <text x="6" y="44" font-size="9" fill="${SF}">PS◯</text><text x="6" y="98" font-size="9" fill="${SF}">PS✕</text>
+  ${cell(70,22,"不偏",1)}${cell(192,22,"不偏",1)}${cell(70,76,"不偏",1)}${cell(192,76,"偏り",0)}
+  <text x="160" y="146" font-size="9" fill="${IN}" text-anchor="middle">どちらか一方が正しければ不偏 = 二重頑健</text></svg>`;}
+function fNetwork(){const nd=(x,y,t)=>`<circle cx="${x}" cy="${y}" r="16" fill="#fff" stroke="${TL}" stroke-width="1.6"/><text x="${x}" y="${y+4}" font-size="11" fill="${IK}" text-anchor="middle">${t}</text>`;
+ const ed=(x1,y1,x2,y2,dash)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${dash?IN:SF}" stroke-width="${dash?1.8:2.4}" ${dash?'stroke-dasharray="5 4"':''}/>`;
+ return `<svg viewBox="0 0 320 175">${ed(70,46,250,46)}${ed(70,46,70,132)}${ed(250,46,250,132)}${ed(70,132,250,132,1)}
+  ${nd(70,46,"A")}${nd(250,46,"B")}${nd(70,132,"C")}${nd(250,132,"D")}
+  <text x="160" y="38" font-size="9" fill="${SF}" text-anchor="middle">実線=直接比較した試験あり</text>
+  <text x="160" y="158" font-size="9" fill="${IN}" text-anchor="middle">C–D間は直接比較なし → 間接比較(点線)で推定</text></svg>`;}
+function fCIF(){const W=320,H=160,sc=scaler([0,5],[0,1],W,H,26),ev=[],comp=[];
+ for(let t=0;t<=5;t+=0.1){const a=0.45*(1-Math.exp(-t/1.8)),b=0.30*(1-Math.exp(-t/2.5));ev.push([t,a]);comp.push([t,a+b]);}
+ let aEv='M'+sc.x(0)+' '+sc.y(0);ev.forEach(p=>aEv+=' L'+sc.x(p[0]).toFixed(1)+' '+sc.y(p[1]).toFixed(1));aEv+=' L'+sc.x(5)+' '+sc.y(0)+' Z';
+ let aComp='';ev.forEach((p,i)=>aComp+=(i?' L':'M')+sc.x(p[0]).toFixed(1)+' '+sc.y(p[1]).toFixed(1));for(let i=comp.length-1;i>=0;i--)aComp+=' L'+sc.x(comp[i][0]).toFixed(1)+' '+sc.y(comp[i][1]).toFixed(1);aComp+=' Z';
+ return `<svg viewBox="0 0 ${W} ${H}"><path d="${aEv}" fill="${TL}" fill-opacity=".25" stroke="${TL}" stroke-width="1.8"/><path d="${aComp}" fill="${R}" fill-opacity=".15" stroke="${R}" stroke-width="1.6"/><text x="${sc.x(2.9)}" y="${sc.y(0.18)}" font-size="9" fill="${TL}">関心イベント(再発)のCIF</text><text x="${sc.x(2.4)}" y="${sc.y(0.6)}" font-size="9" fill="${R}">競合イベント(他病死)が積み上がる</text><text x="${sc.x(2.5)}" y="${H-6}" font-size="9" fill="${SF}" text-anchor="middle">時間 →</text><text x="6" y="18" font-size="9" fill="${SF}">累積発生</text></svg>`;}
+function fWeakIV(){const node=(x,y,t,c)=>`<rect x="${x-30}" y="${y-13}" width="60" height="26" rx="6" fill="#fff" stroke="${c}" stroke-width="1.4"/><text x="${x}" y="${y+4}" font-size="10.5" fill="${IK}" text-anchor="middle">${t}</text>`;
+ const ar=(x1,y1,x2,y2,c,dash)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c||SF}" stroke-width="1.5" ${dash?'stroke-dasharray="5 3"':''} marker-end="url(#iv)"/>`;
+ return `<svg viewBox="0 0 320 175"><defs><marker id="iv" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="${SF}"/></marker></defs>
+  ${node(50,104,"操作変数 Z",GD)}${node(160,104,"曝露 X",TL)}${node(270,104,"結果 Y",R)}${node(215,34,"未測定 U",SF)}
+  ${ar(80,104,130,104,GD)}${ar(190,104,240,104,TL)}${ar(205,46,176,92,SF)}${ar(225,46,256,92,SF)}
+  ${ar(80,96,250,42,R,true)}
+  <text x="150" y="150" font-size="8.5" fill="${SF}" text-anchor="middle">点線(Z→Y直接効果)が無いこと=除外制約。Uは測れない交絡</text></svg>`;}
+function fAlpha(){const W=320,H=160,sc=scaler([0,1],[0,4.5],W,H,28),looks=[[0.25,4.05],[0.5,2.86],[0.75,2.34],[1.0,2.02]];
+ let pts='';looks.forEach((p,i)=>pts+=(i?' L':'M')+sc.x(p[0]).toFixed(1)+' '+sc.y(p[1]).toFixed(1));
+ const dots=looks.map(p=>`<circle cx="${sc.x(p[0])}" cy="${sc.y(p[1])}" r="3.2" fill="${TL}"/>`).join(''),nb=sc.y(1.96);
+ return `<svg viewBox="0 0 ${W} ${H}"><line x1="${sc.x(0)}" y1="${nb}" x2="${sc.x(1)}" y2="${nb}" stroke="${R}" stroke-dasharray="4 3"/><text x="${sc.x(1)}" y="${nb-4}" font-size="9" fill="${R}" text-anchor="end">通常の1.96</text><path d="${pts}" fill="none" stroke="${TL}" stroke-width="2"/>${dots}<text x="${sc.x(0.5)}" y="${H-6}" font-size="9" fill="${SF}" text-anchor="middle">情報量(解析を行う時点) →</text><text x="6" y="18" font-size="9" fill="${SF}">合格に要するz</text></svg>`;}
+function fRDD(){const W=320,H=170,sc=scaler([0,1],[0,10],W,H,30),c=0.5,jump=2.2;
+ const yb=x=>2.5+5*x, ya=x=>2.5+5*x+jump;
+ function seg(f,x0,x1){return 'M'+sc.x(x0).toFixed(1)+' '+sc.y(f(x0)).toFixed(1)+' L'+sc.x(x1).toFixed(1)+' '+sc.y(f(x1)).toFixed(1);}
+ const xs=[0.08,0.16,0.24,0.32,0.4,0.47,0.53,0.6,0.68,0.76,0.84,0.92],rnd=[-0.31,0.22,-0.14,0.33,-0.27,0.18,0.29,-0.2,0.12,-0.25,0.26,-0.16];
+ let dots='';xs.forEach((x,i)=>{const y=(x<c?yb(x):ya(x))+rnd[i];dots+=`<circle cx="${sc.x(x).toFixed(1)}" cy="${sc.y(y).toFixed(1)}" r="2.6" fill="${x<c?SF:TL}"/>`;});
+ return `<svg viewBox="0 0 ${W} ${H}"><line x1="${sc.x(c)}" y1="${sc.y(0)}" x2="${sc.x(c)}" y2="${sc.y(10)}" stroke="${L}" stroke-dasharray="4 3"/><path d="${seg(yb,0,c)}" fill="none" stroke="${SF}" stroke-width="2"/><path d="${seg(ya,c,1)}" fill="none" stroke="${TL}" stroke-width="2"/><line x1="${sc.x(c)}" y1="${sc.y(yb(c))}" x2="${sc.x(c)}" y2="${sc.y(ya(c))}" stroke="${R}" stroke-width="2.5"/><text x="${sc.x(c)+5}" y="${sc.y((yb(c)+ya(c))/2)}" font-size="9" fill="${R}">段差=効果</text>${dots}<text x="${sc.x(c)}" y="${H-6}" font-size="9" fill="${SF}" text-anchor="middle">割付変数(カットオフで処置が切替)</text></svg>`;}
+function fDilution(){const W=320,H=170,sc=scaler([0,10],[0,10],W,H,28);
+ const tru=x=>1+0.85*x, obs=x=>3+0.4*x;
+ function seg(f){return 'M'+sc.x(0)+' '+sc.y(f(0)).toFixed(1)+' L'+sc.x(10)+' '+sc.y(f(10)).toFixed(1);}
+ const xs=[1,2,3,4,5,6,7,8,9],dx=[1.4,-1.2,1.6,-1.5,1.1,-1.3,1.5,-1.1,1.2];
+ let dots='';xs.forEach((x,i)=>{const xe=x+dx[i],y=tru(x);dots+=`<circle cx="${sc.x(xe).toFixed(1)}" cy="${sc.y(y).toFixed(1)}" r="2.4" fill="${SF}" opacity="0.65"/>`;});
+ return `<svg viewBox="0 0 ${W} ${H}">${dots}<path d="${seg(tru)}" fill="none" stroke="${R}" stroke-width="2.2"/><path d="${seg(obs)}" fill="none" stroke="${TL}" stroke-width="2" stroke-dasharray="5 3"/><text x="${sc.x(6.5)}" y="${sc.y(tru(6.5))-5}" font-size="9" fill="${R}">真の関係(急)</text><text x="${sc.x(6)}" y="${sc.y(obs(6))+13}" font-size="9" fill="${TL}">観測(なまる)</text><text x="${sc.x(5)}" y="${H-6}" font-size="9" fill="${SF}" text-anchor="middle">誤差を含む測定値 →</text></svg>`;}
+function fSim(){const W=320,H=160,sc=scaler([-4,4],[0,1],W,H,26),n=16,cut=1.96;
+ const bars=[];for(let i=0;i<n;i++){const x=-4+8*(i+0.5)/n;bars.push([x,Math.exp(-x*x/2)]);}
+ const bw=(sc.x(4)-sc.x(-4))/n*0.9;let rect='';
+ bars.forEach(b=>{const rej=b[0]>=cut;rect+=`<rect x="${(sc.x(b[0])-bw/2).toFixed(1)}" y="${sc.y(b[1]).toFixed(1)}" width="${bw.toFixed(1)}" height="${(sc.y(0)-sc.y(b[1])).toFixed(1)}" fill="${rej?R:TL}" opacity="${rej?0.85:0.5}"/>`;});
+ return `<svg viewBox="0 0 ${W} ${H}">${rect}<line x1="${sc.x(cut)}" y1="${sc.y(0)}" x2="${sc.x(cut)}" y2="${sc.y(1)}" stroke="${IK}" stroke-dasharray="4 3"/><text x="${sc.x(cut)+3}" y="18" font-size="9" fill="${R}">棄却域(赤の割合=検出力)</text><text x="${sc.x(0)}" y="${H-6}" font-size="9" fill="${SF}" text-anchor="middle">1万回の模擬試験で得たz統計量</text></svg>`;}
+function fGLMmap(){const W=320,H=170;const nd=(x,y,w,t,c)=>`<rect x="${x-w/2}" y="${y-13}" width="${w}" height="26" rx="6" fill="#fff" stroke="${c}" stroke-width="1.4"/><text x="${x}" y="${y+4}" font-size="10" fill="${IK}" text-anchor="middle">${t}</text>`;
+ const ar=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${SF}" stroke-width="1.2" marker-end="url(#aGm)"/>`;
+ return `<svg viewBox="0 0 ${W} ${H}"><defs><marker id="aGm" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0 0L6 3L0 6Z" fill="${SF}"/></marker></defs>${nd(160,24,150,"g(E[Y]) = Xβ",IK)}${ar(110,32,60,60)}${ar(160,37,160,60)}${ar(210,32,260,60)}${nd(58,75,98,"恒等 / 正規",TL)}${nd(160,75,98,"logit / 二項",GD)}${nd(262,75,100,"log / Poisson",R)}${ar(58,88,58,110)}${ar(160,88,160,110)}${ar(262,88,262,110)}${nd(58,125,98,"線形回帰",TL)}${nd(160,125,98,"ロジスティック",GD)}${nd(262,125,100,"Poisson回帰",R)}<text x="58" y="156" font-size="9" fill="${SF}" text-anchor="middle">β＝平均の差</text><text x="160" y="156" font-size="9" fill="${SF}" text-anchor="middle">exp(β)＝オッズ比</text><text x="262" y="156" font-size="9" fill="${SF}" text-anchor="middle">exp(β)＝率比</text></svg>`;}
+function fMixed(){const W=320,H=160,sc=scaler([0,10],[0,12],W,H,24);let s='';[[2,0.55],[4.5,0.4],[3,0.75],[6,0.25],[5,0.6],[1.2,0.45]].forEach(([b0,b1])=>{s+=`<line x1="${sc.x(0)}" y1="${sc.y(b0)}" x2="${sc.x(10)}" y2="${sc.y(b0+b1*10)}" stroke="${TL}" stroke-width="1" opacity=".45"/>`;});
+ return `<svg viewBox="0 0 ${W} ${H}"><line x1="${sc.x(0)}" y1="${sc.y(0)}" x2="${sc.x(10)}" y2="${sc.y(0)}" stroke="${L}"/><line x1="${sc.x(0)}" y1="${sc.y(0)}" x2="${sc.x(0)}" y2="${sc.y(12)}" stroke="${L}"/>${s}<line x1="${sc.x(0)}" y1="${sc.y(3.6)}" x2="${sc.x(10)}" y2="${sc.y(8.6)}" stroke="${R}" stroke-width="2.6"/><text x="${sc.x(5)}" y="${H-6}" font-size="9" fill="${SF}" text-anchor="middle">時間 →</text><text x="${sc.x(9.6)}" y="${sc.y(9.6)}" font-size="9.5" fill="${R}" text-anchor="end">固定効果(全体の傾向)</text><text x="${sc.x(0.4)}" y="${sc.y(11.2)}" font-size="9" fill="${TL}">細い線＝個人ごと(ランダム切片・傾き)</text></svg>`;}
+function fMissMech(){const W=320,H=150;const nd=(x,y,t,c,w=64)=>`<rect x="${x-w/2}" y="${y-12}" width="${w}" height="24" rx="6" fill="#fff" stroke="${c}" stroke-width="1.3"/><text x="${x}" y="${y+4}" font-size="9.5" fill="${IK}" text-anchor="middle">${t}</text>`;
+ const ar=(x,c,d)=>`<line x1="${x}" y1="72" x2="${x}" y2="94" stroke="${c}" stroke-width="1.3" ${d?'stroke-dasharray="4 3"':''} marker-end="url(#aMs)"/>`;
+ return `<svg viewBox="0 0 ${W} ${H}"><defs><marker id="aMs" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0 0L6 3L0 6Z" fill="${SF}"/></marker></defs><text x="56" y="22" font-size="11" font-weight="600" fill="${IK}" text-anchor="middle">MCAR</text><text x="160" y="22" font-size="11" font-weight="600" fill="${IK}" text-anchor="middle">MAR</text><text x="264" y="22" font-size="11" font-weight="600" fill="${IK}" text-anchor="middle">MNAR</text>${nd(56,60,"偶然のみ",SF)}${ar(56,SF)}${nd(56,108,"欠測",R)}${nd(160,60,"観測済み変数",TL,86)}${ar(160,TL)}${nd(160,108,"欠測",R)}${nd(264,60,"欠けた値自身",GD,90)}${ar(264,GD,1)}${nd(264,108,"欠測",R)}<text x="56" y="142" font-size="8.5" fill="${SF}" text-anchor="middle">完全例解析も可</text><text x="160" y="142" font-size="8.5" fill="${SF}" text-anchor="middle">多重代入・最尤法</text><text x="264" y="142" font-size="8.5" fill="${SF}" text-anchor="middle">感度分析が必須</text></svg>`;}
+function fFWER(){const W=320,H=160,sc=scaler([0,20],[0,0.72],W,H,28),p=[];for(let k=0;k<=20;k+=0.5)p.push([k,1-Math.pow(0.95,k)]);
+ return `<svg viewBox="0 0 ${W} ${H}"><line x1="${sc.x(0)}" y1="${sc.y(0)}" x2="${sc.x(20)}" y2="${sc.y(0)}" stroke="${L}"/><line x1="${sc.x(0)}" y1="${sc.y(0)}" x2="${sc.x(0)}" y2="${sc.y(0.72)}" stroke="${L}"/><line x1="${sc.x(0)}" y1="${sc.y(0.05)}" x2="${sc.x(20)}" y2="${sc.y(0.05)}" stroke="${G}" stroke-dasharray="4 3"/><path d="${path(p,sc)}" fill="none" stroke="${R}" stroke-width="2"/><circle cx="${sc.x(14)}" cy="${sc.y(1-Math.pow(0.95,14))}" r="3" fill="${R}"/><text x="${sc.x(13.5)}" y="${sc.y(1-Math.pow(0.95,14))-8}" font-size="9" fill="${R}" text-anchor="middle">14回で50%超え</text><text x="${sc.x(19.6)}" y="${sc.y(0.05)-5}" font-size="9" fill="${G}" text-anchor="end">1回ならα=0.05</text>${[5,10,15,20].map(k=>`<text x="${sc.x(k)}" y="${H-14}" font-size="9" fill="${SF}" text-anchor="middle">${k}</text>`).join('')}<text x="${sc.x(10)}" y="${H-3}" font-size="9" fill="${SF}" text-anchor="middle">独立な検定の回数</text><text x="${sc.x(0.4)}" y="${sc.y(0.66)}" font-size="9" fill="${SF}">少なくとも1つ偽陽性が出る確率</text></svg>`;}
+function fMSM(){const W=320,H=150;const nd=(x,y,t,c)=>`<rect x="${x-32}" y="${y-13}" width="64" height="26" rx="6" fill="#fff" stroke="${c}" stroke-width="1.4"/><text x="${x}" y="${y+4}" font-size="10" fill="${IK}" text-anchor="middle">${t}</text>`;
+ const ar=(x1,y1,x2,y2,c)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c||SF}" stroke-width="1.3" marker-end="url(#aMw)"/>`;
+ return `<svg viewBox="0 0 ${W} ${H}"><defs><marker id="aMw" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0 0L6 3L0 6Z" fill="${SF}"/></marker></defs>${ar(70,98,108,62,SF)}${ar(150,62,190,98,GD)}${ar(184,42,250,42,GD)}${ar(238,98,272,58,TL)}${nd(46,110,"治療 A₀",TL)}${nd(146,45,"活動性 L₁",GD)}${nd(214,110,"治療 A₁",TL)}${nd(286,45,"転帰 Y",IK)}<text x="160" y="138" font-size="9" fill="${SF}" text-anchor="middle">L₁はA₀の「結果」かつA₁→Yの「交絡」。調整しても・しなくても偏る</text></svg>`;}
+function fDCA(){const W=320,H=160,sc=scaler([0,0.5],[-0.04,0.21],W,H,28),pi=0.2;const all=[],mod=[];
+ for(let t=0.01;t<=0.5;t+=0.01){const nb=pi-(1-pi)*t/(1-t);if(nb>=-0.04)all.push([t,nb]);mod.push([t,0.03+0.175*Math.exp(-5.5*t)]);}
+ return `<svg viewBox="0 0 ${W} ${H}"><line x1="${sc.x(0)}" y1="${sc.y(0)}" x2="${sc.x(0.5)}" y2="${sc.y(0)}" stroke="${SF}" stroke-dasharray="4 3"/><path d="${path(all,sc)}" fill="none" stroke="${TL}" stroke-width="1.6"/><path d="${path(mod,sc)}" fill="none" stroke="${R}" stroke-width="2.2"/><text x="${sc.x(0.32)}" y="${sc.y(0.105)}" font-size="9.5" fill="${R}">モデルに従って治療</text><text x="${sc.x(0.115)}" y="${sc.y(0.027)}" font-size="9" fill="${TL}">全員治療</text><text x="${sc.x(0.45)}" y="${sc.y(0)-5}" font-size="9" fill="${SF}" text-anchor="end">全員様子見(NB=0)</text><text x="${sc.x(0.25)}" y="${H-3}" font-size="9" fill="${SF}" text-anchor="middle">閾値確率 pt(これ以上なら治療する、という線引き) →</text><text x="${sc.x(0.01)}" y="${sc.y(0.2)}" font-size="9" fill="${SF}">純利益 NB</text></svg>`;}
+const FIGS={fLogit,fSpline,fCalib,fPH,fDAG,fOverlap,fForestSub,fOverfit,fMediate,fBayesPost,fDR,fNetwork,fCIF,fWeakIV,fAlpha,fRDD,fDilution,fSim,fGLMmap,fMixed,fMissMech,fFWER,fMSM,fDCA};
+
+/* ===== glossary (tap a highlighted term to see a plain definition) ===== */
+const GLOSS={
+"累積発生関数":"競合リスク下で、時刻までに実際にその出来事が起きた人の割合(CIF)。",
+"競合リスク":"関心の出来事の前に、それを妨げる別の結末(他病死など)が起こりうる状況。",
+"原因別ハザード":"まだ何も起きていない人の中で、いま関心イベントが起きる勢い。病因を問うのに向く。",
+"部分分布ハザード":"絶対リスク(CIF)を直接モデル化するためのハザード。予測向き(Fine-Gray)。",
+"比例ハザード":"群間のハザード比が観察期間を通じてほぼ一定、というCoxの前提(PH)。",
+"Schoenfeld残差":"各イベント時点での予測からのずれ。時間に対する傾きでPH違反を点検する。",
+"セミパラメトリック":"基準ハザードの形は仮定せず、群間の比だけを取り出すCoxの性質。",
+"不死時間バイアス":"治療を受けた人は受けるまで必ず生きていた、という事実を見落として治療を良く見せる偏り。",
+"一般化線形モデル":"線形回帰やロジスティック回帰などを、同じ設計図の変種としてまとめた枠組み(GLM)。",
+"線形予測子":"共変量に重みβを掛けて足し合わせたもの。効果の足し算の本体。",
+"リンク関数":"アウトカムの期待値と線形予測子を橋渡しする関数。これで係数の意味が決まる。",
+"調整オッズ比":"ほかの変数を一定に保ったうえでのオッズ比(adjusted OR)。",
+"オッズ比":"起こりやすさ÷起こりにくさ、の群間比。ロジスティック回帰の係数を指数化した値。",
+"制限付き3次スプライン":"連続変数の効果の曲がり(J型・U型)を、なめらかな曲線で表す方法。",
+"完全分離":"あるグループで全員がイベント(または全員非)になり、係数が無限大に発散する状態。",
+"Firthの罰則付き推定":"完全分離などで係数が発散するのを防ぐ、罰則を加えた推定法。",
+"判別":"高リスクの人と低リスクの人を正しく順序づける力(discrimination)。",
+"C統計量":"判別の指標。ROC曲線の下の面積(AUC)と同じ。0.5で当てずっぽう、1.0で完璧。",
+"較正":"予測確率が実測割合と一致する正確さ。20%予測の集団で実際に約20%が起きるか。",
+"効果修飾":"治療の効きめが第3の変数によって変わる現象(effect modification)。",
+"交互作用項":"効果修飾を表す、変数どうしの掛け算の項。",
+"乗法スケール":"比(オッズ比・ハザード比)どうしの掛け算で効果を見る物差し。",
+"加法スケール":"絶対リスクの差(足し算)で効果を見る物差し。臨床で効くのはこちらが多い。",
+"RERI":"相対尺度の超過リスクで、加法スケールの交互作用を測る指標。",
+"混合効果モデル":"全体に共通する効果と、個人ごとのクセ(ランダム効果)を同時に扱う手法。",
+"作業相関行列":"個人内の相関のだいたいの形を仮置きする行列。多少間違えても結果は頑健。",
+"級内相関":"同じ人や同じ施設のデータがどれだけ似ているかの指標(ICC)。",
+"周辺効果":"集団全体で曝露が変わったときの平均効果。GEEが推定する量。",
+"傾向スコア":"たくさんの背景変数から、その人が治療を受ける確率を1点に要約したもの(PS)。",
+"標準化差":"両群の背景がどれだけずれているかの指標(SMD)。0.1未満でバランス良好。",
+"操作変数":"治療の受けやすさは変えるが結果には直接効かない第3の変数(IV)。",
+"差分の差分":"介入前後の変化を介入群と対照群で引き算し、時間トレンドを相殺する方法(DiD)。",
+"中間因子":"曝露→これ→結果と、効果が通り道にしている変数。総合効果を見るなら調整しない。",
+"交絡因子":"曝露と結果の共通原因。調整して裏口の経路を閉じる。",
+"コライダー":"曝露と結果の両方から矢印が刺さる合流点。調整するとない関連が生まれる。",
+"バークソン・バイアス":"入院など特定条件で絞った集団で生じる、見かけの関連(選択バイアスの一種)。",
+"生存者バイアス":"生き残った人だけを見ることで生じる偏り。",
+"多重代入":"欠測をもっともらしい値で複数とおり埋め、結果を平均する方法(MICE)。",
+"Rubinの規則":"多重代入の結果を、埋め方によるばらつきも足し込んで統合する規則。",
+"楽観":"同じデータで作り成績をつけると性能が良く出すぎる、予測モデルの落とし穴(optimism)。",
+"正則化":"係数を0方向に縮めて過剰適合を抑える手法。LASSO・Ridge・Elastic Netなど。",
+"ブートストラップ":"データを復元抽出して何度も作り直し、楽観の量などを見積もる方法。",
+"多重性":"たくさん検定するほど偽陽性が積み上がる問題。",
+"FWER":"検定全体で1つでも間違える確率。BonferroniやHolmなどで抑える。",
+"FDR":"見つけた中の間違いの割合。Benjamini-Hochbergで抑える。大量検定向き。",
+"推定対象":"解析手法を選ぶ前に明示する、何を推定したいのかの対象(estimand)。",
+"E-value":"見えた関連を未測定交絡だけで説明するのに必要な、交絡の強さ。結果の頑健性の指標。",
+"媒介分析":"曝露の効果のうち、ある通り道(媒介)を経由する分を切り分ける手法。",
+"反実仮想":"もしこうだったら、を考える因果推論の枠組み。",
+"部分プーリング":"各群の推定で、互いの情報を貸し借りして安定させる中間的なやり方。",
+"縮小":"症例の少ない群の推定値が全体平均へ適度に引き寄せられて安定すること(shrinkage)。",
+"信用区間":"ベイズの区間。真の値が95%の確率でこの中にある、とそのまま言える。",
+"弱情報事前":"結論にほとんど影響しない、控えめな事前分布。",
+"二重頑健":"結果モデルと治療モデルの両方を作り、どちらか片方が正しければ偏らない性質。",
+"クロスフィッティング":"データを分けて学習・推定し、機械学習使用時の過剰適合を避ける方法。",
+"ネットワークメタ解析":"直接比較のない治療を共通の相手を介して間接的に比べ、順位づける手法(NMA)。",
+"推移性":"橋渡しに使う試験どうしで患者背景が十分に似ていること。NMAの前提。",
+"一致性":"同じ比較で直接の証拠と間接の証拠が大きく食い違わないこと。NMAの前提。",
+"過剰適合":"データに合わせすぎて、別データで当たらなくなる状態(過学習)。",
+"Brierスコア":"予測確率の正確さを測る指標。小さいほど良い。",
+"データ漏洩":"本来使えない情報が学習に混入し、性能が偽って高く出ること(leakage)。",
+"弱操作変数":"操作変数が曝露をわずかしか動かさず、推定がひどく偏る状態。第1段階F<10が目安。",
+"除外制約":"操作変数が曝露を通じてのみ結果に効く(直接の近道がない)という、検証できない条件。",
+"アルファ消費関数":"全体の有意水準を予算とみなし、中間解析のたびに少しずつ取り崩す仕組み。",
+"群逐次デザイン":"あらかじめ決めた時点で中間解析し、早期に有効中止や無益中止を判断する設計。",
+"中間解析":"試験の途中で、あらかじめ決めた時点で結果を覗くこと。多重性に注意。",
+"反応適応型ランダム化":"試験が進むほど成績の良い腕に多く割り付ける、ベイズ流の適応(RAR)。",
+"回帰不連続デザイン":"連続した割付変数がしきい値を超えるか否かで処置が機械的に切り替わる状況を使い、境界の段差から効果を推定する準実験(RDD)。",
+"ランニング変数":"処置の有無を決めるしきい値の対象となる連続変数(割付変数)。例:LDL値や年齢。",
+"分割時系列":"介入の前後で時系列の水準と傾きの変化を回帰で捉える準実験デザイン(ITS)。",
+"局所処置効果":"カットオフ近傍でのみ妥当な効果。集団全体には一般化しにくい(RDDが推定する量)。",
+"測定誤差":"曝露や共変量が真値からずれて測られること。推定を系統的に歪める。",
+"回帰希釈":"非微分な測定誤差により、連続曝露の効果がゼロ方向に薄まる現象。",
+"非微分誤差":"曝露の真値や結果と無関係に生じる測定誤差。効果を希釈する向きに働く。",
+"シミュレーション研究":"真のモデルを仮定して仮想データを多数生成し、解析の作動特性を調べる方法。",
+"作動特性":"ある解析・設計の振る舞い。検出力・第一種過誤・バイアス・被覆確率など。",
+"モンテカルロ誤差":"シミュレーションの反復が有限であることに由来する、集計値そのもののばらつき。"
+};
+function gloss(w){for(var k in GLOSS){if(w.indexOf(k)>=0)return GLOSS[k];}return null;}
+
+/* ===== markup ===== */
+function md(t){return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\*\*([^*]+)\*\*/g,function(m,w){var d=gloss(w);return d?'<span class="kw gl" data-d="'+d+'">'+w+'</span>':'<strong class="kw">'+w+'</strong>';}).replace(/\n/g,"<br>");}
+function block(b){
+ if(b.p)return `<p>${md(b.p)}</p>`;
+ if(b.box)return `<div class="box" style="border-left-color:${b.box.c||TL}"><div class="bt" style="color:${b.box.c||TL}">${md(b.box.t)}</div><div class="bb">${md(b.box.b)}</div></div>`;
+ if(b.fig)return `<figure><div class="figbox">${FIGS[b.fig.html]?FIGS[b.fig.html]():''}</div><figcaption><b>図${b.fig.n}.</b> ${md(b.fig.cap)}</figcaption></figure>`;
+ if(b.formula)return `<div class="formula">${b.formula}</div>`;
+ if(b.eg)return `<div class="eg"><div class="et">論文での見え方・報告例</div>${md(b.eg)}</div>`;
+ if(b.rows)return `<div class="rows">`+b.rows.map(r=>`<div><span class="k">${r[0]}</span><span>${md(r[1])}</span></div>`).join("")+`</div>`;
+ return "";
+}
+
+/* ===== content ===== */
+const CH=[
+{t:"1. 一般化線形モデル(GLM)という地図",b:[
+ {p:"上級編は、ばらばらに見える回帰たちを「**一般化線形モデル(GLM)**」という1枚の地図の上に並べることから始めます。GLMとは、線形回帰・ロジスティック回帰・Poisson回帰などを、同じ設計図のバリエーションとしてまとめた枠組みのことです。最初にこの地図を持っておくと、後の各手法が「同じ仕組みのどこを変えただけか」として見えてきます。"},
+ {p:"GLMは3つの部品でできています。①アウトカムが従う確率分布(連続なら正規、二値なら二項、件数ならPoisson)、②**線形予測子** η＝β₀+β₁x₁+…(共変量に重みβを掛けて足したもの。要するに「効果の足し算の本体」)、③その2つを橋渡しする**リンク関数** g。モデルは『g(アウトカムの期待値)＝η』という1行で表せます。"},
+ {formula:"線形回帰:     E[Y] = Xβ           (恒等リンク)\nロジスティック: logit(p) = log{p/(1-p)} = Xβ\nPoisson回帰:   log(λ) = Xβ"},
+ {fig:{n:"1-1",cap:"GLMの地図。同じ設計図『g(E[Y])=Xβ』から、分布とリンク関数の選び方しだいで主要な回帰が生まれます。リンクを選んだ瞬間に、係数の読み方(差か・倍率か)も決まります。",html:"fGLMmap"}},
+ {p:"ポイントは、**リンク関数を選ぶと、係数の意味も自動的に決まる**ことです。恒等リンク(そのまま)なら係数は「1単位増えると平均がいくつ動くか」。ロジット(対数オッズ)なら、係数を指数化 exp(β) すると**オッズ比**。対数リンクなら exp(β) が**リスク比や率比**。言い換えると、係数はいつも『リンクした尺度の上では足し算の効果』で、元の尺度に戻すと『掛け算の効果(◯倍)』に変わる——この対応が全手法で共通します。"},
+ {box:{t:"なぜ「枠組み」で捉えると得か",c:G,b:"手法ごとにバラバラに覚えると、交互作用・過分散(ばらつきが想定より大きいこと)・頑健標準誤差といった共通の論点を、そのたびに別物として学び直すことになります。GLMの地図があれば「これはリンクが違うだけ」「これは分散構造を足しただけ」と整理でき、初見の手法にも勘が働きます。"}},
+ {p:"以降の章では、この地図上の主要な目的地(ロジスティック・Cox・混合モデルなど)を、『解釈・前提・診断(うまくいっているかの確認)・報告』の4点セットで順に巡ります。"}
+]},
+{t:"2. ロジスティック回帰の実践",b:[
+ {p:"アウトカムが「発症あり/なし」のような二値のとき、最もよく使うのがロジスティック回帰です。基礎編では「オッズ比が出る」とだけ触れましたが、ここでは実務で問われる4点——**解釈・モデルの組み立て・隠れた前提・性能評価**——を順に押さえます。"},
+ {formula:"logit(p) = β₀ + β₁x₁ + β₂x₂ + …\nオッズ比 OR = exp(β)    95%信頼区間 = exp(β ± 1.96 × 標準誤差)"},
+ {fig:{n:"2-1",cap:"ロジスティック関数。直線では確率が0〜1からはみ出してしまうので、S字に押し込めます。効果は線形予測子ηの上では足し算でも、確率に直すとS字なので非線形になります。",html:"fLogit"}},
+ {p:"**まず係数の読み方**。連続変数のβは「その変数が1つ増えたときの対数オッズの増分」で、指数化した exp(β) が**調整オッズ比(adjusted OR)**——『他の変数を一定に保ったうえでの倍率』です。ここで実務上いちばん大事なのが、論文表のORが**単変量(crude＝何も調整していない)か、多変量調整済み(adjusted)か**の区別。両者は別の問いの答えで、取り違えると結論を誤読します。"},
+ {box:{t:"見落としがちな前提:連続変数の「直線性」",c:R,b:"ロジスティック回帰は『対数オッズが共変量に対して一直線に増える』と暗黙に仮定しています。ところが年齢やBMIは、低すぎても高すぎてもリスクが上がるJ型・U型のことが多い。生のまま入れるとこの曲がりを見落とします。対策が**制限付き3次スプライン**——区間ごとに曲線をつなぎ、なめらかな非線形を許す手法です。論文の「age was modeled with restricted cubic splines」はこの処理を指します。"}},
+ {fig:{n:"2-2",cap:"真の関係がJ型(青)なのに直線(赤破線)を当てると、両端での効果を取りこぼします。だから「直線で十分か」を一度疑い、必要ならスプラインで曲げます。",html:"fSpline"}},
+ {p:"**モデルの組み立ては『目的』で分かれます**。(a)交絡を調整して特定の曝露の効果を知りたい(説明型)のか、(b)個人のリスクを当てたい(予測型)のか。説明型なら、調整する変数は事前の知識(第7章のDAG)で選ぶのが筋で、p値で機械的に選ぶ(ステップワイズ)のは避けます。予測型なら、後述の正則化と内部検証が主役になります。"},
+ {box:{t:"性能は2つの軸で測る",c:TL,b:"**判別(discrimination)**＝高リスクの人と低リスクの人を、ちゃんと順序づけられるか。指標は**C統計量(ROC曲線の下の面積AUCと同じ)**。0.5で当てずっぽう、1.0で完璧。\n**較正(calibration)**＝『20%』と予測した人たちで本当に約20%が発症するか、という確率そのものの正確さ。\nこの2つは別物で、判別が高くても較正が崩れていれば臨床では危険です。"}},
+ {fig:{n:"2-3",cap:"較正プロット。横が予測確率、縦が実際の発症割合。対角線がぴったり一致(理想)。曲線が対角線から系統的にずれていれば、確率が偏って出ている合図です。",html:"fCalib"}},
+ {eg:"「多変量ロジスティック回帰で年齢・性別・併存疾患を調整したところ、曝露の調整オッズ比は 1.84(95%CI 1.21–2.79, p=0.004)。年齢は制限付き3次スプラインでモデル化。判別能はC統計量0.78、較正はHosmer-Lemeshow検定 p=0.42 で良好だった。」"},
+ {box:{t:"つまずきやすい点",c:R,b:"・**事象数が足りない**:イベント1件あたり投入変数は最大でも約0.1個(目安EPV≥10)。これを割ると係数が暴れ、過剰適合します。\n・**完全分離**:あるグループで全員がイベント(または全員非イベント)だと、係数が無限大に発散。**Firthの罰則付き推定**などで回避。\n・**ORをリスク比と読む誤り**:アウトカムが稀でない限り、ORはリスク比より1から離れて(大げさに)出ます。"}}
+]},
+{t:"3. 交互作用と効果修飾",b:[
+ {p:"「この薬は若い人には効くが高齢者では効かない」——治療の効きめが第3の変数(ここでは年齢)によって変わる現象を**効果修飾(effect modification)**と呼び、それをモデルで表す掛け算の項を**交互作用項**と言います。よくサブグループ解析と混同されますが、実は別物です。"},
+ {formula:"logit(p) = β₀ + β₁・treat + β₂・age + β₃・(treat × age)\n→ treatの効果は β₁ + β₃・age となり、ageによって変わる(β₃が交互作用)"},
+ {box:{t:"「どの物差しで見るか」で結論が変わる",c:GD,b:"交互作用は、**掛け算の物差し(乗法スケール)**で見るか、**足し算の物差し(加法スケール)**で見るかで結論が変わりえます。ロジスティックやCoxの係数が見ているのは比(オッズ比・ハザード比)どうしの掛け算スケール。一方、臨床・公衆衛生で本当に効くのは絶対リスクの差(加法スケール)であることが多い。乗法では交互作用なしでも、加法では有りうる(逆もある)ので、必要なら絶対差の交互作用(**RERI**などの指標)も併せて報告します。"}},
+ {fig:{n:"3-1",cap:"サブグループのフォレストプロット。全体(濃色)に比べ若年層は効果が大きく、高齢層は1.0をまたぐ。ただし各サブグループは人数が減って信頼区間が広く、これだけでは効果修飾の証拠になりません。",html:"fForestSub"}},
+ {box:{t:"サブグループを扱う時の規律",c:R,b:"・各群を別々に検定して『片方だけ有意』は効果修飾の証拠にならない。**交互作用項そのもの**を検定する(p for interaction)。\n・サブグループは事前に決め、数を絞る(増やすほど偽陽性。第10章)。\n・交互作用の検出には、主効果よりずっと多い人数が要る(たいてい力不足)。\n・結果は『探索的』と明記し、確証は別研究に委ねる。"}},
+ {eg:"「治療×年齢の交互作用項は有意でなかった(p for interaction = 0.18)。事前指定したサブグループ解析の結果は、探索的なものとして提示する。」"}
+]},
+{t:"4. 生存解析の実践 ― Coxと比例ハザード",b:[
+ {p:"『イベントが起きるまでの時間』を扱うCox比例ハザードモデルは、観察研究・臨床試験の主力です。基礎編のKM曲線・ログランク検定から一歩進み、ここでは**前提の確認・時間で変わる曝露・競合リスク**を扱います。"},
+ {formula:"h(t|X) = h₀(t) × exp(β₁x₁ + …)\nハザード比 HR = exp(β)   ※h₀(t)=基準ハザードは形を仮定しない"},
+ {p:"ハザードとは『今この瞬間にイベントが起きる勢い』。Coxの賢さは、その時間的な形(基準ハザード h₀(t))を具体的に仮定せずに、群間の比であるハザード比だけを取り出せる点です(だから半分だけ仮定する=セミパラメトリックと呼ばれます)。その代わり、『その比が観察期間を通じてほぼ一定』という**比例ハザード(PH)仮定**に寄りかかります。"},
+ {box:{t:"PH仮定が成り立っているかの確認",c:TL,b:"・**Schoenfeld残差**(各イベント時点での「ずれ」)を時間に対して並べ、傾きが0から外れる(検定でp小)ならPH違反のサイン。\n・**log(-log 生存率) を log(時間) に対して描く**と、2群の線が平行ならPHと整合的(図4-1)。交差・収束するなら違反。\n違反していたら、時間で層別化する／時間依存の項を入れる／期間を区切って区間ごとにHRを出す、などで対応します。"}},
+ {fig:{n:"4-1",cap:"log(-log 生存率)対log時間のプロット。2本が平行ならPH仮定と矛盾しません。もし交差していたら、1つのHRで効果をまとめることに無理がある合図です。",html:"fPH"}},
+ {p:"**時間で変わる曝露(時間依存共変量)**にも注意。移植や治療変更のように、追跡の途中で曝露状態が切り替わる場合、それを最初から固定値として扱うと**不死時間バイアス**が生じます。これは『治療を受けた人は、受けるまで必ず生きていた』という当たり前の事実を見落とし、治療を実際より良く見せてしまう偏り。時点ごとに状態を更新する時間依存Coxで防ぎます。"},
+ {box:{t:"競合リスク",c:R,b:"関心のあるイベント(例:再発)の前に、それを妨げる別の結末(例:他病死)が起こりうる状況を**競合リスク**と言います。このとき通常のKMは累積発生を過大評価します。**累積発生関数(CIF)**と**Fine-Grayモデル(部分分布ハザード)**で扱うのが標準。『病因を知りたい』のか『発生を予測したい』のかで、原因別ハザードとどちらを報告するか選びます。"}},
+ {eg:"「多変量Cox回帰の調整ハザード比は 0.71(95%CI 0.58–0.87)。Schoenfeld残差に基づく検定で比例ハザード性に明らかな違反はなかった(p=0.34)。競合する非関連死を考慮し、Fine-Grayモデルでも感度分析を行った。」"}
+]},
+{t:"5. 反復測定・階層データ ― 混合モデルとGEE",b:[
+ {p:"同じ患者を何度も測ったデータ、あるいは『患者が病院に属する』ような入れ子のデータ。これらは観測どうしが似通っていて独立ではありません。独立とみなして普通の回帰にかけると、標準誤差(推定のあやふやさ)を小さく見積もりすぎ、偽の有意を量産します。対処の二大潮流が**混合効果モデル**と**GEE**です。"},
+ {formula:"混合モデル例:  Yij = β₀ + β₁xij + u0i + u1i・tij + εij\n  u0i=個人ごとの切片のずれ(ランダム切片)、u1i=傾きのずれ(ランダム傾き)"},
+ {fig:{n:"5-1",cap:"混合効果モデルのイメージ。細い線は患者ごとの経過(出発点も傾きも少しずつ違う)、太線が全員に共通する固定効果。個人差を「ばらつき」としてモデルに組み込むことで、相関したデータを正しく扱えます。",html:"fMixed"}},
+ {p:"**混合効果モデル**は、全員に共通する効果(固定効果β)に加え、個人ごとのクセ(ランダム効果＝切片や傾きのばらつき)を式に組み込み、『似ている』という相関構造を正面から表現します。個人差そのものに関心がある、受診回数が人によって不揃い、欠測がある——そんな縦断データに強い手法です。係数は『同じ個人の中で曝露が変わったときの効果(条件付き)』という解釈になります。"},
+ {p:"**GEE(一般化推定方程式)**は逆に、個人内の相関を『邪魔者』として**作業相関行列**でざっくり吸収し、**集団全体の平均的な効果(周辺効果)**を頑健に取り出します。解釈は『集団全体で曝露が変わったときの平均効果』。混合モデルの『個人内の効果』とは問いが違い、非線形リンクでは数値も一致しません。"},
+ {box:{t:"どちらを選ぶか",c:TL,b:"・**個人差・予測・不規則な測定**が主題 → 混合効果モデル(条件付き解釈)。\n・**集団平均の効果**を相関構造に煩わされず頑健に出したい → GEE(周辺解釈)。\n判断材料に**級内相関(ICC)**——『同じ人/同じ施設のデータがどれだけ似ているか』の指標——を見ます。なおクラスター(施設など)の数が少ないと、GEEの頑健標準誤差は不安定になります。"}},
+ {eg:"「経時的なMayoスコアを、固定効果(治療・時間・治療×時間)とランダム切片・ランダム傾きを持つ線形混合モデルで解析した。欠測はMARを仮定し、最尤推定を用いた。」"}
+]},
+{t:"6. 交絡調整の高度な手法",b:[
+ {p:"多変量回帰で交絡を調整するのが基本(第1–2章)ですが、観察研究で因果に迫るには、ほかにも強力な道具があります。共通するねらいは『**くじ引き(ランダム化)に近い状況を、計算で疑似的に作り出す**』ことです。"},
+ {box:{t:"傾向スコア(PS)",c:TL,b:"たくさんの背景変数から『この人が治療を受ける確率』を1つの点数(0〜1)に要約したもの。使い方は ①**マッチング**(似たPSの治療群・対照群をペアにする)、②**IPTW(逆確率重み付け)**(受けにくい人ほど重く数えて、偏りのない擬似集団を作る)、③層別化、④共変量として投入。回帰より優れる点は、**アウトカムを見る前に**両群のバランスを点検・調整できること、そして変数が多く事象が少ない場面に強いことです。"}},
+ {fig:{n:"6-1",cap:"両群の傾向スコアの分布。重なっている範囲(共通サポート)でしか公平な比較はできません。重なりの乏しい両端は『比べる相手がいない』ので、無理に推定すると不安定になります。",html:"fOverlap"}},
+ {p:"PS法では、調整がうまくいったかを**標準化差(SMD)**——両群の背景がどれだけずれているかの指標——で確認します。慣例として|SMD|＜0.1ならバランス良好。ここでp値を使わずSMDで見るのが現代の作法です(人数が多いと小さな差でもp値が出てしまうため)。"},
+ {box:{t:"操作変数と差分の差分",c:GD,b:"**操作変数(IV)**:『治療の受けやすさは変えるが、結果には直接は効かない』第3の変数(例:遺伝子型を使うメンデル無作為化、地域差)を“てこ”にして、**測定できていない交絡**まで乗り越えようとする方法。ただし『結果に直接効かない』という条件(除外制約)は証明できず、信じるしかない弱点があります。\n**差分の差分(DiD)**:介入の前後の変化を、介入群と対照群で引き算し、世の中全体の時間変化を相殺。『両群は介入がなければ同じように推移したはず(平行トレンド)』という仮定に依存します。"}},
+ {box:{t:"共通の限界",c:R,b:"PSも回帰も、結局**測定された交絡しか調整できません**(IVは例外を狙うが別の強い仮定が要る)。測り忘れた要因による残差交絡は常に残るので、後述のE-value(第10章)などで『どれくらい頑健か』を示すのが望ましい姿勢です。"}},
+ {eg:"「IPTWで重み付け後、全共変量の標準化差は0.1未満となりバランスは良好。重み付きCoxによる平均処置効果(ATE)のハザード比は 0.76(95%CI 0.61–0.95)であった。」"}
+]},
+{t:"7. 因果ダイアグラム(DAG)と変数選択",b:[
+ {p:"『どの変数を調整に入れるべきか』は、統計の計算ではなく**因果の構造についての知識**で決まります。それを矢印の図にしたのが**DAG(有向非巡回グラフ)**。p値や予測精度を頼りに調整変数を選ぶ習慣は、しばしば“調整してはいけないもの”まで入れてしまい、かえって結果を歪めます。"},
+ {fig:{n:"7-1",cap:"DAGの例。Cは交絡(共通原因)→調整する。Mは中間因子(E→M→O)→総合効果を見たいなら調整しない。Kは合流点/コライダー(E→K←O)→調整すると“ないはずの関連”が生まれる。",html:"fDAG"}},
+ {box:{t:"調整の三原則",c:TL,b:"・**交絡因子(曝露と結果の共通原因)** → 調整する。これで裏口の経路(バックドア)を閉じる。\n・**中間因子(曝露→これ→結果と、効果が通り道にしている変数)** → 総合効果を見たいなら調整しない(調整すると効果の一部を消す)。\n・**合流点=コライダー(曝露と結果の両方から矢印が刺さる点)とその子孫** → 絶対に調整しない。調整すると、本来ない関連を人工的に作ってしまう。"}},
+ {p:"この『コライダーを誤って調整する』が、**選択バイアスの正体**でもあります。入院患者だけ・生存者だけ・検査を受けた人だけ、といった『ある条件で絞り込んだ集団』での解析は、知らないうちにコライダーで層別化していることが多く、見かけの関連(**バークソン・バイアス**や**生存者バイアス**)を生みます。"},
+ {box:{t:"実務での使い方",c:GD,b:"解析前にDAGを描き、曝露→結果の裏口経路を見つけ、それを閉じる『最小限の十分な調整集合』を選ぶ。そして、回帰のTable 2に並ぶ共変量の係数を**全部まとめて因果効果と読まない**(Table 2 fallacy)。同じ表の中に、交絡として入れた変数と中間因子が混ざっており、係数の意味は変数ごとに違うからです。"}}
+]},
+{t:"8. 欠測データの扱い",b:[
+ {p:"欠測は『あるか/ないか』よりも『**なぜ欠けたか**』が本質です。その理由(メカニズム)の種類によって、許される対処法が変わります。"},
+ {rows:[["MCAR(完全にランダム)","欠測が他の何とも無関係。欠測者を捨てる完全例解析でも偏らない(ただし人数が減り力は落ちる)。"],["MAR(観測値で説明可)","欠測の起こりやすさが、観測されている他の変数で説明できる。多重代入や最尤法が有効。"],["MNAR(欠測値自体に依存)","欠けた値そのものが欠測理由(例:重症だから来院せず値が不明)。標準手法でも偏りが残り、感度分析が必須。"]]},
+ {fig:{n:"8-1",cap:"欠測の3つのメカニズム。「何が欠測を引き起こしているか」で許される対処が変わります。MNARでは欠けた値そのものが原因(破線=観測できない)なので、どんな手法でも仮定なしには直せません。",html:"fMissMech"}},
+ {box:{t:"多重代入(MICE)",c:TL,b:"MARのもとでの標準的な対処。手順は ①欠測を『もっともらしい値』で複数とおり(例:m=20〜50)埋めた完成データを作り、②それぞれで同じ解析を行い、③**Rubinの規則**で結果を合体(このとき『埋め方による結果のばらつき』も不確実性に足し込む)。1とおりだけ埋める単一代入(平均値で埋める・LOCFなど)は、あやふやさを小さく見せてしまい偏りも生むので、今は非推奨です。"}},
+ {p:"忘れてはいけないのは、**完全例解析(欠測者を捨てる)が妥当かどうかも、メカニズム次第**ということ。欠測が結果に関係していれば(MNAR寄りなら)、完全例解析もMICEも偏りえます。万能薬はないので、**わざとMNARを仮定した感度分析**(δ調整やパターン混合モデルで『もし欠測者が違っていたら』を試す)で、結論がぐらつかないかを確認します。"},
+ {eg:"「主要解析は連鎖方程式による多重代入(m=40)を用い、Rubinの規則で統合した。欠測がMNARである可能性を考え、δ法による感度分析でも結論は変わらなかった。」"}
+]},
+{t:"9. モデル構築・検証と過剰適合",b:[
+ {p:"予測モデルの章です。合言葉は**楽観(optimism)**——『同じデータで作って、同じデータで成績をつける』と、見かけの性能は必ず良く出すぎる、という落とし穴のことです。"},
+ {fig:{n:"9-1",cap:"モデルを複雑にするほど、作成データ上の見かけの誤差(青)は下がり続けますが、別データでの誤差(赤)はある点から増えます。この青と赤の差が『楽観』。複雑にしすぎないことが大切です。",html:"fOverfit"}},
+ {box:{t:"変数選択の落とし穴",c:R,b:"**予測モデルでは、p値による段階的選択(ステップワイズ)は推奨されません**。選ばれた変数のp値・係数・信頼区間はすべて偏り、別データで再現しないからです。代わりに ①事前知識で選ぶ、②**正則化(LASSO・Ridge・Elastic Net)**——係数を0方向に縮めて過剰適合を抑える手法。とくにLASSOは不要な係数を0にして変数選択も同時に行う——③全変数を入れてペナルティをかける、などを使います。"}},
+ {box:{t:"内部検証と外部検証",c:TL,b:"・**内部検証**:同じ集団内で楽観の量を見積もって性能を割り引く。**ブートストラップ**(データを復元抽出して何度も作り直す)が推奨。単純な train/test 分割は小標本では不安定。\n・**外部検証**:別の時期・施設・集団で試す。これがあって初めて『他でも通用する』と言える。\n報告は予測モデル用の指針 **TRIPOD** に沿うのが標準です。"}},
+ {p:"性能は3つの面に分けて報告します。**判別**(C統計量＝順序づけの力)、**較正**(較正勾配・切片や較正プロット＝確率の正確さ)、そして可能なら**臨床的な正味の利益**(決定曲線分析DCA＝『この予測を使うと実際どれだけ得か』)。AUCが同じでも、較正や正味利益はまるで違うことがあります。"},
+ {eg:"「ペナルティ付きロジスティック回帰(LASSO)でモデルを構築し、1000回のブートストラップで楽観を補正したC統計量は0.81、較正勾配は0.93。外部コホートでの検証でもC統計量0.77を維持した(TRIPOD準拠)。」"}
+]},
+{t:"10. 多重性・推定対象・報告",b:[
+ {p:"この章は、解析全体を貫く“作法”です。**自分が何を推定しているのか(推定対象)**をはっきりさせ、**たくさん比べることの弊害(多重性)**を抑え、**効果の大きさとあやふやさ**を中心に報告する——この3点が研究の信頼性を支えます。"},
+ {fig:{n:"10-1",cap:"多重性の正体。1回あたりα=0.05でも、独立な検定を重ねると「少なくとも1つは偽陽性」の確率は1−0.95ᵏで急上昇し、14回で5割を超えます。だから検定の数そのものを設計段階で管理します。",html:"fFWER"}},
+ {box:{t:"多重性の制御",c:TL,b:"検定を増やすほど偽陽性が積み上がる問題への対処は2系統。\n**FWER(1つでも間違える確率)を抑える**:Bonferroni(単純だが保守的)、Holm(段階的で検出力が高い)、ゲートキーピング(主要→副次の順に検定して関所を作る)。\n**FDR(見つけた中の間違いの割合)を抑える**:Benjamini-Hochberg。遺伝子・オミクスのような大量検定向き。\n根本対策は、主要評価項目と確証的な比較を**事前登録**で先に固定してしまうこと。"}},
+ {box:{t:"推定対象(estimand)を先に決める",c:GD,b:"近年の臨床試験指針(ICH E9(R1))は、解析手法を選ぶ前に『**そもそも何を推定したいのか**』を明示せよ、と求めます。具体的には、対象集団・エンドポイント・要約指標に加え、**中間事象(治療中止・救済治療・死亡など、途中で起きて解釈を揺らす出来事)をどう扱うか**を宣言します。同じデータでも、この扱い(治療方針のまま見るか、起きなかったと仮定するか、複合的に扱うか)で結論が変わります。ITTかPPか、という古典的議論もこの枠で整理できます。"}},
+ {box:{t:"残差交絡への“どれくらい頑健か”指標 ― E-value",c:GD,b:"観察研究で見えた関連が、もし未測定の交絡だけで説明されてしまうとしたら、その隠れた交絡は曝露・結果の両方とどれほど強く結びついていなければならないか——それを表すのが**E-value**。値が大きいほど『よほど強い未知の交絡がない限り、この結論はひっくり返らない』と主張でき、結果の頑健性の物差しになります。"}},
+ {box:{t:"報告の原則",c:R,b:"・**点推定値＋95%信頼区間**を主役に。p値だけ・『有意/非有意』の二分は避ける。\n・効果の**大きさと臨床的な意味**を必ず論じる。\n・指針に準拠する:観察研究は**STROBE**、RCTは**CONSORT**、予測モデルは**TRIPOD**、診断研究は**STARD**。\n・統計解析計画書(SAP)と事前登録で、探索的な分析と確証的な分析をはっきり分ける。"}},
+ {p:"高度な手法ほど、結果の見栄えは作り込めてしまいます。だからこそ『推定対象を明示し、前提を確かめ、不確実性を正直に示し、別データで再現する』という地味な規律が、技法の華やかさより大切です。これは基礎編の結論とまったく地続きで、以降の章すべての土台になります。"}
+]}
+,
+{t:"11. 媒介分析 ― 効果の「通り道」を分解する",b:[
+ {p:"第7章で「中間因子(媒介変数)は調整するな」と述べました。総合効果を見たいときはその通りです。でも研究では逆に『曝露の効果のうち、どれだけがその通り道(媒介)を経由しているのか』を知りたいことがあります。たとえば『減塩が脳卒中を減らす効果のうち、何割が“血圧低下”を介したものか』。これを定量化するのが**媒介分析**です。"},
+ {formula:"総効果 = 直接効果 + 間接効果\n  直接効果:E が M を通さずに O に及ぼす分\n  間接効果:E→M→O の通り道を経由する分"},
+ {fig:{n:"11-1",cap:"曝露E・媒介M・結果Oの関係。E→M→O が間接効果(緑)、E→O が直接効果(点線)。媒介分析はこの2つに効果を切り分けます。",html:"fMediate"}},
+ {p:"古典的には『Mを入れる前後で係数がどれだけ減るか』で間接効果を測りました(Baron–Kenny法)。ただしこれは効果がきれいに足し算で分かれることを前提とし、**曝露と媒介の交互作用**(EとMが組み合わさって効く)があると破綻します。現代は**反実仮想(もしこうだったら、を考える因果の枠組み)**に基づく**因果媒介分析**が標準で、自然直接効果・自然間接効果として、交互作用があっても矛盾なく分解できます。"},
+ {box:{t:"いちばんの落とし穴",c:R,b:"媒介分析が成り立つには、『**媒介Mと結果Oの間に、調整されていない交絡がない**』という強い条件が要ります。曝露はランダム化されていても、M→Oの関係は観察的なので、ここに隠れた交絡があると間接効果は簡単に偏ります。また、Mだと思っていたものが実は『EとOの共通原因(=交絡)』だった、という取り違えも致命的です。"}},
+ {eg:"「因果媒介分析の結果、降圧の総効果のうち媒介(血圧低下)を介した割合(proportion mediated)は約62%と推定された。曝露–媒介交互作用を許容したモデルを用い、媒介–結果交絡について感度分析を行った。」"}
+]}
+,
+{t:"12. ベイズ階層モデル",b:[
+ {p:"これまでの解析の多く(頻度論)は『データがどれくらい珍しいか』を問いました。**ベイズ**は『手元の見込み(事前分布)を、データ(尤度)で更新して、更新後の見込み(事後分布)を得る』という、より直感に近い枠組みです。基礎編のベイズの考え方を、推定の道具にまで広げたものと考えてください。"},
+ {fig:{n:"12-1",cap:"事前分布(灰の破線:解析前の見込み)に、データの尤度(金:データが示す情報)を掛け合わせると、事後分布(青:更新後の結論)が得られます。事後はふつう両者の“間”に来て、幅も狭まります。",html:"fBayesPost"}},
+ {box:{t:"事前分布(prior)の役割",c:GD,b:"事前分布とは『データを見る前に持っている、パラメータについての見込み』。先行研究があれば反映でき、なければ結論にほとんど影響しない**弱情報事前**を置きます。事前の影響が結論を左右しないかは**感度分析**(別の事前で結果が変わらないか)で確認するのが作法です。"}},
+ {p:"ベイズの真価が出るのが**階層モデル(マルチレベルモデル)**です。多施設・多サブグループのデータで、各群を『完全に別物として推定(no pooling、少数例の群が暴れる)』するのでも『全部ひとまとめ(complete pooling、群差を消す)』のでもなく、その中間で**お互いの情報を貸し借り(部分プーリング)**します。結果として、症例の少ない群の推定値が全体平均へ適度に引き寄せられて安定する——これを**縮小(shrinkage)**と呼びます。極端な値に振り回されにくくなるのが利点です。"},
+ {box:{t:"信用区間と実装",c:TL,b:"ベイズの区間は**信用区間(credible interval)**と呼び、頻度論の信頼区間と違って『真の値が95%の確率でこの中にある』と**そのまま**言えます(解釈が素直)。計算は事後分布を乱数で近似する**MCMC**(マルコフ連鎖モンテカルロ)で行い、StanやR の brms が代表的。収束したかは**R-hat**(1.00付近ならOK)などで確認します。"}},
+ {eg:"「施設をランダム効果としたベイズ階層ロジスティック回帰を用い、弱情報事前(正規分布)を設定。治療効果のオッズ比の事後中央値は0.74(95%信用区間 0.59–0.92)。事前分布を変えた感度分析でも結論は安定していた。」"}
+]}
+,
+{t:"13. 二重頑健推定(AIPW・TMLE)",b:[
+ {p:"観察研究で交絡を調整する道は、大きく2つありました。①**結果モデル**(アウトカムを共変量で回帰する。第2章)と、②**治療モデル**(傾向スコアで治療の受けやすさをモデル化する。第6章)。普通はどちらか一方に賭けますが、選んだモデルの形が間違っていれば結果は偏ります。"},
+ {p:"そこで『**両方**作っておき、どちらか一方さえ正しければ偏らない』という保険をかけるのが**二重頑健(doubly robust)推定**です。代表が**AIPW(補強逆確率重み付け)**と**TMLE(ターゲット最尤推定)**。二つの賭けのうち片方が外れても、もう片方が当たっていれば救われる、という仕組みです。"},
+ {fig:{n:"13-1",cap:"結果モデルと傾向スコア(PS)モデルの正誤の組み合わせ。両方間違えたとき以外は不偏。つまり“どちらか当たればよい”ぶん、誤特定に強くなります。",html:"fDR"}},
+ {box:{t:"機械学習との相性",c:TL,b:"二重頑健推定は、邪魔な部分(結果モデル・PSモデル＝nuisance)を**機械学習(複数手法を束ねるSuperLearnerなど)**で柔軟に推定しつつ、最後に『知りたい効果』へ的を絞って(targeting)補正します。これにより『関係は直線』といった人為的な仮定を緩めつつ、推定値の偏りと信頼区間の妥当性を保ちやすくなります。"}},
+ {box:{t:"注意点",c:R,b:"・**positivity(共通サポート)**は依然必要:どの背景の人にも治療/非治療の両方がそれなりに存在しないと推定できない(第6章の重なりと同じ)。\n・実装と分散推定がやや重い。\n・機械学習を使う場合、過剰適合を避けるため**クロスフィッティング**(データを分けて推定)を併用するのが現代の標準(これをDouble/Debiased ML と呼びます)。"}},
+ {eg:"「平均処置効果をTMLEで推定した。結果モデルと処置モデルはSuperLearner(複数アルゴリズムの加重平均)で学習し、クロスフィッティングを適用。ATEのリスク差は −4.1%(95%CI −6.8〜−1.3)であった。」"}
+]}
+,
+{t:"14. ネットワークメタ解析",b:[
+ {p:"基礎編・第16章のメタ解析は、同じ2つを比べた試験を束ねるものでした。ところが実臨床では『AとB』『BとC』の試験はあるのに『AとC』の直接対決がない、ということが頻繁にあります。そこでBを“橋渡し”にして間接的に比べ、さらに全治療を一つの土俵で同時に比較・順位づけするのが**ネットワークメタ解析(NMA)**です。"},
+ {fig:{n:"14-1",cap:"治療を点、直接比較した試験を線で結んだネットワーク図。C–Dは直接試験がなくても、共通の相手(AやB)を介した点線の経路で間接的に比較できます。",html:"fNetwork"}},
+ {box:{t:"成り立つための前提",c:GD,b:"・**推移性(transitivity)**:橋渡しに使う試験どうしで、患者背景や条件が十分に似ていること(リンゴとミカンを橋にしない)。\n・**一致性(consistency)**:同じ比較について、直接の証拠と間接の証拠が大きく食い違わないこと。食い違い(非一致)がないかを必ず検定・図示します。"}},
+ {p:"NMAでは治療の**順位づけ**もできます(SUCRA や P-score といった指標で『1位らしさ』を数値化)。ただし順位は不確実性を覆い隠しやすく、わずかな差で順位が入れ替わることもあるので、順位だけを鵜呑みにせず、効果推定値と信頼区間、ネットワークのつながり方(どれだけ証拠で支えられているか)を併せて読むのが肝心です。"},
+ {box:{t:"落とし穴",c:R,b:"間接比較は直接比較より証拠として弱く、橋渡しに使う試験の質や異質性に結果が左右されます。『直接比較がないから間接で』は便利ですが、その分だけ慎重に。報告は PRISMA-NMA 等の指針に沿います。"}},
+ {eg:"「12試験・5治療のネットワークメタ解析(ランダム効果)を実施。ループ内の非一致は認めず(p=0.41)、寛解達成について治療XがSUCRA 0.87で最上位と推定されたが、上位3治療の信頼区間は重複していた。」"}
+]}
+,
+{t:"15. 生存・予測のための機械学習",b:[
+ {p:"予測モデル(第9章)の発展として、非線形な関係や変数どうしの複雑な絡み合いを、人が指定せずとも自動で拾う**機械学習**があります。ランダムフォレスト(多数の決定木の多数決)、勾配ブースティング(弱い木を順に足し込む)など。生存時間版の**ランダム生存フォレスト**もあり、打ち切りを扱いながら予測できます。"},
+ {fig:{n:"15-1",cap:"柔軟なモデルほど作成データには良く当たりますが(青)、別データでの誤差(赤)はある点から悪化します。機械学習は表現力が高いぶん、この過剰適合の崖がより深く、検証がいっそう重要になります。",html:"fOverfit"}},
+ {box:{t:"強みと、その代償",c:GD,b:"**強み**:関数形や交互作用を事前に決めなくても、データから自動で捉える。大規模・高次元データで威力。\n**代償**:①**解釈性の低下**(なぜその予測かが見えにくい“ブラックボックス”)、②**過剰適合しやすい**、③小〜中規模データでは、しばしば古典的なロジスティック/Cox回帰に勝てない。派手さに惑わされず、回帰を基準(ベンチマーク)として比較するのが誠実です。"}},
+ {box:{t:"評価と解釈の補助",c:TL,b:"・生存予測の指標:**Harrellのc-index**(順序づけの力、第9章のC統計量の生存版)、時間依存AUC、**Brierスコア**(確率の正確さ)。較正も必ず確認。\n・解釈の補助:**変数重要度**(どの変数が効いたか)、**SHAP値**(各予測に各変数がどれだけ寄与したかを個別に示す)。これらで“ブラックボックス”に少しでも窓を開けます。"}},
+ {box:{t:"見落とされがちな危険",c:R,b:"**データ漏洩(leakage)**:本来使えない未来情報や、検証データの情報が学習に混入すると、性能が偽って高く出ます。前処理を学習データだけで行う、時系列を尊重する、などで防ぎます。**公平性**(特定集団で性能が偏らないか)の点検も、臨床応用では欠かせません。"}},
+ {p:"結局のところ、機械学習でも結論は同じです。**外部検証と較正、そして正直な不確実性の提示**——上級編を通じて繰り返してきたこの規律こそが、手法の新しさより大切です。"}
+]}
+,
+{t:"16. 競合リスクの詳細 ― CIF・原因別・部分分布",b:[
+ {p:"第4章で競合リスク(関心のあるイベントの前に、それを妨げる別の結末が起こりうる状況)に触れました。本章はそこを掘り下げます。がん再発を追っているのに途中で他病死が起きる、移植後の慢性拒絶を見たいのに先に死亡が来る——こうした場面で『どの量を、どう推定し、どう読むか』を整理します。"},
+ {box:{t:"なぜ普通のKMではダメなのか",c:R,b:"Kaplan-Meier法は、競合イベント(例:他病死)を**単なる打ち切り**として扱います。打ち切りの裏には『この人はいずれ関心イベントを起こしえた』という前提がありますが、死亡してしまった人はもう再発しえません。にもかかわらず打ち切り扱いすると、関心イベントの累積発生を**過大評価**してしまいます。これが競合リスク下でKMが破綻する核心です。"}},
+ {p:"正しい要約は**累積発生関数(CIF＝cumulative incidence function)**。これは『時刻tまでに、競合イベントに邪魔されずに、実際に関心イベントが起きた人の割合』です。すべての結末のCIFを足すと、ちょうど『何かが起きた人の総割合』になります(KMの1-生存率のように1を超えてしまうことはありません)。"},
+ {fig:{n:"16-1",cap:"積み上げ式のCIF。下の領域(青)が関心イベント、その上に競合イベント(赤)が積み重なります。競合イベントが多い集団ほど、関心イベントが起こりうる『余地』が削られていきます。",html:"fCIF"}},
+ {box:{t:"2つのハザード ― 原因別 と 部分分布",c:TL,b:"競合リスクでは『ハザード』が2種類に分かれます。\n**原因別ハザード(cause-specific)**:『まだ何も起きていない人』の中で、いま関心イベントが起きる勢い。**病因・メカニズムを問う**のに向きます(その曝露は本当に再発を駆動するのか)。\n**部分分布ハザード(subdistribution, Fine-Gray)**:競合イベントを起こした人も“まだ起きていない人”の集団に留め置いたうえでの勢い。**CIF=絶対リスクを直接モデル化**でき、**予測・予後**に向きます。\nこの2つは別の問いの答えで、係数の符号すら食い違うことがあります。"}},
+ {formula:"原因別Cox:    h_k(t|X) = h_{0k}(t)·exp(Xβ)    (イベント種別kごとに別々に当てる)\nFine-Gray:    部分分布ハザードをモデル化 → 係数exp(β)は『CIFへの効果』として読む"},
+ {p:"使い分けの目安はこうです。**『この因子は再発の生物学的駆動因子か』という病因の問い**なら、関心イベントと競合イベントのそれぞれに原因別Coxを当て、両方を見て解釈します。**『この患者の5年再発確率は何%か』という予測の問い**なら、Fine-Grayで絶対リスク(CIF)を直接出します。論文では両方を併記し、結論が頑健かを示すのが丁寧な作法です。"},
+ {box:{t:"よくある誤り",c:R,b:"・競合リスクがあるのに、関心イベントのKM曲線(1-生存率)を『累積発生』として提示する → 過大評価。\n・Fine-Grayの係数を『ハザード比』としてメカニズムの言葉で語る → 部分分布ハザードは病因の解釈になじまない。\n・競合イベントのCIFを報告し忘れる → 全体像が見えない。関心・競合の双方のCIFを示すのが基本。"}},
+ {eg:"「再発を関心イベント、非再発死亡を競合イベントとして解析した。原因別Cox回帰では曝露の調整ハザード比は1.62(95%CI 1.15–2.28)。絶対リスクの観点からFine-Grayモデルでも検討し、5年累積再発率は曝露群28.4%・対照群18.1%であった。競合する死亡のCIFも併せて図示した。」"}
+]}
+,
+{t:"17. 操作変数法と弱操作変数",b:[
+ {p:"第6章で操作変数(IV)に少し触れました。観察研究で測り忘れた交絡(未測定交絡)まで乗り越えようとする、野心的な手法です。本章ではその仕組みと、いちばん怖い落とし穴である『弱い操作変数』を扱います。"},
+ {p:"IVの発想はこうです。治療を受けるかどうかは、健康度・重症度など測れない要因(未測定交絡U)に汚染されています。そこで、**治療の受けやすさは動かすが、結果には直接は効かない**第3の変数Z(操作変数)を“てこ”として使い、Zによって生じた治療の差だけを取り出して効果を推定します。Zが本当にくじ引きのように振る舞えば、Uの影響を迂回できます。"},
+ {fig:{n:"17-1",cap:"IVの構造。Z→X→Y の経路だけを使います。成立には『Z→Y の直接効果(点線)が無い(除外制約)』『ZがXを十分に動かす(関連性)』『ZとUが無関係』の3条件が要ります。",html:"fWeakIV"}},
+ {box:{t:"成立の3条件",c:TL,b:"①**関連性(relevance)**:ZがXを実際に、しかも十分強く動かす。これは**データで検証できる**唯一の条件。\n②**除外制約(exclusion restriction)**:ZはXを通じてのみYに効き、直接の近道を持たない。**検証不能**で、知識で正当化するしかない。\n③**独立性**:Zは未測定交絡Uと無関係(Zがくじ引きのように割り振られている)。\n②③が破れていても気づけないのがIVの怖さです。"}},
+ {formula:"2段階最小二乗(2SLS):\n  第1段階  X̂ = γ₀ + γ₁Z      (ZでXを予測)\n  第2段階  Y = β₀ + β₁X̂       (予測値X̂で効果を推定)\n  → β₁ が局所平均処置効果(LATE)の推定値"},
+ {box:{t:"いちばんの落とし穴 ― 弱い操作変数",c:R,b:"ZがXをほんの少ししか動かさない(弱い)と、2SLSは**ひどく偏り、しかもその偏りは未測定交絡と同じ向き**に出ます。つまり『交絡を消すつもりが、消せていない』状態を、見かけ上きれいな推定値で覆い隠してしまう。経験則として、第1段階の**F統計量がおおむね10未満なら弱IVを疑う**(近年はもっと高い閾値も提案)。弱IVのもとでは信頼区間も信用できず、**LIML**などより頑健な推定や、弱IVに頑健な信頼区間(Anderson-Rubin型)を使います。"}},
+ {p:"医学で最も有名なIVが**メンデル無作為化(MR)**です。生まれ持った遺伝子型(例:LDLを上げる変異)は受精時にほぼランダムに配られ、生活習慣などの交絡に汚染されにくい——これを“天然のくじ引き”として、曝露(例:LDL)の結果(例:心疾患)への因果効果を推定します。ただしMRにも固有の弱点があり、**多面発現(pleiotropy＝その遺伝子が別経路を通じても結果に効くこと)**は除外制約を破ります。MR-Egger回帰や中央値推定など、多面発現に頑健な感度分析を併せるのが標準です。"},
+ {box:{t:"その他の注意",c:GD,b:"・IVが推定するのは集団全体の平均効果ではなく、**Zに反応して治療を変えた人たち(コンプライアー)での効果＝LATE**。一般化には注意。\n・操作変数として『地域差・施設の処方傾向・診療の自然実験』なども使われるが、除外制約の妥当性は常に議論の的。\n・報告ではF統計量(関連性の強さ)と、除外制約を支持する論拠を必ず示す。"}},
+ {eg:"「2段階最小二乗法による操作変数解析を行った。第1段階のF統計量は42で弱操作変数の懸念は小さかった。曝露の局所平均処置効果はリスク差−5.8%(95%CI −9.1〜−2.5)。メンデル無作為化の枠組みでは、多面発現に頑健なMR-Egger・重み付き中央値法でも結論は一致した。」"}
+]}
+,
+{t:"18. 適応的試験デザイン ― 群逐次・ベイズ流",b:[
+ {p:"最終追加章は、試験を“走らせながら賢く変える”設計です。古典的なRCTは人数も解析時点も最初に固定しますが、**適応的デザイン**は、事前に決めたルールに従って途中で計画を調整します。倫理的(効かない/危険なら早く止める)で効率的(無駄な被験者を減らす)になりうる一方、やり方を誤ると多重性で偽陽性を量産します。"},
+ {box:{t:"群逐次デザインと中間解析",c:TL,b:"最も普及した形。試験を最後まで待たず、**あらかじめ決めた時点で何度か覗き見(中間解析)**し、効果が十分なら早期に有効中止、見込みが薄ければ無益中止します。ただし第3章・第10章で見たとおり、**何度も覗けばそのたびに偽陽性のチャンスが増えます**。そこで“覗き見の代償”を払う仕組みが必要になります。"}},
+ {p:"その仕組みが**アルファ消費関数(alpha spending)**です。全体の有意水準(例:5%)を“予算”とみなし、中間解析のたびに少しずつ取り崩していく。早い時点ほど厳しい基準(より大きなzが必要)を課し、最後の解析に予算を残します。O'Brien-Fleming型は『序盤は極めて厳しく、終盤でほぼ通常の基準』という、最も使われる配分です。"},
+ {fig:{n:"18-1",cap:"群逐次の合格ライン(O'Brien-Fleming型のイメージ)。早い中間解析ほど高いzを要求し(序盤で止めるのは“よほど”のときだけ)、最終解析でほぼ通常の1.96に近づきます。これで全体の偽陽性を5%に保ちます。",html:"fAlpha"}},
+ {box:{t:"そのほかの適応",c:GD,b:"・**サンプルサイズ再設計**:中間で見えたばらつきをもとに、必要人数を見直す(効果量そのものは覗かない『盲検下』の方法が無難)。\n・**アーム選択・無益中止**:複数治療のうち見込みの薄い腕を途中で落とす。\n・**プラットフォーム試験/マスター・プロトコル**:共通の土台で複数治療・複数集団を同時並行・継続的に評価。COVID-19のRECOVERY試験などで一気に普及。"}},
+ {box:{t:"ベイズ流の適応",c:TL,b:"ベイズ(第12章)は適応設計と相性が良い。**反応適応型ランダム化(RAR)**は、試験が進むほど成績の良い腕に多くの患者を割り付ける(うまくいっている治療を多くの人が受けられる)。**事後確率や予測確率**を停止ルールに使い、『有効である事後確率が99%を超えたら中止』のように直感的な基準を設けられます。代わりに、頻度論的な偽陽性率(タイプIエラー)はシミュレーションで作動特性を確認・制御するのが通例です。"}},
+ {box:{t:"落とし穴と作法",c:R,b:"・適応ルールは**必ず事前に固定し、登録・SAPに明記**する。後出しの“適応”は単なるp-hacking。\n・早期中止は効果量を**過大評価**しやすい(偶然上振れした時点で止まるため)。点推定は慎重に。\n・運用中の盲検性・情報管理(独立データモニタリング委員会DMCの関与)が重要。\n・規制当局の適応デザイン指針(FDA/ICH)に沿って作動特性を示す。"}},
+ {eg:"「O'Brien-Fleming型のアルファ消費関数を用いた2回の中間解析を伴う群逐次デザインを採用。1回目の中間解析(情報量50%)で有効中止境界(z=2.86)を越え、独立データモニタリング委員会の勧告により早期に有効中止した。早期中止に伴う効果量の上振れを考慮し、調整後推定値も併記した。」"},
+ {p:"適応的デザインは『計画を変える自由』と引き換えに『厳密な事前規定』を要求します。柔軟さと規律は矛盾せず、むしろ後者があって初めて前者が許される——上級編を貫いてきた、推定対象を定め前提を確かめ不確実性を正直に示すという姿勢の、最後の応用です。ここで本テキストの応用編を閉じます。"}
+]}
+,
+{t:"19. 回帰不連続デザインと分割時系列",b:[
+ {p:"ランダム化が倫理的・現実的に不可能でも、制度や自然が作る『境目』を利用すれば因果効果に迫れることがあります。こうした準実験(quasi-experiment)の代表が、回帰不連続デザインと分割時系列です。"},
+ {p:"**回帰不連続デザイン(RDD)**は、連続した**ランニング変数**(割付変数)があるしきい値(カットオフ)を超えるか否かで、処置の有無が機械的に切り替わる状況を使います。LDL値が基準を少しだけ超えた人と少しだけ下回った人は背景がほぼ同じなのに片方だけ治療を受ける——境界のすぐ両側は『局所的にランダム化された』とみなせるのです。"},
+ {fig:{n:"19-1",cap:"回帰不連続デザイン。カットオフの両側で回帰線を当て、直上と直下の結果の段差を効果として読む。境界近傍の集団は背景が似ているため、ここでの比較はランダム化に近い。",html:"fRDD"}},
+ {formula:"効果 = lim(x↓c) E[Y|X=x] − lim(x↑c) E[Y|X=x]"},
+ {p:"効果はカットオフ直上と直下の『段差』として推定します。境界から離れた人は背景が違うので、ここで分かるのは**局所処置効果**(カットオフ近傍の効果)であり、集団全体には一般化できない点に注意します。"},
+ {box:{t:"前提と確認",c:GD,b:"・ランニング変数を人為的に操作できないこと(申請者が値をいじって基準を跨ぐと崩れる→境界での密度の連続性を検定)。\n・カットオフ以外に同じ場所で変わる要因がないこと。\n・**帯域幅**(境界の何点までを使うか)の選び方で結果が動くため、複数の帯域幅で頑健性を示す。"}},
+ {p:"一方**分割時系列デザイン(ITS)**は、集団レベルの時系列に介入時点で線を引き、水準(レベル)の跳びと傾き(トレンド)の変化を回帰で捉えます。診療ガイドライン改訂や規制導入の効果評価に向きます。"},
+ {box:{t:"ITSの注意",c:R,b:"介入と同時に起きた別の出来事、季節性、計測方法の変更が交絡しうる。可能なら対照系列(影響を受けない地域・疾患)を併走させ、差分で評価する。"}},
+ {rows:[["RDDが推定する量","局所処置効果(カットオフ近傍)"],["要となる検証","密度の連続性・帯域幅の感度分析"],["ITSが捉える変化","水準の跳びと傾きの変化"],["共通の弱点","境界・介入時点での同時変化の交絡"]]},
+ {eg:"「処方基準のカットオフを用いた鋭い回帰不連続デザインで、帯域幅±0.5・±1.0の双方で一貫した局所処置効果を確認した。ランニング変数の密度はカットオフ前後で連続しており(McCraryの検定 p=0.42)、操作の兆候は認めなかった。」"}
+]},
+{t:"20. 測定誤差と回帰希釈",b:[
+ {p:"曝露も共変量も、現実には誤差を含んで測られます。血圧は一回ごとに揺れ、食事調査は記憶に頼る。この**測定誤差**は、ただのばらつきにとどまらず、推定値を系統的に歪めます。"},
+ {p:"鍵は、誤差が群によって違うかどうかです。**非微分誤差**(曝露の真値や結果と無関係な誤差)は、連続曝露では効果をゼロ方向へ薄めます。これを**回帰希釈**と呼びます。逆に、患者群と対照群で想起の正確さが違うような微分誤差は、効果を過大にも過小にもしうり、方向が読めません。"},
+ {fig:{n:"20-1",cap:"回帰希釈。赤い線が真の(急な)関係。横方向に散らばる測定誤差が入ると、観測される関係(青の破線)は傾きがなまり、ゼロ方向に薄まる。",html:"fDilution"}},
+ {formula:"観測勾配 ≈ 真の勾配 × λ,  λ = σ²_真 /(σ²_真 + σ²_誤差) (信頼性係数)"},
+ {p:"信頼性係数λは0〜1の値で、測定が粗いほど1から下がり、観測される関連はその分だけなまります。注意したいのは、共変量に誤差があると交絡の調整が不完全になり、残留交絡を生むことです——調整したつもりが、しきれていない。"},
+ {box:{t:"対処",c:GD,b:"・同一人で反復測定して信頼性を推定し、補正に用いる。\n・**回帰較正(regression calibration)**やSIMEXで減衰を補正する。\n・少数例で精密測定を行う妥当性研究(validation substudy)を組み込む。\n・誤差の大きさを変えた感度分析で結論の頑健性を示す。"}},
+ {rows:[["非微分誤差","効果をゼロ方向に薄める(回帰希釈)"],["微分誤差","方向不定(過大にも過小にも)"],["共変量の誤差","調整が不完全になり残留交絡"],["対処","反復測定・較正・妥当性研究"]]},
+ {eg:"「主要曝露は2時点の反復測定から信頼性係数λ=0.72と推定し、回帰較正で減衰を補正した。補正前の関連は補正後に約1.4倍へ拡大し、非微分誤差による希釈の存在が示唆された。」"}
+]},
+{t:"21. シミュレーションで設計を点検する",b:[
+ {p:"解析計画がほんとうに妥当か——検出力は足りるか、第一種過誤は守られるか、信頼区間は名目どおり真値を捕まえるか。実データを取る前にそれを確かめる最も強力な道具が、**シミュレーション研究**です。"},
+ {p:"手順はシンプルです。真のモデルとパラメータを仮定し、乱数で多数の仮想データセットを生成し、それぞれに解析を適用し、結果を集計する。こうして得られる検出力・過誤・バイアス・被覆確率をまとめて**作動特性**と呼びます。"},
+ {fig:{n:"21-1",cap:"模擬実験の集計。仮定した真のモデルから1万組のデータを作り、各々で検定統計量を計算してヒストグラム化。棄却域(赤)に落ちた割合が検出力、帰無が真のときのそれが第一種過誤。",html:"fSim"}},
+ {formula:"検出力 ≈ 棄却した回数 / 反復回数,  被覆確率 ≈ 区間が真値を含んだ割合"},
+ {p:"解析的に解けない設計でこそ威力を発揮します。複雑な混合モデルの検出力、適応デザインが全体のαを守れているかの確認、欠測補完法どうしの比較——いずれも数式では追えず、模擬実験が答えを出します。"},
+ {box:{t:"作法",c:GD,b:"・乱数シードを固定して再現性を確保する。\n・反復回数は**モンテカルロ誤差**(集計値自体のばらつき)を見て十分に大きく取る(検出力推定なら通常1000〜10000回)。\n・真値・サンプルサイズ・誤設定の度合いを振った感度分析で、結論がどこまで保つかを示す。"}},
+ {rows:[["作動特性","検出力・第一種過誤・バイアス・被覆確率"],["被覆確率","95%CIが真値を含む割合(理想は0.95)"],["モンテカルロ誤差","反復が有限ゆえの集計値のばらつき"],["使いどころ","解析的に解けない複雑な設計"]]},
+ {eg:"「提案手法の作動特性を10000反復のシミュレーションで評価した。名目5%に対し第一種過誤は4.8%、被覆確率は94.6%と良好で、想定効果量における検出力は0.83であった。乱数シードと生成コードは補遺に公開する。」"},
+ {p:"数式が沈黙する場所で、計算機に何度も同じ問いを投げかけ、設計の振る舞いを目で確かめる——シミュレーションは、前提を確かめ不確実性を正直に示すという上級編の姿勢を、計画段階にまで広げてくれます。"}
+]},
+{t:"22. 時間依存交絡と周辺構造モデル(MSM)",b:[
+ {p:"治療は一度きりではありません。IBDの生物学的製剤のように、経過を見ながら**開始・増量・中止が繰り返される**のが実臨床です。このとき観察データには、通常の回帰では原理的に解けない難問が現れます。それが**時間依存交絡**です。"},
+ {p:"構図はこうです。疾患活動性(L₁)が高い患者ほど次の治療(A₁)を受けやすく、活動性は転帰(Y)も悪くする——だからL₁はA₁に対する交絡因子で、調整が必要に見えます。ところがそのL₁は、**過去の治療(A₀)の効果が現れた結果**でもある。つまりL₁は『交絡因子』と『中間因子(効果の通り道)』の二重身分なのです。"},
+ {fig:{n:"22-1",cap:"時間依存交絡のDAG。活動性L₁はA₁→Yの交絡因子だが、同時にA₀の結果(中間因子)。回帰でL₁を調整するとA₀の効果の一部を消し、調整しないとA₁の効果が交絡で歪む——通常の回帰では二者択一しかできません。",html:"fMSM"}},
+ {p:"第11章で見たとおり中間因子を調整すれば効果の一部を消してしまい、調整しなければ交絡が残る。**どちらを選んでも偏る**——これが通常の回帰の限界です。解決策は『調整』ではなく『重み付け』。各時点で**その治療歴をたどる確率**を推定し、その逆数で患者を重み付けすると、時変共変量と治療選択の結びつきが切れた**疑似集団**ができます。この疑似集団上で治療効果を推定するモデルが**周辺構造モデル(MSM)**で、重みにはばらつきを抑えた**安定化重み**を使うのが標準です。"},
+ {formula:"安定化重み SW = Π_t  P(A_t | 治療歴)  /  P(A_t | 治療歴, 時変共変量の歴)\nMSM例:  logit P(Y=1) = β₀ + β₁・(累積治療期間)   ※疑似集団上で推定"},
+ {box:{t:"つまずきやすい点",c:R,b:"・**positivity(正値性)**:どの共変量パターンでも『治療を受ける/受けない』の両方が起こりうることが前提。実質的に全員が治療される層があると重みが爆発します。\n・**極端な重み**:上位1%での裁断(truncation)や重みの分布の報告が実務の作法。平均が1から大きく外れた安定化重みは、モデルの誤設定のサインです。\n・重み付けの土台となる治療モデル自体が誤っていれば結果も偏ります(だからこそ第13章の二重頑健化と相性がよい)。"}},
+ {eg:"「時間依存交絡(疾患活動性・ステロイド使用)を考慮するため、安定化逆確率重みによる周辺構造Coxモデルを用いた。重みは1パーセンタイルで裁断し、平均1.02であった。生物学的製剤の継続使用のHRは0.71(95%CI 0.55–0.92)。」"},
+ {p:"この発想は、観察データを『仮想のランダム化試験』に見立てて設計から書き起こす**ターゲット試験エミュレーション**へと発展しています。手法の名前は難しくとも、問いは常に単純です——『もし試験ができたなら、何と何を比べたかったのか』。"}
+]},
+{t:"23. 臨床的有用性の評価 ― 決定曲線分析とNRI",b:[
+ {p:"第9章で予測モデルの性能は**判別(C統計量)と較正**で測ると述べました。しかし両者が良くても、『そのモデルを**臨床判断に使うべきか**』には答えていません。使うかどうかは、誤陽性と誤陰性の**損害の重みづけ**——つまり臨床的な価値判断——に依存するからです。それを組み込む道具が**決定曲線分析(DCA)**です。"},
+ {p:"鍵になるのが**閾値確率 pt**。『リスクが何%以上なら治療(精査)に踏み切るか』という臨床側の線引きです。pt=10%で治療する医師は、暗黙に『見逃し1件は不要な治療9件ぶんの損害』と重みづけしている——この関係を使うと、利益と損害を同じ物差しで足し引きした**純利益(net benefit)**が計算できます。"},
+ {formula:"純利益 NB = 真陽性数/n − 偽陽性数/n × pt/(1−pt)\n(ptが高い医師ほど偽陽性のペナルティを重く数える)"},
+ {fig:{n:"23-1",cap:"決定曲線分析。横軸は閾値確率pt、縦軸は純利益。モデル(赤)が「全員治療」(青)と「全員様子見」(破線)の両方を上回るptの範囲でだけ、そのモデルは臨床的に役立ちます。",html:"fDCA"}},
+ {p:"読み方は単純で、臨床的に現実的なptの範囲(例:5〜20%)で、モデルの曲線が『全員治療』『全員様子見』という**素朴な戦略を上回っているか**を見るだけ。AUCがわずかに改善しても、現実的なptで純利益が増えないなら、そのマーカー追加に臨床的価値はありません。"},
+ {box:{t:"NRI・IDIには注意",c:R,b:"新しいマーカーの追加価値の指標として**NRI(再分類改善度)**——リスク分類が正しい方向に動いた人の割合——が一時多用されました。しかしNRIは**較正の崩れたモデルで見かけ上改善しやすく**、カテゴリの切り方にも依存し、偽陽性の増加を覆い隠すことが知られています。連続版NRIやIDIも同様の批判があり、現在は『判別・較正・DCAを揃えて報告し、NRI単独で価値を主張しない』のが堅実な立場です。"}},
+ {eg:"「バイオマーカー追加によりC統計量は0.74から0.77へ上昇した。決定曲線分析では、閾値確率5〜25%の範囲で追加モデルの純利益が既存モデルを一貫して上回り、臨床的有用性が示唆された(TRIPOD準拠)。」"},
+ {p:"統計モデルの最終的な審判は、p値でもAUCでもなく『それを使うと患者の意思決定が良くなるか』です。判別・較正・純利益の3点セットでモデルを裁く——この視点をもって、応用編を閉じます。"}
+]}
+];
+
+/* ===== render ===== */
+let cur=0;
+function render(){
+  const nav=document.getElementById("nav");
+  nav.innerHTML=CH.map((c,i)=>`<button class="tab${i===cur?' on':''}" data-i="${i}">${c.t.split(".")[0]}</button>`).join("");
+  nav.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{cur=+b.dataset.i;render();window.scrollTo(0,0);});
+  document.getElementById("art").innerHTML=`<h2>${CH[cur].t}</h2><div class="uline"></div>`+CH[cur].b.map(block).join("");
+  wireGloss();
+  document.getElementById("pg").textContent=(cur+1)+" / "+CH.length;
+  document.getElementById("prev").disabled=cur===0;
+  document.getElementById("next").disabled=cur===CH.length-1;
+}
+function wireGloss(){document.querySelectorAll("#art .gl").forEach(function(el){el.onclick=function(){if(el._d){el._d.remove();el._d=null;return;}var s=document.createElement("span");s.className="gldef";s.textContent="▸ "+el.getAttribute("data-d");el.after(s);el._d=s;};});}
+document.getElementById("prev").onclick=()=>{if(cur>0){cur--;render();window.scrollTo(0,0);}};
+document.getElementById("next").onclick=()=>{if(cur<CH.length-1){cur++;render();window.scrollTo(0,0);}};
+render();
+</script>
+</body>
+</html>
